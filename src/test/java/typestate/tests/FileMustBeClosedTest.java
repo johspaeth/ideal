@@ -3,7 +3,6 @@ package typestate.tests;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import test.slowmethod.SlowMethodDetector;
 import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.impl.statemachines.FileMustBeClosedStateMachine;

@@ -3,16 +3,12 @@ package typestate.tests;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import org.junit.Test;
 
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import test.IDEALTestingFramework;
-import test.slowmethod.SlowMethodDetector;
 import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
