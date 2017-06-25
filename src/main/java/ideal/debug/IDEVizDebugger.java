@@ -1,31 +1,17 @@
 package ideal.debug;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 import com.beust.jcommander.internal.Lists;
-import com.google.common.base.Joiner;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
-import heros.EdgeFunction;
 import heros.debug.visualization.ExplodedSuperGraph;
 import heros.debug.visualization.IDEToJSON;
-import heros.debug.visualization.ExplodedSuperGraph.ESGNode;
 import heros.debug.visualization.IDEToJSON.Direction;
-import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
@@ -231,6 +217,13 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 			}
 		}
 		return u.toString();
+	}
+
+
+	@Override
+	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<V> solver) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

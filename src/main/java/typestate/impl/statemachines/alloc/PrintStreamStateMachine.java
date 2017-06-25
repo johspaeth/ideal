@@ -25,11 +25,11 @@ public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState>
 
 		@Override
 		public boolean isErrorState() {
-			return this == ERROR;
+			return this == ERROR || this == OPEN;
 		}
 	}
 
-	PrintStreamStateMachine() {
+	public PrintStreamStateMachine() {
 		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED,
 				Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, readMethods(), Parameter.This, States.OPEN,

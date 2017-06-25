@@ -1,12 +1,9 @@
 package ideal.debug;
 
-import java.util.Map;
 import java.util.Set;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
-import heros.EdgeFunction;
-import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
@@ -143,6 +140,12 @@ public class NullDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void finishPhase2WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver) {
+		
+	}
+
+	@Override
+	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<V> solver) {
+		// TODO Auto-generated method stub
 		
 	}
 

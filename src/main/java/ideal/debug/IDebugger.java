@@ -62,4 +62,6 @@ public interface IDebugger<V>
 
 	void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target);
 
+	void onSeedFinished(IFactAtStatement seed, AnalysisSolver<V> solver);
+
 }

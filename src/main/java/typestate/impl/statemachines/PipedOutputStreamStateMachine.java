@@ -44,7 +44,7 @@ public class PipedOutputStreamStateMachine extends MatcherStateMachine<ConcreteS
 
 	}
 
-	PipedOutputStreamStateMachine() {
+	public PipedOutputStreamStateMachine() {
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.INIT, connect(), Parameter.This, States.CONNECTED, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));

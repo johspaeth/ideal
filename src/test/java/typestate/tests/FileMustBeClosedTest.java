@@ -21,6 +21,22 @@ public class FileMustBeClosedTest extends IDEALTestingFramework{
 	}
 
 	@Test
+	public void returned() {
+		File file = new File();
+		open(file);
+		mustBeInErrorState(file);
+		close(file);
+		mustBeInAcceptingState(file);
+	}
+	private void open(File file) {
+		file.open();
+	}
+
+	private void close(File file) {
+		file.close();
+	}
+
+	@Test
 	public void simple0() {
 		File file = new File();
 		file.open();

@@ -28,7 +28,7 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 		implements TypestateChangeFunction<ConcreteState> {
 
 	public static enum States implements ConcreteState {
-		NONE, UNITIALIZED, SIGN_CHECK, VERIFY_CHECK, ERROR;
+		UNITIALIZED, SIGN_CHECK, VERIFY_CHECK, ERROR;
 
 		@Override
 		public boolean isErrorState() {
@@ -37,8 +37,6 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 	}
 
 	public SignatureStateMachine() {
-		addTransition(new MatcherTransition<ConcreteState>(States.NONE, constructor(), Parameter.This,
-				States.UNITIALIZED, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initSign(), Parameter.This,
 				States.SIGN_CHECK, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initVerify(), Parameter.This,
@@ -127,6 +125,6 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
-		return new TypestateDomainValue<ConcreteState>(States.NONE);
+		return new TypestateDomainValue<ConcreteState>(States.UNITIALIZED);
 	}
 }

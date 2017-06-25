@@ -29,7 +29,7 @@ public class PrintWriterStateMachine extends MatcherStateMachine<ConcreteState>
 		}
 	}
 
-	PrintWriterStateMachine() {
+	public PrintWriterStateMachine() {
 		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(), Parameter.This, States.CLOSED,
 				Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED,

@@ -128,8 +128,7 @@ public class AnalysisSolver<V>
 					if (!cell.getRowKey().equals(InternalAnalysisProblem.ZERO)) {
 						continue;
 					}
-					if (cell.getColumnKey().isStatic()
-							|| BoomerangContext.isParameterOrThisValue(method, cell.getColumnKey().getBase()) || BoomerangContext.isReturnValue(method,cell.getColumnKey().getBase())) {
+					if (BoomerangContext.isParameterOrThisValue(method, cell.getColumnKey().getBase()) || BoomerangContext.isReturnValue(method,cell.getColumnKey().getBase())) {
 						parameterLocalsAtEndPoint.add(cell.getColumnKey());
 					} else {
 						nonParameterLocalsAtEndPoint.add(cell.getColumnKey());

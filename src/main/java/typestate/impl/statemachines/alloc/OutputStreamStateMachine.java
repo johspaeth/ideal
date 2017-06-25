@@ -31,7 +31,7 @@ public class OutputStreamStateMachine extends MatcherStateMachine<ConcreteState>
 
 	}
 
-	OutputStreamStateMachine() {
+	public OutputStreamStateMachine() {
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(

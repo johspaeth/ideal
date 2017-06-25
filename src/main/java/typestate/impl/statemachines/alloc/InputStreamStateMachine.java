@@ -30,7 +30,7 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 		}
 	}
 
-	InputStreamStateMachine() {
+	public InputStreamStateMachine() {
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
 		addTransition(

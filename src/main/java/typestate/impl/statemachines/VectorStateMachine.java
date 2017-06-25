@@ -7,9 +7,14 @@ import java.util.Set;
 import java.util.Vector;
 
 import boomerang.accessgraph.AccessGraph;
+import soot.Local;
+import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
+import soot.jimple.AssignStmt;
+import soot.jimple.NewExpr;
 import typestate.ConcreteState;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
@@ -56,6 +61,7 @@ public class VectorStateMachine extends MatcherStateMachine<ConcreteState> imple
 		List<SootClass> vectorClasses = getSubclassesOf("java.util.Vector");
 		Set<SootMethod> selectMethodByName = selectMethodByName(vectorClasses,
 				"add|addAll|addElement|insertElementAt|set|setElementAt");
+		selectMethodByName.add(Scene.v().getMethod("<java.util.Vector: void <init>(java.util.Collection)>"));
 		return selectMethodByName;
 	}
 
@@ -71,7 +77,8 @@ public class VectorStateMachine extends MatcherStateMachine<ConcreteState> imple
 			Collection<SootMethod> calledMethod) {
 		if(m.toString().contains("<clinit>"))
 			return Collections.emptySet();
-		return generateAtAllocationSiteOf(unit,Vector.class);
+
+		 return generateAtAllocationSiteOf(unit,Vector.class);
 	}
 	
 	@Override

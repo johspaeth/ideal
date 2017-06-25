@@ -225,6 +225,7 @@ public class PerSeedAnalysisContext<V> {
 			reporter().onSeedTimeout(seed);
 		}
 		reporter().onSeedFinished(seed, solver);
+		debugger().onSeedFinished(seed, solver);
 		destroy();
 		solver.destroy();
 	}

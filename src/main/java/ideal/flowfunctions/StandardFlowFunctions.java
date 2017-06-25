@@ -68,12 +68,6 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
-
-				if(curr instanceof IdentityStmt){
-					IdentityStmt identityStmt = (IdentityStmt) curr;
-					if (identityStmt.getRightOp() instanceof CaughtExceptionRef)
-						return Collections.emptySet();
-				}
 				context.debugger().onNormalPropagation(sourceFact, curr, succ, source);
 				if (AliasFinder.HANDLE_EXCEPTION_FLOW && !source.isStatic() && curr instanceof IdentityStmt) {
 					IdentityStmt identityStmt = (IdentityStmt) curr;
@@ -81,14 +75,12 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 							&& identityStmt.getLeftOp() instanceof Local) {
 						Local leftOp = (Local) identityStmt.getLeftOp();
 						// e = d;
-						if (!source.isStatic() && Scene.v().getOrMakeFastHierarchy().canStoreType( source.getBaseType(),((Local) leftOp).getType())){
-							HashSet<AccessGraph> out = new HashSet<AccessGraph>();
-							out.add(source);
+						HashSet<AccessGraph> out = new HashSet<AccessGraph>();
+						out.add(source);
+						if (source.getBase() != null && Scene.v().getOrMakeFastHierarchy().canStoreType( source.getBaseType(),((Local) leftOp).getType())){
 							out.add(source.deriveWithNewLocal((Local) leftOp, source.getBaseType()));
-							return out;
-						} else{
-							return Collections.emptySet();
 						}
+						return out;
 					}
 				}
 					
