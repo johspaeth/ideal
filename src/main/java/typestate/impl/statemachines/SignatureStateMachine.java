@@ -1,3 +1,4 @@
+
 package typestate.impl.statemachines;
 
 import java.util.Collection;
@@ -35,7 +36,7 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 		}
 	}
 
-	SignatureStateMachine(ExtendedICFG icfg) {
+	public SignatureStateMachine() {
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, constructor(), Parameter.This,
 				States.UNITIALIZED, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initSign(), Parameter.This,
