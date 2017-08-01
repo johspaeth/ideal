@@ -10,6 +10,7 @@ import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import heros.debug.visualization.ExplodedSuperGraph;
+import heros.debug.visualization.ExplodedSuperGraph.ESGNode;
 import heros.debug.visualization.IDEToJSON;
 import heros.debug.visualization.IDEToJSON.Direction;
 import heros.solver.PathEdge;
@@ -86,16 +87,16 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target) {
-		// ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
-		// cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr,
-		// target), "indirectFlow"));
+		 ExplodedSuperGraph esg = getESG(curr);
+		 esg.addEdgeWithLabel(icfg.getMethodOf(curr), esg.new ESGNode(curr, source), esg.new ESGNode(curr,
+		 target), "indirectFlow");
 	}
 
 	@Override
 	public void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target) {
-		// ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
-		// cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr,
-		// target), "indirectFlow"));
+		ExplodedSuperGraph esg = getESG(curr);
+		 esg.addEdgeWithLabel(icfg.getMethodOf(curr), esg.new ESGNode(curr, source), esg.new ESGNode(curr,
+		 target), "indirectFlow");
 	}
 
 	@Override

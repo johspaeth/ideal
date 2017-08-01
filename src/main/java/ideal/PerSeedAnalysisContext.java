@@ -151,6 +151,7 @@ public class PerSeedAnalysisContext<V> {
 		protected AliasResults createItem(PerSeedAnalysisContext<V>.BoomerangQuery key) {
 			try {
 				boomerang.startQuery();
+				analysisDefinition.debugger().beforeAlias(key.getAp(), key.getStmt(), key.d1);
 				AliasResults res = boomerang
 						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, key.getStmt()))
 						.withoutNullAllocationSites();
@@ -303,7 +304,7 @@ public class PerSeedAnalysisContext<V> {
 				&& Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
 			return new AliasResults();
 
-		analysisDefinition.debugger().beforeAlias(boomerangAccessGraph, curr, d1);
+		
 		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph, curr, d1));
 	}
 

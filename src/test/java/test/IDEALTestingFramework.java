@@ -52,6 +52,10 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			}
 
 			@Override
+			public boolean enableNullPointOfAlias() {
+				return true;
+			}
+			@Override
 			public IDebugger<TypestateDomainValue<ConcreteState>> debugger() {
 				return IDEALTestingFramework.this.getDebugger();
 			}
@@ -92,7 +96,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 				}
 				if (!unsound.isEmpty())
 					throw new RuntimeException("Unsound results: " + unsound);
-				IDEALTestingFramework.this.removeVizFile();
+//				IDEALTestingFramework.this.removeVizFile();
 				if (!imprecise.isEmpty()) {
 					throw new ImprecisionException("Imprecise results: " + imprecise);
 				}
