@@ -5,6 +5,7 @@ import java.util.Collection;
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
+import heros.FlowFunctions;
 import heros.solver.IPropagationController;
 import heros.solver.Scheduler;
 import ideal.debug.IDebugger;
@@ -75,7 +76,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 
 	public abstract void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 
-	public abstract StandardFlowFunctions<V> flowFunctions(PerSeedAnalysisContext<V> context);
+	public abstract FlowFunctions<Unit,AccessGraph,SootMethod> flowFunctions(PerSeedAnalysisContext<V> context);
 
 	public abstract void onStartWithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 

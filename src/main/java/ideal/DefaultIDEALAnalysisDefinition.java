@@ -4,8 +4,10 @@ import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import heros.EdgeFunction;
+import heros.FlowFunctions;
 import heros.solver.IPropagationController;
 import ideal.flowfunctions.StandardFlowFunctions;
+import soot.SootMethod;
 import soot.Unit;
 
 public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDefinition<V> {
@@ -85,7 +87,7 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	}
 	
 	@Override
-	public StandardFlowFunctions<V> flowFunctions(PerSeedAnalysisContext<V> context) {
-		return new StandardFlowFunctions<>(context);
+	public FlowFunctions<Unit,AccessGraph,SootMethod> flowFunctions(PerSeedAnalysisContext<V> context) {
+		return new StandardFlowFunctions<V>(context);
 	}
 }
