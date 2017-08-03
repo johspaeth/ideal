@@ -85,7 +85,7 @@ public class TransitionFunction<State> implements EdgeFunction<TypestateDomainVa
 			return otherFunction;
 		if (otherFunction instanceof EdgeIdentity) {
 			Set<ITransition<State>> transitions = new HashSet<>(value);
-			transitions.add(new IdentityTransition<State>());
+			transitions.add(IdentityTransition.v());
 			return new TransitionFunction<State>(transitions);
 		}
 		TransitionFunction<State> func = (TransitionFunction) otherFunction;
