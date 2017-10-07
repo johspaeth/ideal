@@ -13,9 +13,9 @@ public class IDEALScheduler<V> extends Scheduler {
 	public void awaitExecution() {
 		while (!worklist.isEmpty()) {
 			Runnable pop = worklist.pop();
-			if (propagationCount % 1000 == 0) {
+			/*if (propagationCount % 1000 == 0) {
 				context.checkTimeout();
-			}
+			}*/
 			pop.run();
 		}
 	}

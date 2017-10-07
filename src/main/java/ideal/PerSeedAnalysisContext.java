@@ -295,7 +295,7 @@ public class PerSeedAnalysisContext<V> {
 	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
 		if (!analysisDefinition.enableAliasing())
 			return new AliasResults();
-		checkTimeout();
+//		checkTimeout();
 		if (boomerang == null)
 			boomerang = new AliasFinder(analysisDefinition.boomerangOptions());
 		if (!boomerangAccessGraph.isStatic()

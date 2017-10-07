@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
@@ -23,6 +26,8 @@ public class AnalysisSolver<V>
 		extends IDESolver<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
 	private PerSeedAnalysisContext<V> context;
+	
+	protected static final Logger logger = LoggerFactory.getLogger(AnalysisSolver.class);
 
 	public AnalysisSolver(IDEALAnalysisDefinition<V> analysisDefinition, PerSeedAnalysisContext<V> context) {
 		super(new InternalAnalysisProblem<V>(analysisDefinition, context));
@@ -37,6 +42,7 @@ public class AnalysisSolver<V>
 	 * @param d2
 	 */
 	public void injectPhase1Seed(AccessGraph d1, Unit curr, AccessGraph d2, EdgeFunction<V> func) {
+//		logger.debug("propagating unit " + curr);
 		super.propagate(d1, curr, d2, func, null, true);
 		runExecutorAndAwaitCompletion();
 	}

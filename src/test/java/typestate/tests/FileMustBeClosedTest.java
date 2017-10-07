@@ -15,9 +15,10 @@ public class FileMustBeClosedTest extends IDEALTestingFramework{
 	@Test
 	public void simple() {
 		File file = new File();
+		File file2 = file;
 		file.open();
-		mustBeInErrorState(file);
-		file.close();
+//		mustBeInErrorState(file);
+//			file.close();
 		mustBeInAcceptingState(file);
 	}
 
