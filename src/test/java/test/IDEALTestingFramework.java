@@ -16,6 +16,7 @@ import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import soot.Body;
 import soot.Local;
+import soot.Scene;
 import soot.SceneTransformer;
 import soot.SootMethod;
 import soot.Unit;
@@ -77,6 +78,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 				testingResultReporter = new TestingResultReporter(expectedResults);
 				
 				executeAnalysis();
+				
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
 				for (Assertion r : expectedResults) {
@@ -114,6 +116,11 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			return;
 		visited.add(m);
 		Body activeBody = m.getActiveBody();
+		
+		System.out.println("----------------------------------------------------");
+		System.out.println(activeBody);
+		System.out.println("----------------------------------------------------");
+		
 		for (Unit callSite : icfg.getCallsFromWithin(m)) {
 			for (SootMethod callee : icfg.getCalleesOfCallAt(callSite))
 				parseExpectedQueryResults(callee, queries, visited);
