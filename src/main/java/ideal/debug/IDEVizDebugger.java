@@ -20,6 +20,7 @@ import com.google.common.base.Joiner;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.debug.visualization.ExplodedSuperGraph;
 import heros.debug.visualization.IDEToJSON;
@@ -42,9 +43,9 @@ import soot.jimple.Stmt;
 public class IDEVizDebugger<V> implements IDebugger<V> {
 
 	private IDEToJSON<SootMethod, Unit, AccessGraph, V, IExtendedICFG> ideToJSON;
-	private IExtendedICFG icfg;
+	private IExtendedICFG<Unit, SootMethod> icfg;
 
-	public IDEVizDebugger(File file, IExtendedICFG icfg) {
+	public IDEVizDebugger(File file, IExtendedICFG<Unit, SootMethod> icfg) {
 		this.ideToJSON = new IDEToJSON<SootMethod, Unit, AccessGraph, V, IExtendedICFG>(file, icfg){
 			@Override
 			public String getShortLabel(Unit u) {
@@ -66,10 +67,10 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, AccessGraph> summary) {
-		for (Unit callSite : icfg.getCallersOf(methodToSummary)) {
-			ExplodedSuperGraph cfg = getESG(callSite);
-			for (Unit start : icfg.getStartPointsOf(methodToSummary)) {
-				cfg.addSummary(cfg.new ESGNode(start, summary.factAtSource()), cfg.new ESGNode(summary.getTarget(),summary.factAtTarget()));
+		for (UpdatableWrapper<Unit> callSite : icfg.getCallersOf(icfg.wrap(methodToSummary))) {
+			ExplodedSuperGraph<SootMethod, Unit, AccessGraph, V> cfg = getESG(callSite.getContents());
+			for (UpdatableWrapper<Unit> start : icfg.getStartPointsOf(icfg.wrap(methodToSummary))) {
+				cfg.addSummary(cfg.new ESGNode(start.getContents(), summary.factAtSource()), cfg.new ESGNode(summary.getTarget(),summary.factAtTarget()));
 			}
 		}
 	}
@@ -80,7 +81,7 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	private ExplodedSuperGraph<SootMethod, Unit, AccessGraph, V> getESG(Unit unit) {
-		return ideToJSON.getOrCreateESG(icfg.getMethodOf(unit), Direction.Forward);
+		return ideToJSON.getOrCreateESG(icfg.getMethodOf(icfg.wrap(unit)).getContents(), Direction.Forward);
 	}
 
 	@Override

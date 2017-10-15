@@ -10,13 +10,13 @@ import com.google.common.collect.Lists;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.incremental.UpdatableWrapper;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import soot.Body;
 import soot.Local;
-import soot.Scene;
 import soot.SceneTransformer;
 import soot.SootMethod;
 import soot.Unit;
@@ -32,7 +32,7 @@ import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
 public abstract class IDEALTestingFramework extends AbstractTestingFramework{
-	protected IExtendedICFG icfg;
+	protected IExtendedICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
 	private IDEVizDebugger<TypestateDomainValue<ConcreteState>> debugger;
 	protected TestingResultReporter<ConcreteState> testingResultReporter;
@@ -47,7 +47,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			}
 
 			@Override
-			public IExtendedICFG icfg() {
+			public IExtendedICFG<Unit, SootMethod> icfg() {
 				return icfg;
 			}
 
@@ -75,7 +75,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
-				testingResultReporter = new TestingResultReporter(expectedResults);
+				testingResultReporter = new TestingResultReporter<ConcreteState>(expectedResults);
 				
 				executeAnalysis();
 				
@@ -121,9 +121,11 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		System.out.println(activeBody);
 		System.out.println("----------------------------------------------------");
 		
-		for (Unit callSite : icfg.getCallsFromWithin(m)) {
-			for (SootMethod callee : icfg.getCalleesOfCallAt(callSite))
-				parseExpectedQueryResults(callee, queries, visited);
+		System.out.println("type of icfg " + icfg.getClass());
+		System.out.println(icfg.getCallsFromWithin(icfg.wrap(m)));
+		for (UpdatableWrapper<Unit> callSite : icfg.getCallsFromWithin(icfg.wrap(m))) {
+			for (UpdatableWrapper<SootMethod> callee : icfg.getCalleesOfCallAt(callSite))
+				parseExpectedQueryResults(callee.getContents(), queries, visited);
 		}
 		for (Unit u : activeBody.getUnits()) {
 			if (!(u instanceof Stmt))

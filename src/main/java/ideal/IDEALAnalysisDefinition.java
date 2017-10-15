@@ -6,7 +6,6 @@ import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import heros.solver.IPropagationController;
-import heros.solver.Scheduler;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.flowfunctions.StandardFlowFunctions;
@@ -41,7 +40,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 
 	public abstract ResultReporter<V> resultReporter();
 
-	public abstract IExtendedICFG icfg();
+	public abstract IExtendedICFG<Unit, SootMethod> icfg();
 
 	public abstract IDebugger<V> debugger();
 

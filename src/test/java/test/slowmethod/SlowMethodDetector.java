@@ -65,9 +65,9 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 	}
 
 	private boolean isWithinAllowedMethod(Unit n) {
-		boolean contains = visitableMethod.contains(icfg.getMethodOf(n));
+		boolean contains = visitableMethod.contains(icfg.getMethodOf(icfg.wrap(n)).getContents());
 		if (!contains) {
-			worklist.add(icfg.getMethodOf(n));
+			worklist.add(icfg.getMethodOf(icfg.wrap(n)).getContents());
 		}
 		return contains;
 	}
