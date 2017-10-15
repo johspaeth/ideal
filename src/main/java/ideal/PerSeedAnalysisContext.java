@@ -18,6 +18,7 @@ import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.IContextRequester;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.solver.Pair;
@@ -30,6 +31,7 @@ import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
 import soot.Scene;
+import soot.SootMethod;
 import soot.Unit;
 
 public class PerSeedAnalysisContext<V> {
@@ -137,7 +139,7 @@ public class PerSeedAnalysisContext<V> {
 		}
 	}
 
-	public IExtendedICFG icfg() {
+	public IExtendedICFG<Unit, SootMethod> icfg() {
 		return analysisDefinition.icfg();
 	}
 
@@ -236,11 +238,11 @@ public class PerSeedAnalysisContext<V> {
 	private void phase1(AnalysisSolver<V> solver) {
 		debugger().startPhase1WithSeed(seed, solver);
 		Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
-		if (icfg().isExitStmt(seed.getStmt())) {
+		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
 			worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact()));
 		} else {
-			for (Unit u : icfg().getSuccsOf(seed.getStmt())) {
-				worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u, seed.getFact()));
+			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
+				worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u.getContents(), seed.getFact()));
 			}
 		}
 		while (!worklist.isEmpty()) {
@@ -275,17 +277,17 @@ public class PerSeedAnalysisContext<V> {
 	private void phase2(AnalysisSolver<V> solver) {
 		debugger().startPhase2WithSeed(seed, solver);
 		enableIDEPhase();
-		if (icfg().isExitStmt(seed.getStmt())) {
+		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
 			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact(), EdgeIdentity.<V>v());
 		} else {
-			for (Unit u : icfg().getSuccsOf(seed.getStmt())) {
-				solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, u, seed.getFact(), EdgeIdentity.<V>v());
+			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
+				solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, u.getContents(), seed.getFact(), EdgeIdentity.<V>v());
 			}
 		}
 		solver.runExecutorAndAwaitCompletion();
 		HashMap<Unit, Set<AccessGraph>> map = new HashMap<Unit, Set<AccessGraph>>();
-		for (Unit sp : icfg().getStartPointsOf(icfg().getMethodOf(seed.getStmt()))) {
-			map.put(sp, Collections.singleton(InternalAnalysisProblem.ZERO));
+		for (UpdatableWrapper<Unit> sp : icfg().getStartPointsOf(icfg().getMethodOf(icfg().wrap(seed.getStmt())))) {
+			map.put(sp.getContents(), Collections.singleton(InternalAnalysisProblem.ZERO));
 		}
 		solver.computeValues(map);
 		analysisDefinition.onFinishWithSeed(seed,solver);
