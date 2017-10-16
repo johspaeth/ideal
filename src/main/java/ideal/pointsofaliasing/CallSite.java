@@ -7,6 +7,7 @@ import java.util.Set;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
+import boomerang.incremental.UpdatableWrapper;
 import heros.solver.PathEdge;
 import ideal.PerSeedAnalysisContext;
 import soot.Unit;
@@ -15,15 +16,15 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 
 	private AccessGraph callerCallSiteFact;
 
-	public CallSite(AccessGraph callerD1, Unit stmt, AccessGraph callerCallSiteFact, AccessGraph callerD2,
-			Unit returnSite) {
+	public CallSite(AccessGraph callerD1, UpdatableWrapper<Unit> stmt, AccessGraph callerCallSiteFact, AccessGraph callerD2,
+			UpdatableWrapper<Unit> returnSite) {
 		super(callerD1, stmt, callerD2, returnSite);
 		this.callerCallSiteFact = callerCallSiteFact;
 	}
 
 	@Override
-	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
-		Collection<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
+	public Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
+		Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> res = new HashSet<>();
 
 		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)) {
 			res.addAll(unbalancedReturn(tsanalysis));
@@ -36,12 +37,12 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		Set<AccessGraph> popLastField = d2.popLastField();
 		Set<AccessGraph> res = new HashSet<>();
 		for (AccessGraph withoutLast : popLastField) {
-			AliasResults results = tsanalysis.aliasesFor(withoutLast, curr, d1);
+			AliasResults results = tsanalysis.aliasesFor(withoutLast, curr.getContents(), d1);
 			for (AccessGraph mayAliasingAccessGraph : results.mayAliasSet()) {
 				for (WrappedSootField lastField : lastFields) {
 					AccessGraph g = mayAliasingAccessGraph.appendFields(new WrappedSootField[] { lastField });
 					res.add(g);
-					tsanalysis.debugger().indirectFlowAtCall(withoutLast, curr, g);
+					tsanalysis.debugger().indirectFlowAtCall(withoutLast, curr.getContents(), g);
 				}
 			}
 		}
@@ -49,15 +50,15 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		return res;
 	}
 
-	private Collection<PathEdge<Unit, AccessGraph>> unbalancedReturn(PerSeedAnalysisContext<V> tsanalysis) {
-		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
+	private Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> unbalancedReturn(PerSeedAnalysisContext<V> tsanalysis) {
+		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> res = new HashSet<>();
 		for (AccessGraph g : getIndirectFlowTargets(tsanalysis)) {
-			res.add(new PathEdge<Unit, AccessGraph>(d1, succ, g));
+			res.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(d1, succ, g));
 		}
 		return res;
 	}
 
-	public Unit getCallSite() {
+	public UpdatableWrapper<Unit> getCallSite() {
 		return curr;
 	}
 

@@ -1,32 +1,15 @@
 package ideal.debug;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
 import com.beust.jcommander.internal.Lists;
-import com.google.common.base.Joiner;
-
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.IExtendedICFG;
-import boomerang.incremental.UpdatableWrapper;
-import heros.EdgeFunction;
 import heros.debug.visualization.ExplodedSuperGraph;
 import heros.debug.visualization.IDEToJSON;
-import heros.debug.visualization.ExplodedSuperGraph.ESGNode;
 import heros.debug.visualization.IDEToJSON.Direction;
-import heros.solver.Pair;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
@@ -39,20 +22,25 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
 public class IDEVizDebugger<V> implements IDebugger<V> {
 
-	private IDEToJSON<SootMethod, Unit, AccessGraph, V, IExtendedICFG> ideToJSON;
-	private IExtendedICFG<Unit, SootMethod> icfg;
+	private IDEToJSON<SootMethod, Unit, AccessGraph, V, BiDiInterproceduralCFG<Unit,SootMethod>> ideToJSON;
+	private BiDiInterproceduralCFG<Unit, SootMethod> icfg;
 
-	public IDEVizDebugger(File file, IExtendedICFG<Unit, SootMethod> icfg) {
-		this.ideToJSON = new IDEToJSON<SootMethod, Unit, AccessGraph, V, IExtendedICFG>(file, icfg){
+	public IDEVizDebugger(File file, BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
+		this.ideToJSON = new IDEToJSON<SootMethod, Unit, AccessGraph, V, BiDiInterproceduralCFG<Unit, SootMethod>> (file, icfg){
 			@Override
 			public String getShortLabel(Unit u) {
 				return IDEVizDebugger.this.getShortLabel(u);
 			}
 			@Override
 			public List<Unit> getListOfStmts(SootMethod method) {
+				/*List<UpdatableWrapper<Unit>> unitList = new LinkedList();
+				for (Unit unit : method.getContents().getActiveBody().getUnits()) {
+					unitList.add(new UpdatableWrapper(unit));
+				}*/
 				return Lists.newLinkedList(method.getActiveBody().getUnits());
 			}
 		};
@@ -67,10 +55,10 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 
 	@Override
 	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, AccessGraph> summary) {
-		for (UpdatableWrapper<Unit> callSite : icfg.getCallersOf(icfg.wrap(methodToSummary))) {
-			ExplodedSuperGraph<SootMethod, Unit, AccessGraph, V> cfg = getESG(callSite.getContents());
-			for (UpdatableWrapper<Unit> start : icfg.getStartPointsOf(icfg.wrap(methodToSummary))) {
-				cfg.addSummary(cfg.new ESGNode(start.getContents(), summary.factAtSource()), cfg.new ESGNode(summary.getTarget(),summary.factAtTarget()));
+		for (Unit callSite : icfg.getCallersOf(methodToSummary)) {
+			ExplodedSuperGraph<SootMethod, Unit, AccessGraph, V> cfg = getESG(callSite);
+			for (Unit start : icfg.getStartPointsOf(methodToSummary)) {
+				cfg.addSummary(cfg.new ESGNode(start, summary.factAtSource()), cfg.new ESGNode(summary.getTarget(),summary.factAtTarget()));
 			}
 		}
 	}
@@ -81,7 +69,7 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	private ExplodedSuperGraph<SootMethod, Unit, AccessGraph, V> getESG(Unit unit) {
-		return ideToJSON.getOrCreateESG(icfg.getMethodOf(icfg.wrap(unit)).getContents(), Direction.Forward);
+		return ideToJSON.getOrCreateESG(icfg.getMethodOf(unit), Direction.Forward);
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.solver.PathEdge;
 import ideal.PerSeedAnalysisContext;
@@ -18,11 +19,11 @@ public class ReturnEvent<V> extends Event<V> {
 	private AccessGraph d2;
 	private Unit callSite;
 	private AccessGraph d3;
-	private Unit returnSite;
+	private UpdatableWrapper<Unit> returnSite;
 	private AccessGraph d1;
 	private EdgeFunction<V> func;
 
-	public ReturnEvent(Unit exitStmt, AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite, AccessGraph d1, EdgeFunction<V> func) {
+	public ReturnEvent(Unit exitStmt, AccessGraph d2, Unit callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1, EdgeFunction<V> func) {
 		this.exitStmt = exitStmt;
 		this.d2 = d2;
 		this.callSite = callSite;
@@ -82,10 +83,10 @@ public class ReturnEvent<V> extends Event<V> {
 	}
 
 	@Override
-	public Collection<PathEdge<Unit, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
-		Set<PathEdge<Unit, AccessGraph>> res = new HashSet<>();
+	public Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
+		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> res = new HashSet<>();
 		for (AccessGraph mayAliasingAccessGraph : getIndirectFlowTargets(tsanalysis)) {
-			res.add(new PathEdge<Unit, AccessGraph>(d1, returnSite,mayAliasingAccessGraph));
+			res.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(d1, returnSite,mayAliasingAccessGraph));
 		}
 		return res;
 	}

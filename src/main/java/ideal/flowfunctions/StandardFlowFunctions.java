@@ -10,6 +10,7 @@ import boomerang.AliasFinder;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.forward.AbstractFlowFunctions;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.FlowFunction;
 import heros.FlowFunctions;
@@ -54,7 +55,7 @@ import soot.jimple.Stmt;
  *
  */
 public class StandardFlowFunctions<V> extends AbstractFlowFunctions
-		implements FlowFunctions<Unit, AccessGraph, SootMethod> {
+		implements FlowFunctions<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>> {
 	private final PerSeedAnalysisContext<V> context;
 	public StandardFlowFunctions(PerSeedAnalysisContext<V> context) {
 		this.context = context;
@@ -62,8 +63,8 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 	
 	@Override
-	public FlowFunction<AccessGraph> getNormalFlowFunction(final AccessGraph sourceFact, final Unit curr,
-			final Unit succ) {
+	public FlowFunction<AccessGraph> getNormalFlowFunction(final AccessGraph sourceFact, final UpdatableWrapper<Unit> curr,
+			final UpdatableWrapper<Unit> succ) {
 		return new FlowFunction<AccessGraph>() {
 
 			@Override
@@ -284,7 +285,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 
-	protected boolean isFirstFieldUsedTransitivelyInMethod(AccessGraph source, final SootMethod callee) {
+	protected boolean isFirstFieldUsedTransitivelyInMethod(AccessGraph source, final UpdatableWrapper<SootMethod> callee) {
         for(WrappedSootField wrappedField :  source.getFirstField()){
       	  if(context.icfg().isStaticFieldUsed(callee, wrappedField.getField()))
       		  return true;
@@ -292,14 +293,14 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 		return false;
 	}
 	@Override
-	public FlowFunction<AccessGraph> getCallFlowFunction(final AccessGraph d1, final Unit callSite,
-			final SootMethod callee) {
+	public FlowFunction<AccessGraph> getCallFlowFunction(final AccessGraph d1, final UpdatableWrapper<Unit> callSite,
+			final UpdatableWrapper<SootMethod> callee) {
 		assert callee != null;
-		final Local[] paramLocals = new Local[callee.getParameterCount()];
-		for (int i = 0; i < callee.getParameterCount(); i++)
-			paramLocals[i] = callee.getActiveBody().getParameterLocal(i);
+		final Local[] paramLocals = new Local[callee.getContents().getParameterCount()];
+		for (int i = 0; i < callee.getContents().getParameterCount(); i++)
+			paramLocals[i] = callee.getContents().getActiveBody().getParameterLocal(i);
 
-		final Local thisLocal = callee.isStatic() ? null : callee.getActiveBody().getThisLocal();
+		final Local thisLocal = callee.getContents().isStatic() ? null : callee.getContents().getActiveBody().getThisLocal();
 		return new FlowFunction<AccessGraph>() {
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
@@ -329,7 +330,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					for (int i = 0; i < ie.getArgCount(); i++)
 						callArgs[i] = ie.getArg(i);
 
-					if (!callee.isStatic() && ie instanceof InstanceInvokeExpr) {
+					if (!callee.getContents().isStatic() && ie instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iIExpr = (InstanceInvokeExpr) is.getInvokeExpr();
 
 						if (source.baseMatches(iIExpr.getBase())) {
@@ -342,7 +343,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 									if (type instanceof RefType) {
 										RefType refType = (RefType) type;
 										SootClass typeClass = refType.getSootClass();
-										SootClass methodClass = callee.getDeclaringClass();
+										SootClass methodClass = callee.getContents().getDeclaringClass();
 										if (typeClass != null && methodClass != null && typeClass != methodClass
 												&& !typeClass.isInterface()) {
 											if (!Scene.v().getFastHierarchy().isSubclass(typeClass, methodClass)) {
@@ -372,12 +373,12 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	@Override
-	public FlowFunction<AccessGraph> getReturnFlowFunction(final AccessGraph callerD1, final AccessGraph calleeD1, final Unit callSite,
-			final AccessGraph callerCallSiteFact, final SootMethod callee, final Unit exitStmt, final Unit returnSite) {
-		final Local[] paramLocals = new Local[callee.getParameterCount()];
-		for (int i = 0; i < callee.getParameterCount(); i++)
-			paramLocals[i] = callee.getActiveBody().getParameterLocal(i);
-		final Local thisLocal = callee.isStatic() ? null : callee.getActiveBody().getThisLocal();
+	public FlowFunction<AccessGraph> getReturnFlowFunction(final AccessGraph callerD1, final AccessGraph calleeD1, final UpdatableWrapper<Unit> callSite,
+			final AccessGraph callerCallSiteFact, final UpdatableWrapper<SootMethod> callee, final UpdatableWrapper<Unit> exitStmt, final UpdatableWrapper<Unit> returnSite) {
+		final Local[] paramLocals = new Local[callee.getContents().getParameterCount()];
+		for (int i = 0; i < callee.getContents().getParameterCount(); i++)
+			paramLocals[i] = callee.getContents().getActiveBody().getParameterLocal(i);
+		final Local thisLocal = callee.getContents().isStatic() ? null : callee.getContents().getActiveBody().getThisLocal();
 		return new FlowFunction<AccessGraph>() {
 			
 
@@ -415,7 +416,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 							}
 						}
-						if (!callee.isStatic() && ie instanceof InstanceInvokeExpr) {
+						if (!callee.getContents().isStatic() && ie instanceof InstanceInvokeExpr) {
 							if (source.baseMatches(thisLocal)) {
 
 								InstanceInvokeExpr iIExpr = (InstanceInvokeExpr) is.getInvokeExpr();
@@ -472,8 +473,8 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	@Override
-	public FlowFunction<AccessGraph> getCallToReturnFlowFunction(final AccessGraph sourceFact, final Unit callStmt,
-			final Unit returnSite, final boolean hasCallees) {
+	public FlowFunction<AccessGraph> getCallToReturnFlowFunction(final AccessGraph sourceFact, final UpdatableWrapper<Unit> callStmt,
+			final UpdatableWrapper<Unit> returnSite, final boolean hasCallees) {
 //		if (!hasCallees) {
 //			return Identity.v();
 //		}

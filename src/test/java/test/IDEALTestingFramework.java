@@ -65,7 +65,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 
 	protected IDebugger<TypestateDomainValue<ConcreteState>> getDebugger() {
 		if(debugger == null)
-			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
+			debugger = new IDEVizDebugger(ideVizFile, icfg);
 		return debugger;
 	}
 

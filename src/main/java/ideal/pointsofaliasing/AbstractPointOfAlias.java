@@ -1,19 +1,16 @@
 package ideal.pointsofaliasing;
 
-import java.util.Collection;
-
 import boomerang.accessgraph.AccessGraph;
-import heros.solver.PathEdge;
-import ideal.PerSeedAnalysisContext;
+import boomerang.incremental.UpdatableWrapper;
 import soot.Unit;
 
 public abstract class AbstractPointOfAlias<V> implements PointOfAlias<V>{
   protected AccessGraph d2;
-  protected Unit curr;
-  protected Unit succ;
+  protected UpdatableWrapper<Unit> curr;
+  protected UpdatableWrapper<Unit> succ;
   protected AccessGraph d1;
 
-  public AbstractPointOfAlias(AccessGraph d1, Unit stmt, AccessGraph d2, Unit succ) {
+  public AbstractPointOfAlias(AccessGraph d1, UpdatableWrapper<Unit> stmt, AccessGraph d2, UpdatableWrapper<Unit> succ) {
     this.d1 = d1;
     this.curr = stmt;
     this.d2 = d2;
@@ -22,17 +19,17 @@ public abstract class AbstractPointOfAlias<V> implements PointOfAlias<V>{
 
 
   public String toString() {
-    return "<" + d1.toString() + ">-<" + curr.toString() + "," + d2 + ">";
+    return "<" + d1.toString() + ">-<" + curr.getContents().toString() + "," + d2 + ">";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((curr == null) ? 0 : curr.hashCode());
+    result = prime * result + ((curr.getContents() == null) ? 0 : curr.getContents().hashCode());
     result = prime * result + ((d1 == null) ? 0 : d1.hashCode());
     result = prime * result + ((d2 == null) ? 0 : d2.hashCode());
-    result = prime * result + ((succ == null) ? 0 : succ.hashCode());
+    result = prime * result + ((succ.getContents() == null) ? 0 : succ.getContents().hashCode());
     return result;
   }
 
