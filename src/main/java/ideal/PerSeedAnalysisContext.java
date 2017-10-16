@@ -143,7 +143,7 @@ public class PerSeedAnalysisContext<V> {
 		return analysisDefinition.icfg();
 	}
 
-	public IContextRequester getContextRequestorFor(final AccessGraph d1, final Unit stmt) {
+	public IContextRequester getContextRequestorFor(final AccessGraph d1, final UpdatableWrapper<Unit> stmt) {
 		return solver.getContextRequestorFor(d1, stmt);
 	}
 

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
 import heros.Flow;
@@ -23,9 +24,9 @@ import soot.SootMethod;
 import soot.Unit;
 
 public class InternalAnalysisProblem<V> implements
-    IDETabulationProblem<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
+    IDETabulationProblem<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> {
 
-  private InterproceduralCFG<Unit, SootMethod> icfg;
+  private InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>> icfg;
   private PerSeedAnalysisContext<V> context;
   private AnalysisEdgeFunctions<V> edgeFunctions;
   private IPropagationController<Unit, AccessGraph> propagationController;
@@ -67,17 +68,17 @@ public class InternalAnalysisProblem<V> implements
   }
 
   @Override
-  public FlowFunctions<Unit, AccessGraph, SootMethod> flowFunctions() {
+  public FlowFunctions<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>> flowFunctions() {
     return flowFunctions;
   }
 
   @Override
-  public InterproceduralCFG<Unit, SootMethod> interproceduralCFG() {
+  public InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>> interproceduralCFG() {
     return icfg;
   }
 
   @Override
-  public Map<Unit, Set<AccessGraph>> initialSeeds() {
+  public Map<UpdatableWrapper<Unit>, Set<AccessGraph>> initialSeeds() {
     return null;
   }
 
@@ -87,7 +88,7 @@ public class InternalAnalysisProblem<V> implements
   }
 
   @Override
-  public EdgeFunctions<Unit, AccessGraph, SootMethod, V> edgeFunctions() {
+  public EdgeFunctions<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V> edgeFunctions() {
     return new ForwardEdgeFunctions<>(context, edgeFunctions);
   }
 
@@ -129,12 +130,12 @@ public class InternalAnalysisProblem<V> implements
 	}
 
 	@Override
-	public IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> getDebugger() {
+	public IDEDebugger<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> getDebugger() {
 		return context.debugger();
 	}
 
 	@Override
-	public Flow<Unit,AccessGraph,V> flowWrapper() {
+	public Flow<UpdatableWrapper<Unit>, AccessGraph, V> flowWrapper() {
 		return new Flow<Unit,AccessGraph,V>(){
 
 
@@ -160,7 +161,7 @@ public class InternalAnalysisProblem<V> implements
 	}
 
 	@Override
-	public IPropagationController<Unit, AccessGraph> propagationController() {
+	public IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController() {
 		return propagationController;
 	}
 
