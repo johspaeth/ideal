@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
@@ -67,8 +68,8 @@ public class VectorStateMachine extends MatcherStateMachine<ConcreteState> imple
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
-			Collection<SootMethod> calledMethod) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		if(m.toString().contains("<clinit>"))
 			return Collections.emptySet();
 		return generateAtAllocationSiteOf(unit,Vector.class);

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -72,8 +73,8 @@ public class OutputStreamStateMachine extends MatcherStateMachine<ConcreteState>
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
-			Collection<SootMethod> calledMethod) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		return generateThisAtAnyCallSitesOf(unit,calledMethod,constructors());
 	}
 

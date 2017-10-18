@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import boomerang.BoomerangContext;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -31,18 +32,18 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		transition.add(trans);
 	}
 
-	public Set<Transition<State>> getReturnTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod calleeMethod,
-			Unit exitStmt, AccessGraph exitNode, Unit returnSite, AccessGraph retNode) {
+	public Set<Transition<State>> getReturnTransitionsFor(AccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
+			UpdatableWrapper<Unit> exitStmt, AccessGraph exitNode, UpdatableWrapper<Unit> returnSite, AccessGraph retNode) {
 		return getMatchingTransitions(calleeMethod, exitNode, Type.OnReturn);
 	}
 
-	public Set<Transition<State>> getCallTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod callee,
+	public Set<Transition<State>> getCallTransitionsFor(AccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> callee,
 			AccessGraph srcNode, AccessGraph destNode) {
 		return getMatchingTransitions(callee, destNode, Type.OnCall);
 	}
 
-	public Set<Transition<State>> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
-			Unit returnSite, AccessGraph d3) {
+	public Set<Transition<State>> getCallToReturnTransitionsFor(AccessGraph d1, UpdatableWrapper<Unit> callSite, AccessGraph d2,
+			UpdatableWrapper<Unit> returnSite, AccessGraph d3) {
 		Set<Transition<State>> res = new HashSet<>();
 		if(callSite instanceof Stmt){
 			Stmt stmt = (Stmt) callSite;
@@ -61,19 +62,19 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		return res;
 	}
 
-	private Set<Transition<State>> getMatchingTransitions(SootMethod method, AccessGraph node, Type type) {
+	private Set<Transition<State>> getMatchingTransitions(UpdatableWrapper<SootMethod> method, AccessGraph node, Type type) {
 		Set<Transition<State>> res = new HashSet<>();
 		if (node.getFieldCount() == 0) {
 			for (MatcherTransition<State> trans : transition) {
-				if (trans.matches(method) && trans.getType().equals(type)) {
+				if (trans.matches(method.getContents()) && trans.getType().equals(type)) {
 					Parameter param = trans.getParam();
-					if (param.equals(Parameter.This) && BoomerangContext.isThisValue(method, node.getBase()))
+					if (param.equals(Parameter.This) && BoomerangContext.isThisValue(method.getContents(), node.getBase()))
 						res.add(new Transition<State>(trans.from(), trans.to()));
 					if (param.equals(Parameter.Param1)
-							&& method.getActiveBody().getParameterLocal(0).equals(node.getBase()))
+							&& method.getContents().getActiveBody().getParameterLocal(0).equals(node.getBase()))
 						res.add(new Transition<State>(trans.from(), trans.to()));
 					if (param.equals(Parameter.Param2)
-							&& method.getActiveBody().getParameterLocal(1).equals(node.getBase()))
+							&& method.getContents().getActiveBody().getParameterLocal(1).equals(node.getBase()))
 						res.add(new Transition<State>(trans.from(), trans.to()));
 				}
 			}
@@ -103,11 +104,11 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		return res;
 	}
 
-	protected Collection<AccessGraph> generateAtConstructor(Unit unit,
-			Collection<SootMethod> calledMethod, MatcherTransition<State> initialTrans) {
+	protected Collection<AccessGraph> generateAtConstructor(UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, MatcherTransition<State> initialTrans) {
 		boolean matches = false;
-		for (SootMethod method : calledMethod) {
-			if (initialTrans.matches(method)) {
+		for (UpdatableWrapper<SootMethod> method : calledMethod) {
+			if (initialTrans.matches(method.getContents())) {
 				matches = true;
 			}
 		}
@@ -129,7 +130,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		return Collections.emptySet();
 	}
 
-	protected Collection<AccessGraph> getLeftSideOf(Unit unit) {
+	protected Collection<AccessGraph> getLeftSideOf(UpdatableWrapper<Unit> unit) {
 		if (unit instanceof AssignStmt) {
 			Set<AccessGraph> out = new HashSet<>();
 			AssignStmt stmt = (AssignStmt) unit;
@@ -140,10 +141,10 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		return Collections.emptySet();
 	}
 	
-	protected Collection<AccessGraph> generateThisAtAnyCallSitesOf(Unit unit,
-			Collection<SootMethod> calledMethod, Set<SootMethod> hasToCall) {
-		for (SootMethod callee : calledMethod) {
-			if (hasToCall.contains(callee)) {
+	protected Collection<AccessGraph> generateThisAtAnyCallSitesOf(UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, Set<SootMethod> set) {
+		for (UpdatableWrapper<SootMethod> callee : calledMethod) {
+			if (set.contains(callee.getContents())) {
 				if (unit instanceof Stmt) {
 					if (((Stmt) unit).getInvokeExpr() instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit).getInvokeExpr();
@@ -161,7 +162,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	}
 	
 
-	protected Collection<AccessGraph> generateAtAllocationSiteOf(Unit unit, Class allocationSuperType) {
+	protected Collection<AccessGraph> generateAtAllocationSiteOf(UpdatableWrapper<Unit> unit, Class allocationSuperType) {
 		if(unit instanceof AssignStmt){
 			AssignStmt assignStmt = (AssignStmt) unit;
 			if(assignStmt.getRightOp() instanceof NewExpr){
@@ -176,12 +177,12 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		return Collections.emptySet();
 	}
 	@Override
-	public Collection<AccessGraph> generate(SootMethod method, Unit stmt,
-			Collection<SootMethod> calledMethods) {
+	public Collection<AccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt,
+			Collection<UpdatableWrapper<SootMethod>> calledMethods) {
 		return generateSeed(method, stmt, calledMethods);
 	}
 	
-	public abstract Collection<AccessGraph> generateSeed(SootMethod method, Unit stmt,
-			Collection<SootMethod> calledMethods);
+	public abstract Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt,
+			Collection<UpdatableWrapper<SootMethod>> calledMethods);
 }
 	

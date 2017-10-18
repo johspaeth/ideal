@@ -8,9 +8,7 @@ import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
+import boomerang.incremental.UpdatableWrapper;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
@@ -21,7 +19,6 @@ import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
 
 public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 		implements TypestateChangeFunction<ConcreteState> {
@@ -115,8 +112,10 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit, Collection<SootMethod> calledMethod) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		for (SootMethod cons : constructor()) {
+			//TODO GetContents in order to compare
 			if (calledMethod.contains(cons)) {
 				return getLeftSideOf(unit);
 			}

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import soot.Local;
 import soot.RefType;
 import soot.Scene;
@@ -92,9 +93,9 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> calledMethod) {
-		for (SootMethod m : calledMethod) {
-			if (retrieveIteratorConstructors().contains(m)) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
+		for (UpdatableWrapper<SootMethod> m : calledMethod) {
+			if (retrieveIteratorConstructors().contains(m.getContents())) {
 				if (unit instanceof AssignStmt) {
 					Set<AccessGraph> out = new HashSet<>();
 					AssignStmt stmt = (AssignStmt) unit;
@@ -108,8 +109,8 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	}
 
 	@Override
-	public Set<Transition<ConcreteState>> getReturnTransitionsFor(AccessGraph callerD1, Unit callSite, SootMethod calleeMethod,
-			Unit exitStmt, AccessGraph exitNode, Unit returnSite, AccessGraph retNode) {
+	public Set<Transition<ConcreteState>> getReturnTransitionsFor(AccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
+			UpdatableWrapper<Unit> exitStmt, AccessGraph exitNode, UpdatableWrapper<Unit> returnSite, AccessGraph retNode) {
 //		if (retrieveHasNextMethods().contains(calleeMethod)) {
 //			if (icfg.getMethodOf(callSite).getSignature().contains("java.lang.Object next()"))
 //				return Collections.emptySet();

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -18,6 +19,7 @@ import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
+import typestate.impl.statemachines.InputStreamStateMachine.States;
 
 public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
@@ -61,12 +63,12 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit,
-			Collection<SootMethod> calledMethod) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods());
 	}
 	@Override
 	public TypestateDomainValue getBottomElement() {
-		return new TypestateDomainValue(States.NONE);
+		return new TypestateDomainValue<States>(States.NONE);
 	}
 }

@@ -3,6 +3,7 @@ package typestate;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
 import ideal.edgefunction.AnalysisEdgeFunctions;
@@ -19,14 +20,14 @@ public class TypestateEdgeFunctions<State> implements AnalysisEdgeFunctions<Type
 	}
 
 	@Override
-	public EdgeFunction<TypestateDomainValue<State>> getNormalEdgeFunction(AccessGraph d1, Unit curr, AccessGraph currNode,
-			Unit succ, AccessGraph succNode) {
+	public EdgeFunction<TypestateDomainValue<State>> getNormalEdgeFunction(AccessGraph d1, UpdatableWrapper<Unit> curr, AccessGraph currNode,
+			UpdatableWrapper<Unit> succ, AccessGraph succNode) {
 		return EdgeIdentity.v();
 	}
 
 	@Override
-	public EdgeFunction<TypestateDomainValue<State>> getCallEdgeFunction(AccessGraph callerD1, Unit callSite,
-			AccessGraph srcNode, SootMethod calleeMethod, AccessGraph destNode) {
+	public EdgeFunction<TypestateDomainValue<State>> getCallEdgeFunction(AccessGraph callerD1, UpdatableWrapper<Unit> callSite,
+			AccessGraph srcNode, UpdatableWrapper<SootMethod> calleeMethod, AccessGraph destNode) {
 		Set<? extends Transition<State>> trans = func.getCallTransitionsFor(callerD1, callSite, calleeMethod, srcNode,
 				destNode);
 		if (trans.isEmpty())
@@ -35,8 +36,8 @@ public class TypestateEdgeFunctions<State> implements AnalysisEdgeFunctions<Type
 	}
 
 	@Override
-	public EdgeFunction<TypestateDomainValue<State>> getReturnEdgeFunction(AccessGraph callerD1, Unit callSite,
-			SootMethod calleeMethod, Unit exitStmt, AccessGraph exitNode, Unit returnSite, AccessGraph retNode) {
+	public EdgeFunction<TypestateDomainValue<State>> getReturnEdgeFunction(AccessGraph callerD1, UpdatableWrapper<Unit> callSite,
+			UpdatableWrapper<SootMethod> calleeMethod, UpdatableWrapper<Unit> exitStmt, AccessGraph exitNode, UpdatableWrapper<Unit> returnSite, AccessGraph retNode) {
 
 		Set<? extends Transition<State>> trans = func.getReturnTransitionsFor(callerD1, callSite, calleeMethod, exitStmt,
 				exitNode, returnSite, retNode);
@@ -46,8 +47,8 @@ public class TypestateEdgeFunctions<State> implements AnalysisEdgeFunctions<Type
 	}
 
 	@Override
-	public EdgeFunction<TypestateDomainValue<State>> getCallToReturnEdgeFunction(AccessGraph d1, Unit callSite, AccessGraph d2,
-			Unit returnSite, AccessGraph d3) {
+	public EdgeFunction<TypestateDomainValue<State>> getCallToReturnEdgeFunction(AccessGraph d1, UpdatableWrapper<Unit> callSite, AccessGraph d2,
+			UpdatableWrapper<Unit> returnSite, AccessGraph d3) {
 		Set<? extends Transition<State>> trans = func.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
 		if (trans.isEmpty())
 			return EdgeIdentity.v();
