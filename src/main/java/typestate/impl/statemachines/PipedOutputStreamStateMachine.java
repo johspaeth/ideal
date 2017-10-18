@@ -1,35 +1,19 @@
 package typestate.impl.statemachines;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.ExtendedICFG;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
-import soot.Local;
-import soot.Scene;
-import soot.SootClass;
+import boomerang.incremental.UpdatableWrapper;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.ReturnVoidStmt;
-import soot.jimple.Stmt;
 import test.ConcreteState;
-import typestate.TransitionFunction;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
-import typestate.finiteautomata.Transition;
 
 public class PipedOutputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
@@ -62,8 +46,8 @@ public class PipedOutputStreamStateMachine extends MatcherStateMachine<ConcreteS
 
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
-			Collection<SootMethod> calledMethod) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		return generateAtAllocationSiteOf(unit, java.io.PipedOutputStream.class);
 	}
 	@Override

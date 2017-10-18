@@ -1,17 +1,10 @@
 package typestate.impl.statemachines;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.ExtendedICFG;
-import heros.EdgeFunction;
-import heros.solver.Pair;
-import ideal.Analysis;
-import soot.SootClass;
+import boomerang.incremental.UpdatableWrapper;
 import soot.SootMethod;
 import soot.Unit;
 import test.ConcreteState;
@@ -21,7 +14,6 @@ import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
 
 public class PipedInputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
@@ -53,8 +45,8 @@ public class PipedInputStreamStateMachine extends MatcherStateMachine<ConcreteSt
 
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit,
-			Collection<SootMethod> calledMethod) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		return generateAtAllocationSiteOf(unit, java.io.PipedInputStream.class);
 	}
 

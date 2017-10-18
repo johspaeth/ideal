@@ -5,6 +5,7 @@ import java.util.Collection;
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.incremental.UpdatableWrapper;
 import heros.solver.IPropagationController;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
@@ -28,7 +29,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 	 *            method for the call site.
 	 * @return
 	 */
-	public abstract Collection<AccessGraph> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod);
+	public abstract Collection<AccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt, Collection<UpdatableWrapper<SootMethod>> calledMethod);
 
 	/**
 	 * This function must generate and return the AnalysisEdgeFunctions that are

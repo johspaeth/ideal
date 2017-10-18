@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
@@ -46,7 +47,8 @@ public class URLConnStateMachine extends MatcherStateMachine<ConcreteState> impl
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod m, Unit unit, Collection<SootMethod> calledMethod) {
+	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, connect());
 	}
 
