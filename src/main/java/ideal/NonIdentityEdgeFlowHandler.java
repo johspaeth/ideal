@@ -1,15 +1,16 @@
 package ideal;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import soot.Unit;
 
 public interface NonIdentityEdgeFlowHandler<V> {
 
-	public void onCallToReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite, AccessGraph d1,
+	public void onCallToReturnFlow(AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1,
 			EdgeFunction<V> func);
 
-	public void onReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite, AccessGraph d1,
+	public void onReturnFlow(AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1,
 			EdgeFunction<V> func);
 
 }

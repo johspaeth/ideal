@@ -72,30 +72,30 @@ public class AnalysisSolver<V>
 	}
 
 	private class ContextRequester implements IContextRequester {
-		Multimap<UpdatableWrapper<SootMethod>, AccessGraph> methodToStartFact = HashMultimap.create();
+		Multimap<SootMethod, AccessGraph> methodToStartFact = HashMultimap.create();
 		private AccessGraph d1;
 
 		public ContextRequester(AccessGraph d1, UpdatableWrapper<Unit> stmt) {
 			this.d1 = d1;
-			methodToStartFact.put(icfg.getMethodOf(stmt), d1);
+			methodToStartFact.put(icfg.getMethodOf(stmt).getContents(), d1);
 		}
 
 		@Override
-		public boolean continueAtCallSite(UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> callee) {
+		public boolean continueAtCallSite(Unit callSite, SootMethod callee) {
 			if (d1.equals(zeroValue)) {
 				return true;
 			}
-			Collection<UpdatableWrapper<Unit>> startPoints = icfg.getStartPointsOf(callee);
+			Collection<UpdatableWrapper<Unit>> startPoints = icfg.getStartPointsOf(context.icfg().wrap(callee));
 
 			for (UpdatableWrapper<Unit> sp : startPoints) {
 				for (AccessGraph g : new HashSet<>(methodToStartFact.get(callee))) {
 					Map<UpdatableWrapper<Unit>, Set<Pair<AccessGraph, AccessGraph>>> inc = incoming(g, sp);
 					for (Set<Pair<AccessGraph, AccessGraph>> in : inc.values()) {
 						for (Pair<AccessGraph, AccessGraph> e : in) {
-							methodToStartFact.put(icfg.getMethodOf(callSite), e.getO2());
+							methodToStartFact.put(icfg.getMethodOf(context.icfg().wrap(callSite)).getContents(), e.getO2());
 						}
 					}
-					if (inc.containsKey(callSite))
+					if (inc.containsKey(context.icfg().wrap(callSite)))
 						return true;
 				}
 			}
@@ -103,7 +103,7 @@ public class AnalysisSolver<V>
 		}
 
 		@Override
-		public boolean isEntryPointMethod(UpdatableWrapper<SootMethod> method) {
+		public boolean isEntryPointMethod(SootMethod method) {
 			return false;
 		}
 	}

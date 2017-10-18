@@ -57,7 +57,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 
 	public abstract IDEALScheduler<V> getScheduler();
 
-	public abstract IPropagationController<Unit, AccessGraph> propagationController();
+	public abstract IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController();
 
 	public String toString() {
 		String str = "====== IDEal Analysis Options ======";

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import heros.InterproceduralCFG;
 import heros.solver.IDEDebugger;
 import heros.solver.PathEdge;
@@ -14,7 +15,7 @@ import soot.SootMethod;
 import soot.Unit;
 
 public interface IDebugger<V>
-		extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
+		extends IDEDebugger<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> {
 
 	void beforeAnalysis();
 
