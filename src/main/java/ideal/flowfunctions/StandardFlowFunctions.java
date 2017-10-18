@@ -11,10 +11,8 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.forward.AbstractFlowFunctions;
 import boomerang.incremental.UpdatableWrapper;
-import heros.EdgeFunction;
 import heros.FlowFunction;
 import heros.FlowFunctions;
-import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import ideal.Analysis;
 import ideal.PerSeedAnalysisContext;
@@ -110,7 +108,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 								nullnessCheck = true;
 							}
 							if (nullnessCheck && context.enableNullPointAlias()) {
-								context.addPOA(new NullnessCheck<V>(sourceFact, curr, source, ifStmt.getTarget()));
+								context.addPOA(new NullnessCheck<V>(sourceFact, curr, source, context.icfg().wrap((Unit) ifStmt.getTarget())));
 							}
 						}
 
@@ -192,11 +190,11 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 							Local lBase = (Local) base;
 
 							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase);
-							WrappedSootField newFirstField = new WrappedSootField(field, curr);
+							WrappedSootField newFirstField = new WrappedSootField(field, curr.getContents());
 							if (!pointsToSetEmpty(lBase)) {
 								AccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
-								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as,
+								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as),
 										lBase, newAp, succ);
 								if (context.isInIDEPhase()) {
 									out.addAll(context.getFlowAtPointOfAlias(instanceFieldWrite));
@@ -214,9 +212,9 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase);
 							AccessGraph newAp = withNewLocal.prependField(
-									new WrappedSootField(AliasFinder.ARRAY_FIELD, curr));
+									new WrappedSootField(AliasFinder.ARRAY_FIELD, curr.getContents()));
 							out.add(newAp);
-							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite<>(sourceFact, as, lBase,
+							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as), lBase,
 									newAp, succ);
 							if (context.isInIDEPhase()) {
 								out.addAll(context.getFlowAtPointOfAlias(instanceFieldWrite));
@@ -229,11 +227,11 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						StaticFieldRef fr = (StaticFieldRef) leftOp;
 						SootField field = fr.getField();
 						AccessGraph newAp = source
-								.prependField(new WrappedSootField(field, curr)).makeStatic();
+								.prependField(new WrappedSootField(field, curr.getContents())).makeStatic();
 
 						if(newAp.hasSetBasedFieldGraph()){
 							newAp = source.dropTail()
-									.prependField(new WrappedSootField(field, curr)).makeStatic();
+									.prependField(new WrappedSootField(field, curr.getContents())).makeStatic();
 							out.add(newAp);
 						}
 						out.add(newAp);
@@ -287,7 +285,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 	protected boolean isFirstFieldUsedTransitivelyInMethod(AccessGraph source, final UpdatableWrapper<SootMethod> callee) {
         for(WrappedSootField wrappedField :  source.getFirstField()){
-      	  if(context.icfg().isStaticFieldUsed(callee, wrappedField.getField()))
+      	  if(context.icfg().isStaticFieldUsed(callee.getContents(), wrappedField.getField()))
       		  return true;
         }
 		return false;
@@ -490,7 +488,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 		return new FlowFunction<AccessGraph>() {
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
-				if(context.isStrongUpdate(callStmt, source)){
+				if(context.isStrongUpdate(callStmt.getContents(), source)){
 					return  Sets.newHashSet();
 				}
 				if(hasCallees){
