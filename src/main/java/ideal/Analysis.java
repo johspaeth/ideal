@@ -7,6 +7,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.incremental.UpdatableWrapper;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -63,22 +64,22 @@ public class Analysis<V> {
 		QueueReader<MethodOrMethodContext> listener = rm.listener();
 		while (listener.hasNext()) {
 			MethodOrMethodContext next = listener.next();
-			seeds.addAll(computeSeeds(next.method()));
+			seeds.addAll(computeSeeds(icfg.wrap(next.method())));
 		}
 		return seeds;
 	}
 
-	private Collection<IFactAtStatement> computeSeeds(SootMethod method) {
+	private Collection<IFactAtStatement> computeSeeds(UpdatableWrapper<SootMethod> method) {
 		Set<IFactAtStatement> seeds = new HashSet<>();
-		if (!method.hasActiveBody())
+		if (!method.getContents().hasActiveBody())
 			return seeds;
-		if (SEED_IN_APPLICATION_CLASS_METHOD && !method.getDeclaringClass().isApplicationClass())
+		if (SEED_IN_APPLICATION_CLASS_METHOD && !method.getContents().getDeclaringClass().isApplicationClass())
 			return seeds;
-		for (Unit u : method.getActiveBody().getUnits()) {
-			Collection<SootMethod> calledMethods = (Collection<SootMethod>) (icfg.isCallStmt(icfg.wrap(u)) ? icfg.getCalleesOfCallAt(icfg.wrap(u))
-					: new HashSet<SootMethod>());
-			for (AccessGraph fact : analysisDefinition.generate(method, u, calledMethods)) {
-				seeds.add(new FactAtStatement(u,fact));
+		for (Unit u : method.getContents().getActiveBody().getUnits()) {
+			Collection<UpdatableWrapper<SootMethod>> calledMethods = (Collection<UpdatableWrapper<SootMethod>>) (icfg.isCallStmt(icfg.wrap(u)) ? icfg.getCalleesOfCallAt(icfg.wrap(u))
+					: new HashSet<UpdatableWrapper<SootMethod>>());
+			for (AccessGraph fact : analysisDefinition.generate(method, icfg.wrap(u), calledMethods)) {
+				seeds.add(new FactAtStatement(icfg.wrap(u),fact));
 			}
 		}
 		return seeds;
