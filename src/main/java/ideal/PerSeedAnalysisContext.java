@@ -43,7 +43,7 @@ public class PerSeedAnalysisContext<V> {
 	private boolean idePhase;
 	private Multimap<PointOfAlias<V>, AccessGraph> callSiteToFlows = HashMultimap.create();
 	private Multimap<Unit, AccessGraph> callSiteToStrongUpdates = HashMultimap.create();
-	private Set<Pair<Pair<Unit, Unit>, AccessGraph>> nullnessBranches = new HashSet<>();
+	private Set<Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, AccessGraph>> nullnessBranches = new HashSet<>();
 	private AnalysisSolver<V> solver;
 	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
 	private AliasFinder boomerang;
@@ -51,7 +51,7 @@ public class PerSeedAnalysisContext<V> {
 	private Stopwatch startTime;
 	private IFactAtStatement seed;
 	private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
-	private Map<PathEdge<Unit, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
+	private Map<PathEdge<UpdatableWrapper<Unit>, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
 	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, IFactAtStatement seed) {
 		this.seed = seed;
@@ -134,8 +134,8 @@ public class PerSeedAnalysisContext<V> {
 
 	public void storeComputedNullnessFlow(NullnessCheck<V> nullnessCheck, AliasResults results) {
 		for (AccessGraph receivesUpdate : results.mayAliasSet()) {
-			nullnessBranches.add(new Pair<Pair<Unit, Unit>, AccessGraph>(
-					new Pair<Unit, Unit>(nullnessCheck.getCurr(), nullnessCheck.getSucc()), receivesUpdate));
+			nullnessBranches.add(new Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, AccessGraph>(
+					new Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>(nullnessCheck.getCurr(), nullnessCheck.getSucc()), receivesUpdate));
 		}
 	}
 
@@ -154,7 +154,7 @@ public class PerSeedAnalysisContext<V> {
 			try {
 				boomerang.startQuery();
 				AliasResults res = boomerang
-						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, key.getStmt()))
+						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, analysisDefinition.icfg().wrap(key.getStmt())))
 						.withoutNullAllocationSites();
 				analysisDefinition.debugger().onAliasesComputed(key.getAp(), key.getStmt(), key.d1, res);
 				if (res.queryTimedout()) {
@@ -237,17 +237,17 @@ public class PerSeedAnalysisContext<V> {
 
 	private void phase1(AnalysisSolver<V> solver) {
 		debugger().startPhase1WithSeed(seed, solver);
-		Set<PathEdge<Unit, AccessGraph>> worklist = new HashSet<>();
+		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> worklist = new HashSet<>();
 		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
-			worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact()));
+			worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, analysisDefinition.icfg().wrap(seed.getStmt()), seed.getFact()));
 		} else {
 			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
-				worklist.add(new PathEdge<Unit, AccessGraph>(InternalAnalysisProblem.ZERO, u.getContents(), seed.getFact()));
+				worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, u, seed.getFact()));
 			}
 		}
 		while (!worklist.isEmpty()) {
 			debugger().startForwardPhase(worklist);
-			for (PathEdge<Unit, AccessGraph> s : worklist) {
+			for (PathEdge<UpdatableWrapper<Unit>, AccessGraph> s : worklist) {
 				EdgeFunction<V> func = pathEdgeToEdgeFunc.get(s);
 				if (func == null)
 					func = EdgeIdentity.v();
@@ -261,11 +261,11 @@ public class PerSeedAnalysisContext<V> {
 					continue;
 				seenPOA.add(p);
 				debugger().solvePOA(p);
-				Collection<PathEdge<Unit, AccessGraph>> edges = p.getPathEdges(this);
+				Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> edges = p.getPathEdges(this);
 				worklist.addAll(edges);
 				if (p instanceof ReturnEvent) {
-					ReturnEvent<V> returnEvent = (ReturnEvent) p;
-					for (PathEdge<Unit, AccessGraph> edge : edges) {
+					ReturnEvent<V> returnEvent = (ReturnEvent<V>) p;
+					for (PathEdge<UpdatableWrapper<Unit>, AccessGraph> edge : edges) {
 						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
 					}
 				}
@@ -278,16 +278,16 @@ public class PerSeedAnalysisContext<V> {
 		debugger().startPhase2WithSeed(seed, solver);
 		enableIDEPhase();
 		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
-			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact(), EdgeIdentity.<V>v());
+			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, analysisDefinition.icfg().wrap(seed.getStmt()), seed.getFact(), EdgeIdentity.<V>v());
 		} else {
 			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
-				solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, u.getContents(), seed.getFact(), EdgeIdentity.<V>v());
+				solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, u, seed.getFact(), EdgeIdentity.<V>v());
 			}
 		}
 		solver.runExecutorAndAwaitCompletion();
-		HashMap<Unit, Set<AccessGraph>> map = new HashMap<Unit, Set<AccessGraph>>();
+		Map<UpdatableWrapper<Unit>, Set<AccessGraph>> map = new HashMap<UpdatableWrapper<Unit>, Set<AccessGraph>>();
 		for (UpdatableWrapper<Unit> sp : icfg().getStartPointsOf(icfg().getMethodOf(icfg().wrap(seed.getStmt())))) {
-			map.put(sp.getContents(), Collections.singleton(InternalAnalysisProblem.ZERO));
+			map.put(sp, Collections.singleton(InternalAnalysisProblem.ZERO));
 		}
 		solver.computeValues(map);
 		analysisDefinition.onFinishWithSeed(seed,solver);

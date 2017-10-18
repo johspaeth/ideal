@@ -36,7 +36,7 @@ public interface IDebugger<V>
 
 	void startAliasPhase(Set<PointOfAlias<V>> pointsOfAlias);
 
-	void startForwardPhase(Set<PathEdge<Unit, AccessGraph>> worklist);
+	void startForwardPhase(Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> worklist);
 
 	void onAliasesComputed(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1, AliasResults res);
 
