@@ -15,7 +15,7 @@ import soot.SootMethod;
 import soot.Unit;
 
 public interface IDebugger<V>
-		extends IDEDebugger<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> {
+		extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> {
 
 	void beforeAnalysis();
 
@@ -53,7 +53,7 @@ public interface IDebugger<V>
 
 	void solvePOA(PointOfAlias<V> p);
 
-	void onNormalPropagation(AccessGraph d1, Unit curr, Unit succ, AccessGraph source);
+	void onNormalPropagation(AccessGraph d1, UpdatableWrapper<Unit> curr, UpdatableWrapper<Unit> succ, AccessGraph source);
 
 	void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target);
 
