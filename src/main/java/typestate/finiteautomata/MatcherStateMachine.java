@@ -163,8 +163,8 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	
 
 	protected Collection<AccessGraph> generateAtAllocationSiteOf(UpdatableWrapper<Unit> unit, Class allocationSuperType) {
-		if(unit instanceof AssignStmt){
-			AssignStmt assignStmt = (AssignStmt) unit;
+		if(unit.getContents() instanceof AssignStmt){
+			AssignStmt assignStmt = (AssignStmt) unit.getContents();
 			if(assignStmt.getRightOp() instanceof NewExpr){
 				NewExpr newExpr = (NewExpr) assignStmt.getRightOp();
 				Value leftOp = assignStmt.getLeftOp();

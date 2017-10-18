@@ -1,16 +1,16 @@
 package ideal;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.incremental.UpdatableWrapper;
 import soot.Unit;
-import soot.jimple.Stmt;
 
 public class FactAtStatement implements IFactAtStatement {
 
 	private AccessGraph fact;
 	private Unit u;
 
-	public FactAtStatement(Unit u, AccessGraph fact) {
-		this.u = u;
+	public FactAtStatement(UpdatableWrapper<Unit> u, AccessGraph fact) {
+		this.u = u.getContents();
 		this.fact = fact;
 	}
 
