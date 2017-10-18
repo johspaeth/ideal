@@ -29,7 +29,7 @@ public class InternalAnalysisProblem<V> implements
   private InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>> icfg;
   private PerSeedAnalysisContext<V> context;
   private AnalysisEdgeFunctions<V> edgeFunctions;
-  private IPropagationController<Unit, AccessGraph> propagationController;
+  private IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController;
   private NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler;
   private StandardFlowFunctions<V> flowFunctions;
   public final static AccessGraph ZERO = new AccessGraph(null){
@@ -136,18 +136,18 @@ public class InternalAnalysisProblem<V> implements
 
 	@Override
 	public Flow<UpdatableWrapper<Unit>, AccessGraph, V> flowWrapper() {
-		return new Flow<Unit,AccessGraph,V>(){
+		return new Flow<UpdatableWrapper<Unit>,AccessGraph,V>(){
 
 
 			@Override
-			public void nonIdentityCallToReturnFlow( AccessGraph d2,Unit callSite, AccessGraph d3, Unit returnSite,
+			public void nonIdentityCallToReturnFlow( AccessGraph d2,UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite,
 					AccessGraph d1, EdgeFunction<V> func) {
 				//TODO search for aliases and update results.
 				InternalAnalysisProblem.this.nonIdentityEdgeFlowHandler.onCallToReturnFlow(d2,callSite,d3,returnSite,d1,func);
 			}
 
 			@Override
-			public void nonIdentityReturnFlow(Unit exitStmt,AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite,
+			public void nonIdentityReturnFlow(UpdatableWrapper<Unit> exitStmt,AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite,
 					AccessGraph d1, EdgeFunction<V> func) {
 				InternalAnalysisProblem.this.nonIdentityEdgeFlowHandler.onReturnFlow(d2,callSite,d3,returnSite,d1,func);
 				if(!context.isInIDEPhase())
@@ -163,6 +163,11 @@ public class InternalAnalysisProblem<V> implements
 	@Override
 	public IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController() {
 		return propagationController;
+	}
+
+	@Override
+	public void updateCFG(InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>> cfg) {
+		this.icfg = cfg;
 	}
 
 }

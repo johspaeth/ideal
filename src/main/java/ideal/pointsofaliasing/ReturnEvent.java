@@ -23,10 +23,10 @@ public class ReturnEvent<V> extends Event<V> {
 	private AccessGraph d1;
 	private EdgeFunction<V> func;
 
-	public ReturnEvent(Unit exitStmt, AccessGraph d2, Unit callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1, EdgeFunction<V> func) {
-		this.exitStmt = exitStmt;
+	public ReturnEvent(UpdatableWrapper<Unit> exitStmt, AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1, EdgeFunction<V> func) {
+		this.exitStmt = exitStmt.getContents();
 		this.d2 = d2;
-		this.callSite = callSite;
+		this.callSite = callSite.getContents();
 		this.d3 = d3;
 		this.returnSite = returnSite;
 		this.d1 = d1;

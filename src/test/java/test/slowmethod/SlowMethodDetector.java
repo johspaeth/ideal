@@ -3,20 +3,17 @@ package test.slowmethod;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.ifdssolver.IPathEdge;
 import boomerang.ifdssolver.IPropagationController;
+import boomerang.incremental.UpdatableWrapper;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
@@ -95,12 +92,12 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 			}
 
 			@Override
-			public heros.solver.IPropagationController<Unit, AccessGraph> propagationController() {
-				return new heros.solver.IPropagationController<Unit, AccessGraph>() {
+			public heros.solver.IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController() {
+				return new heros.solver.IPropagationController<UpdatableWrapper<Unit>, AccessGraph>() {
 
 					@Override
-					public boolean continuePropagate(AccessGraph d1, Unit n, AccessGraph d2) {
-						return SlowMethodDetector.this.isWithinAllowedMethod(n);
+					public boolean continuePropagate(AccessGraph d1, UpdatableWrapper<Unit> n, AccessGraph d2) {
+						return SlowMethodDetector.this.isWithinAllowedMethod(n.getContents());
 					}
 				};
 			}

@@ -3,6 +3,7 @@ package ideal;
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.solver.IPropagationController;
 import ideal.flowfunctions.StandardFlowFunctions;
@@ -53,11 +54,11 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	}
 	
 	@Override
-	public IPropagationController<Unit, AccessGraph> propagationController() {
-		return new IPropagationController<Unit,AccessGraph>(){
+	public IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController() {
+		return new IPropagationController<UpdatableWrapper<Unit>,AccessGraph>(){
 
 			@Override
-			public boolean continuePropagate(AccessGraph d1, Unit n, AccessGraph d2) {
+			public boolean continuePropagate(AccessGraph d1, UpdatableWrapper<Unit> n, AccessGraph d2) {
 				return true;
 			}};
 	}
@@ -73,12 +74,12 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	public NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler(){
 		return new NonIdentityEdgeFlowHandler<V>() {
 			@Override
-			public void onCallToReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite,
+			public void onCallToReturnFlow(AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite,
 					AccessGraph d1, EdgeFunction<V> func) {
 			}
 
 			@Override
-			public void onReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite, AccessGraph d1,
+			public void onReturnFlow(AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1,
 					EdgeFunction<V> func) {
 			}
 		};
