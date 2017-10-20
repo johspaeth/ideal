@@ -13,9 +13,9 @@ import heros.IDETabulationProblem;
 import heros.InterproceduralCFG;
 import heros.JoinLattice;
 import heros.edgefunc.AllTop;
-import heros.solver.IDEDebugger;
 import heros.solver.IPropagationController;
 import heros.solver.Scheduler;
+import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
 import ideal.flowfunctions.StandardFlowFunctions;
@@ -129,8 +129,7 @@ public class InternalAnalysisProblem<V> implements
 		return false;
 	}
 
-	@Override
-	public IDEDebugger<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> getDebugger() {
+	public IDebugger<V> getDebugger() {
 		return context.debugger();
 	}
 
