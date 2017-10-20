@@ -73,7 +73,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					if (identityStmt.getRightOp() instanceof CaughtExceptionRef)
 						return Collections.emptySet();
 				}
-				context.debugger().onNormalPropagation(sourceFact, curr, succ, source);
+				context.debugger().onNormalPropagation(sourceFact, curr.getContents(), succ.getContents(), source);
 				if (AliasFinder.HANDLE_EXCEPTION_FLOW && !source.isStatic() && curr instanceof IdentityStmt) {
 					IdentityStmt identityStmt = (IdentityStmt) curr;
 					if (identityStmt.getRightOp() instanceof CaughtExceptionRef
@@ -304,7 +304,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
 				assert source != null;
 				Set<AccessGraph> out = new HashSet<>();
-				Stmt is = (Stmt) callSite;
+				Stmt is = (Stmt) callSite.getContents();
 				source = source.deriveWithoutAllocationSite();
 				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic()) {
 					if (callee != null && isFirstFieldUsedTransitivelyInMethod(source,callee)) {

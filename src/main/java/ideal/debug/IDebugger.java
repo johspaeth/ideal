@@ -4,7 +4,6 @@ import java.util.Set;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
 import heros.InterproceduralCFG;
 import heros.solver.IDEDebugger;
 import heros.solver.PathEdge;
@@ -15,7 +14,7 @@ import soot.SootMethod;
 import soot.Unit;
 
 public interface IDebugger<V>
-		extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> {
+		extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
 	void beforeAnalysis();
 
@@ -36,7 +35,7 @@ public interface IDebugger<V>
 
 	void startAliasPhase(Set<PointOfAlias<V>> pointsOfAlias);
 
-	void startForwardPhase(Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> worklist);
+	void startForwardPhase(Set<PathEdge<Unit, AccessGraph>> worklist);
 
 	void onAliasesComputed(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1, AliasResults res);
 
@@ -53,7 +52,7 @@ public interface IDebugger<V>
 
 	void solvePOA(PointOfAlias<V> p);
 
-	void onNormalPropagation(AccessGraph d1, UpdatableWrapper<Unit> curr, UpdatableWrapper<Unit> succ, AccessGraph source);
+	void onNormalPropagation(AccessGraph d1, Unit curr, Unit succ, AccessGraph source);
 
 	void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target);
 

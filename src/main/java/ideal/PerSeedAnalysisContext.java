@@ -246,7 +246,7 @@ public class PerSeedAnalysisContext<V> {
 			}
 		}
 		while (!worklist.isEmpty()) {
-			debugger().startForwardPhase(worklist);
+//			debugger().startForwardPhase(worklist);
 			for (PathEdge<UpdatableWrapper<Unit>, AccessGraph> s : worklist) {
 				EdgeFunction<V> func = pathEdgeToEdgeFunc.get(s);
 				if (func == null)

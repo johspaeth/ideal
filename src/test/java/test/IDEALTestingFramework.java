@@ -13,7 +13,7 @@ import boomerang.cfg.IExtendedICFG;
 import boomerang.incremental.UpdatableWrapper;
 import ideal.Analysis;
 import ideal.ResultReporter;
-import ideal.debug.IDEVizDebugger;
+import ideal.debug.IDEDebugger;
 import ideal.debug.IDebugger;
 import soot.Body;
 import soot.Local;
@@ -34,7 +34,7 @@ import typestate.TypestateDomainValue;
 public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 	protected IExtendedICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
-	private IDEVizDebugger<TypestateDomainValue<ConcreteState>> debugger;
+	private IDebugger<TypestateDomainValue<ConcreteState>> debugger;
 	protected TestingResultReporter<ConcreteState> testingResultReporter;
 
 	protected abstract TypestateChangeFunction<ConcreteState> createTypestateChangeFunction();
@@ -65,7 +65,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 
 	protected IDebugger<TypestateDomainValue<ConcreteState>> getDebugger() {
 		if(debugger == null)
-			debugger = new IDEVizDebugger(ideVizFile, icfg);
+			debugger = new IDEDebugger<>();
 		return debugger;
 	}
 
@@ -74,7 +74,8 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
-				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
+				Set<Assertion> expectedResults = parseExpectedQueryResults(icfg.wrap(sootTestMethod));
+				System.out.println("Expected Results " + expectedResults);
 				testingResultReporter = new TestingResultReporter<ConcreteState>(expectedResults);
 				
 				executeAnalysis();
@@ -105,27 +106,25 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		IDEALTestingFramework.this.createAnalysis().run();
 	}
 
-	private Set<Assertion> parseExpectedQueryResults(SootMethod sootTestMethod) {
+	private Set<Assertion> parseExpectedQueryResults(UpdatableWrapper<SootMethod> sootTestMethod) {
 		Set<Assertion> results = new HashSet<>();
-		parseExpectedQueryResults(sootTestMethod, results, new HashSet<SootMethod>());
+		parseExpectedQueryResults(sootTestMethod, results, new HashSet<UpdatableWrapper<SootMethod>>());
 		return results;
 	}
 
-	private void parseExpectedQueryResults(SootMethod m, Set<Assertion> queries, Set<SootMethod> visited) {
-		if (!m.hasActiveBody() || visited.contains(m))
+	private void parseExpectedQueryResults(UpdatableWrapper<SootMethod> m, Set<Assertion> queries, Set<UpdatableWrapper<SootMethod>> visited) {
+		if (!m.getContents().hasActiveBody() || visited.contains(m))
 			return;
 		visited.add(m);
-		Body activeBody = m.getActiveBody();
+		Body activeBody = m.getContents().getActiveBody();
 		
 		System.out.println("----------------------------------------------------");
 		System.out.println(activeBody);
 		System.out.println("----------------------------------------------------");
 		
-		System.out.println("type of icfg " + icfg.getClass());
-		System.out.println(icfg.getCallsFromWithin(icfg.wrap(m)));
-		for (UpdatableWrapper<Unit> callSite : icfg.getCallsFromWithin(icfg.wrap(m))) {
+		for (UpdatableWrapper<Unit> callSite : icfg.getCallsFromWithin(m)) {
 			for (UpdatableWrapper<SootMethod> callee : icfg.getCalleesOfCallAt(callSite))
-				parseExpectedQueryResults(callee.getContents(), queries, visited);
+				parseExpectedQueryResults(callee, queries, visited);
 		}
 		for (Unit u : activeBody.getUnits()) {
 			if (!(u instanceof Stmt))

@@ -34,6 +34,11 @@ public class AnalysisSolver<V>
 		super(new InternalAnalysisProblem<V>(analysisDefinition, context));
 		this.context = context;
 	}
+	
+	public UpdatableWrapper<Unit> wrapUnit(Unit unit)
+	{
+		return this.context.icfg().wrap(unit);
+	}
 
 	/**
 	 * Starts the IFDS phase with the given path edge <d1>-><curr,d2>

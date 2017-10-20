@@ -6,8 +6,8 @@ import java.util.Set;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import boomerang.incremental.UpdatableWrapper;
 import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import soot.Unit;
@@ -17,6 +17,7 @@ public class TestingResultReporter<State> implements ResultReporter<TypestateDom
 	private Multimap<Unit, Assertion> stmtToResults = HashMultimap.create();
 	public TestingResultReporter(Set<Assertion> expectedResults) {
 		for(Assertion e : expectedResults){
+			System.out.println("e " + e);
 			if(e instanceof ComparableResult)
 				stmtToResults.put(((ComparableResult) e).getStmt(), e);
 		}
@@ -27,7 +28,7 @@ public class TestingResultReporter<State> implements ResultReporter<TypestateDom
 		for(Entry<Unit, Assertion> e : stmtToResults.entries()){
 			if(e.getValue() instanceof ComparableResult){
 				ComparableResult expectedResults = (ComparableResult) e.getValue();
-				TypestateDomainValue<State> resultAt = solver.resultAt(e.getKey(), expectedResults.getAccessGraph());
+				TypestateDomainValue<State> resultAt = solver.resultAt(solver.wrapUnit(e.getKey()), expectedResults.getAccessGraph());
 				if(resultAt != null)
 					expectedResults.computedResults(resultAt);
 			}
