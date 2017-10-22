@@ -134,6 +134,12 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 			public String toString() {
 				return "SlowMethodDebuggerOptions";
 			}
+
+			@Override
+			public IExtendedICFG<Unit, SootMethod> eIcfg() {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		});
 	}
 }

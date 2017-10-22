@@ -39,7 +39,7 @@ public class InternalAnalysisProblem<V> implements
   };
 
   InternalAnalysisProblem(IDEALAnalysisDefinition<V> analysisDefinition, PerSeedAnalysisContext<V> context) {
-    this.icfg = analysisDefinition.icfg();
+    this.icfg = analysisDefinition.eIcfg();
     this.edgeFunctions = analysisDefinition.edgeFunctions();
     this.propagationController = analysisDefinition.propagationController();
     this.nonIdentityEdgeFlowHandler = analysisDefinition.nonIdentityEdgeFlowHandler();
