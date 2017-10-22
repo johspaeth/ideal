@@ -23,7 +23,6 @@ import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
-import heros.solver.Scheduler;
 import heros.utilities.DefaultValueMap;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
@@ -140,7 +139,7 @@ public class PerSeedAnalysisContext<V> {
 	}
 
 	public IExtendedICFG<Unit, SootMethod> icfg() {
-		return analysisDefinition.icfg();
+		return analysisDefinition.eIcfg();
 	}
 
 	public IContextRequester getContextRequestorFor(final AccessGraph d1, final UpdatableWrapper<Unit> stmt) {
@@ -154,7 +153,7 @@ public class PerSeedAnalysisContext<V> {
 			try {
 				boomerang.startQuery();
 				AliasResults res = boomerang
-						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, analysisDefinition.icfg().wrap(key.getStmt())))
+						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, analysisDefinition.eIcfg().wrap(key.getStmt())))
 						.withoutNullAllocationSites();
 				analysisDefinition.debugger().onAliasesComputed(key.getAp(), key.getStmt(), key.d1, res);
 				if (res.queryTimedout()) {
@@ -239,7 +238,7 @@ public class PerSeedAnalysisContext<V> {
 		debugger().startPhase1WithSeed(seed, solver);
 		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> worklist = new HashSet<>();
 		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
-			worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, analysisDefinition.icfg().wrap(seed.getStmt()), seed.getFact()));
+			worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, analysisDefinition.eIcfg().wrap(seed.getStmt()), seed.getFact()));
 		} else {
 			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
 				worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, u, seed.getFact()));
@@ -278,7 +277,7 @@ public class PerSeedAnalysisContext<V> {
 		debugger().startPhase2WithSeed(seed, solver);
 		enableIDEPhase();
 		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
-			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, analysisDefinition.icfg().wrap(seed.getStmt()), seed.getFact(), EdgeIdentity.<V>v());
+			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, analysisDefinition.eIcfg().wrap(seed.getStmt()), seed.getFact(), EdgeIdentity.<V>v());
 		} else {
 			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
 				solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, u, seed.getFact(), EdgeIdentity.<V>v());

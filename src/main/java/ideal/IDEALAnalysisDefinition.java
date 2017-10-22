@@ -12,6 +12,7 @@ import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.flowfunctions.StandardFlowFunctions;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
 public abstract class IDEALAnalysisDefinition<V> {
 
@@ -41,7 +42,9 @@ public abstract class IDEALAnalysisDefinition<V> {
 
 	public abstract ResultReporter<V> resultReporter();
 
-	public abstract IExtendedICFG<Unit, SootMethod> icfg();
+	public abstract IExtendedICFG<Unit, SootMethod> eIcfg();
+	
+	public abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
 
 	public abstract IDebugger<V> debugger();
 

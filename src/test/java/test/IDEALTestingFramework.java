@@ -23,6 +23,7 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.ExpectedResults.InternalState;
 import test.core.selfrunning.AbstractTestingFramework;
@@ -32,7 +33,7 @@ import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
 public abstract class IDEALTestingFramework extends AbstractTestingFramework{
-	protected IExtendedICFG<Unit, SootMethod> icfg;
+	protected ExtendedICFG icfg;
 	protected long analysisTime;
 	private IDebugger<TypestateDomainValue<ConcreteState>> debugger;
 	protected TestingResultReporter<ConcreteState> testingResultReporter;
@@ -47,8 +48,8 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			}
 
 			@Override
-			public IExtendedICFG<Unit, SootMethod> icfg() {
-				return icfg;
+			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+				return icfg.getBaseECFG();
 			}
 
 			@Override
@@ -59,6 +60,11 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			@Override
 			public TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
 				return IDEALTestingFramework.this.createTypestateChangeFunction();
+			}
+
+			@Override
+			public IExtendedICFG<Unit, SootMethod> eIcfg() {
+				return icfg;
 			}
 		});
 	}

@@ -30,7 +30,7 @@ public class Analysis<V> {
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
 		this.analysisDefinition = analysisDefinition;
-		this.icfg = analysisDefinition.icfg();
+		this.icfg = analysisDefinition.eIcfg();
 		this.debugger = analysisDefinition.debugger();
 	}
 
