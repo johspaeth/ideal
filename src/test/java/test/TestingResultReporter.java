@@ -14,7 +14,7 @@ import soot.Unit;
 import typestate.TypestateDomainValue;
 
 public class TestingResultReporter<State> implements ResultReporter<TypestateDomainValue<State>>{
-	private Multimap<Unit, Assertion> stmtToResults = HashMultimap.create();
+	private Multimap<UpdatableWrapper<Unit>, Assertion> stmtToResults = HashMultimap.create();
 	public TestingResultReporter(Set<Assertion> expectedResults) {
 		for(Assertion e : expectedResults){
 			System.out.println("e " + e);
@@ -25,10 +25,17 @@ public class TestingResultReporter<State> implements ResultReporter<TypestateDom
 
 	@Override
 	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<State>> solver) {
-		for(Entry<Unit, Assertion> e : stmtToResults.entries()){
+		for(Entry<UpdatableWrapper<Unit>, Assertion> e : stmtToResults.entries()){
 			if(e.getValue() instanceof ComparableResult){
 				ComparableResult expectedResults = (ComparableResult) e.getValue();
-				TypestateDomainValue<State> resultAt = solver.resultAt(solver.wrapUnit(e.getKey()), expectedResults.getAccessGraph());
+				TypestateDomainValue<State> resultAt = solver.resultAt(e.getKey(), expectedResults.getAccessGraph());
+				System.out.println("--------------------------------TestingResultReporter-------------------------------------");
+				System.out.println("e.getKey " + e.getKey());
+				System.out.println("expectedResults.getAccessGraph " + expectedResults.getAccessGraph());
+				System.out.println("e.getKey class " + e.getKey().getClass());
+				System.out.println("expectedResults.getAccessGraph class " + expectedResults.getAccessGraph().getClass());
+				System.out.println("resultAt " + resultAt);
+				System.out.println("--------------------------------TestingResultReporter-------------------------------------");
 				if(resultAt != null)
 					expectedResults.computedResults(resultAt);
 			}

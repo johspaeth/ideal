@@ -81,7 +81,11 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				Set<Assertion> expectedResults = parseExpectedQueryResults(icfg.wrap(sootTestMethod));
-				System.out.println("Expected Results " + expectedResults);
+				
+				for (Assertion expectedAssertion : expectedResults) {
+					System.out.println("expectedAssertion " + expectedAssertion);
+				}
+				
 				testingResultReporter = new TestingResultReporter<ConcreteState>(expectedResults);
 				
 				executeAnalysis();
@@ -150,14 +154,14 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			AccessGraph val = new AccessGraph(queryVar);
 			if (invocationName.startsWith("mayBeIn")) {
 				if (invocationName.contains("Error"))
-					queries.add(new MayBe(stmt, val, InternalState.ERROR));
+					queries.add(new MayBe(icfg.wrap((Unit) stmt), val, InternalState.ERROR));
 				else
-					queries.add(new MayBe(stmt, val, InternalState.ACCEPTING));
+					queries.add(new MayBe(icfg.wrap((Unit) stmt), val, InternalState.ACCEPTING));
 			} else if (invocationName.startsWith("mustBeIn")) {
 				if (invocationName.contains("Error"))
-					queries.add(new MustBe(stmt, val, InternalState.ERROR));
+					queries.add(new MustBe(icfg.wrap((Unit) stmt), val, InternalState.ERROR));
 				else
-					queries.add(new MustBe(stmt, val, InternalState.ACCEPTING));
+					queries.add(new MustBe(icfg.wrap((Unit) stmt), val, InternalState.ACCEPTING));
 			}
 		}
 	}

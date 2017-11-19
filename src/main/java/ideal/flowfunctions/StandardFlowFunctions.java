@@ -68,14 +68,14 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 			@Override
 			public Set<AccessGraph> computeTargets(AccessGraph source) {
 
-				if(curr instanceof IdentityStmt){
-					IdentityStmt identityStmt = (IdentityStmt) curr;
+				if(curr.getContents() instanceof IdentityStmt){
+					IdentityStmt identityStmt = (IdentityStmt) curr.getContents();
 					if (identityStmt.getRightOp() instanceof CaughtExceptionRef)
 						return Collections.emptySet();
 				}
 				context.debugger().onNormalPropagation(sourceFact, curr.getContents(), succ.getContents(), source);
-				if (AliasFinder.HANDLE_EXCEPTION_FLOW && !source.isStatic() && curr instanceof IdentityStmt) {
-					IdentityStmt identityStmt = (IdentityStmt) curr;
+				if (AliasFinder.HANDLE_EXCEPTION_FLOW && !source.isStatic() && curr.getContents() instanceof IdentityStmt) {
+					IdentityStmt identityStmt = (IdentityStmt) curr.getContents();
 					if (identityStmt.getRightOp() instanceof CaughtExceptionRef
 							&& identityStmt.getLeftOp() instanceof Local) {
 						Local leftOp = (Local) identityStmt.getLeftOp();
@@ -92,9 +92,9 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 				}
 					
 
-				if (!(curr instanceof AssignStmt)) {
-					if (curr instanceof IfStmt) {
-						IfStmt ifStmt = (IfStmt) curr;
+				if (!(curr.getContents() instanceof AssignStmt)) {
+					if (curr.getContents() instanceof IfStmt) {
+						IfStmt ifStmt = (IfStmt) curr.getContents();
 						Value condition = ifStmt.getCondition();
 
 						if (condition instanceof EqExpr && source.getFieldCount() == 0) {
@@ -116,7 +116,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					return Collections.singleton(source);
 				}
 
-				AssignStmt as = (AssignStmt) curr;
+				AssignStmt as = (AssignStmt) curr.getContents();
 				Value leftOp = as.getLeftOp();
 				Value rightOp = as.getRightOp();
 
@@ -388,8 +388,8 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					return Collections.singleton(source);
 
 				HashSet<AccessGraph> out = new HashSet<AccessGraph>();
-				if (callSite instanceof Stmt) {
-					Stmt is = (Stmt) callSite;
+				if (callSite.getContents() instanceof Stmt) {
+					Stmt is = (Stmt) callSite.getContents();
 
 					if (is.containsInvokeExpr()) {
 						InvokeExpr ie = is.getInvokeExpr();
@@ -438,12 +438,12 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					}
 				}
 
-				if (callSite instanceof AssignStmt && exitStmt instanceof ReturnStmt) {
-					AssignStmt as = (AssignStmt) callSite;
+				if (callSite.getContents() instanceof AssignStmt && exitStmt.getContents() instanceof ReturnStmt) {
+					AssignStmt as = (AssignStmt) callSite.getContents();
 					Value leftOp = as.getLeftOp();
 					// mapping of return value
 
-					ReturnStmt returnStmt = (ReturnStmt) exitStmt;
+					ReturnStmt returnStmt = (ReturnStmt) exitStmt.getContents();
 					Value returns = returnStmt.getOp();
 					// d = return out;
 					if (leftOp instanceof Local) {
@@ -476,10 +476,10 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 //		if (!hasCallees) {
 //			return Identity.v();
 //		}
-		if (!(callStmt instanceof Stmt)) {
+		if (!(callStmt.getContents() instanceof Stmt)) {
 			return Identity.v();
 		}
-		Stmt callSite = (Stmt) callStmt;
+		Stmt callSite = (Stmt) callStmt.getContents();
 		if (!callSite.containsInvokeExpr()) {
 			return Identity.v();
 		}

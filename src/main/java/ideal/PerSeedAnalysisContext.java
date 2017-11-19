@@ -237,10 +237,10 @@ public class PerSeedAnalysisContext<V> {
 	private void phase1(AnalysisSolver<V> solver) {
 		debugger().startPhase1WithSeed(seed, solver);
 		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> worklist = new HashSet<>();
-		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
-			worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, analysisDefinition.eIcfg().wrap(seed.getStmt()), seed.getFact()));
+		if (icfg().isExitStmt(seed.getStmt())) {
+			worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact()));
 		} else {
-			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
+			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(seed.getStmt())) {
 				worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, u, seed.getFact()));
 			}
 		}
@@ -276,16 +276,21 @@ public class PerSeedAnalysisContext<V> {
 	private void phase2(AnalysisSolver<V> solver) {
 		debugger().startPhase2WithSeed(seed, solver);
 		enableIDEPhase();
-		if (icfg().isExitStmt(icfg().wrap(seed.getStmt()))) {
-			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, analysisDefinition.eIcfg().wrap(seed.getStmt()), seed.getFact(), EdgeIdentity.<V>v());
+		if (icfg().isExitStmt(seed.getStmt())) {
+			solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact(), EdgeIdentity.<V>v());
 		} else {
-			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(icfg().wrap(seed.getStmt()))) {
+			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(seed.getStmt())) {
 				solver.injectPhase1Seed(InternalAnalysisProblem.ZERO, u, seed.getFact(), EdgeIdentity.<V>v());
 			}
 		}
 		solver.runExecutorAndAwaitCompletion();
 		Map<UpdatableWrapper<Unit>, Set<AccessGraph>> map = new HashMap<UpdatableWrapper<Unit>, Set<AccessGraph>>();
-		for (UpdatableWrapper<Unit> sp : icfg().getStartPointsOf(icfg().getMethodOf(icfg().wrap(seed.getStmt())))) {
+		System.out.println("class of seed " + seed.getClass());
+		System.out.println("class of seed.getStmt().class " + seed.getStmt().getClass());
+		for (UpdatableWrapper<Unit> sp : icfg().getStartPointsOf(icfg().getMethodOf(seed.getStmt()))) {
+			System.out.println("sp " + sp);
+			System.out.println("class of sp " + sp.getClass());
+			System.out.println("class of sp. " + sp.getContents().getClass());
 			map.put(sp, Collections.singleton(InternalAnalysisProblem.ZERO));
 		}
 		solver.computeValues(map);
