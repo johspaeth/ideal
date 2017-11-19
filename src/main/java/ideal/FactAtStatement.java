@@ -7,10 +7,10 @@ import soot.Unit;
 public class FactAtStatement implements IFactAtStatement {
 
 	private AccessGraph fact;
-	private Unit u;
+	private UpdatableWrapper<Unit> u;
 
 	public FactAtStatement(UpdatableWrapper<Unit> u, AccessGraph fact) {
-		this.u = u.getContents();
+		this.u = u;
 		this.fact = fact;
 	}
 
@@ -18,7 +18,7 @@ public class FactAtStatement implements IFactAtStatement {
 		return fact;
 	}
 
-	public Unit getStmt() {
+	public UpdatableWrapper<Unit> getStmt() {
 		return u;
 	}
 

@@ -35,10 +35,10 @@ public class AnalysisSolver<V>
 		this.context = context;
 	}
 	
-	public UpdatableWrapper<Unit> wrapUnit(Unit unit)
+	/*public UpdatableWrapper<Unit> wrapUnit(Unit unit)
 	{
 		return this.context.icfg().wrap(unit);
-	}
+	}*/
 
 	/**
 	 * Starts the IFDS phase with the given path edge <d1>-><curr,d2>
@@ -49,8 +49,10 @@ public class AnalysisSolver<V>
 	 */
 	public void injectPhase1Seed(AccessGraph d1, UpdatableWrapper<Unit> curr, AccessGraph d2, EdgeFunction<V> func) {
 //		logger.debug("propagating UpdatableWrapper<Unit> " + curr);
+		System.out.println("--------------------------------------IDESolver run()--------------------------------------------------------------------------------");
 		super.propagate(d1, curr, d2, func, null, true);
 		runExecutorAndAwaitCompletion();
+		System.out.println("--------------------------------------IDESolver run()--------------------------------------------------------------------------------");
 	}
 
 	@Override

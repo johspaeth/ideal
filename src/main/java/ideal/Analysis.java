@@ -38,6 +38,12 @@ public class Analysis<V> {
 		printOptions();
 		WrappedSootField.TRACK_STMT = false;
 		Set<IFactAtStatement> initialSeeds = computeSeeds();
+		
+		System.out.println("Initial seeds " + initialSeeds);
+		for (IFactAtStatement iFactAtStatement : initialSeeds) {
+			System.out.println("stmt " + iFactAtStatement.getStmt() + " AccessGraph " + iFactAtStatement.getFact());
+		}
+		
 		if (initialSeeds.isEmpty())
 			System.err.println("No seeds found!");
 		else
@@ -50,6 +56,7 @@ public class Analysis<V> {
 	}
 
 	public void analysisForSeed(IFactAtStatement seed){
+		System.out.println("\nseed in analysisForSeed " + seed.getStmt());
 		new PerSeedAnalysisContext<>(analysisDefinition, seed).run();
 	}
 	
