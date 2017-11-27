@@ -215,7 +215,7 @@ public class PerSeedAnalysisContext<V> {
 		try {
 //			System.out.println("================== STARTING PHASE 1 ==================");
 			phase1(solver);
-			solver.destroy();
+//			solver.destroy();
 			solver = new AnalysisSolver<>(analysisDefinition, this);
 //			System.out.println("================== STARTING PHASE 2 ==================");
 			phase2(solver);
@@ -225,9 +225,10 @@ public class PerSeedAnalysisContext<V> {
 			debugger().onAnalysisTimeout(seed);
 			reporter().onSeedTimeout(seed);
 		}
-		reporter().onSeedFinished(seed, solver);
-		destroy();
-		solver.destroy();
+		if(reporter() != null)
+			reporter().onSeedFinished(seed, solver);
+//		destroy();
+//		solver.destroy();
 	}
 
 	private ResultReporter<V> reporter() {
@@ -320,6 +321,9 @@ public class PerSeedAnalysisContext<V> {
 		nullnessBranches = null;
 		eventAtCallSite.clear();
 		analysisDefinition = null;
+		
+//		destroy the solver later on if update needs to be called from Analysis.java on each analysisContext.
+		solver.destroy();
 	}
 
 	public void checkTimeout() {
@@ -333,6 +337,10 @@ public class PerSeedAnalysisContext<V> {
 
 	public boolean enableNullPointAlias() {
 		return analysisDefinition.enableNullPointOfAlias();
+	}
+	
+	public void updateSolverResults() {
+		solver.update();
 	}
 
 }

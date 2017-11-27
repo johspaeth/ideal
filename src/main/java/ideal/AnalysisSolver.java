@@ -125,4 +125,8 @@ public class AnalysisSolver<V>
 	public Set<Cell<AccessGraph, AccessGraph, EdgeFunction<V>>> getPathEdgesAt(UpdatableWrapper<Unit> statement) {
 		return jumpFn.lookupByTarget(statement);
 	}
+	
+	public void updateAnalysis() {
+		this.update();
+	}
 }

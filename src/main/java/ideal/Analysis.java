@@ -2,6 +2,7 @@ package ideal;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
@@ -27,11 +28,13 @@ public class Analysis<V> {
 	private final IDebugger<V> debugger;
 	private final IExtendedICFG<Unit, SootMethod> icfg;
 	protected final IDEALAnalysisDefinition<V> analysisDefinition;
+	private LinkedList<PerSeedAnalysisContext<V>> perSeedContexts;
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
 		this.analysisDefinition = analysisDefinition;
 		this.icfg = analysisDefinition.eIcfg();
 		this.debugger = analysisDefinition.debugger();
+		this.perSeedContexts = new LinkedList<PerSeedAnalysisContext<V>>();
 	}
 
 	public void run() {
@@ -57,7 +60,15 @@ public class Analysis<V> {
 
 	public void analysisForSeed(IFactAtStatement seed){
 		System.out.println("\nseed in analysisForSeed " + seed.getStmt());
-		new PerSeedAnalysisContext<>(analysisDefinition, seed).run();
+		perSeedContexts.add(new PerSeedAnalysisContext<>(analysisDefinition, seed));
+		perSeedContexts.get(perSeedContexts.size()-1).run();
+	}
+	
+	public void update() {
+		for(PerSeedAnalysisContext<V> contextSolver: perSeedContexts) {
+			contextSolver.updateSolverResults();
+			contextSolver.destroy();
+		}
 	}
 	
 	private void printOptions() {
