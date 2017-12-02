@@ -7,6 +7,7 @@ import java.util.Set;
 import com.beust.jcommander.internal.Lists;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import heros.BiDiInterproceduralCFG;
 import heros.debug.visualization.ExplodedSuperGraph;
 import heros.debug.visualization.IDEToJSON;
 import heros.debug.visualization.IDEToJSON.Direction;
@@ -22,7 +23,6 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
 public class IDEVizDebugger<V> implements IDebugger<V> {
 

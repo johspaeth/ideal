@@ -14,9 +14,9 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.context.IContextRequester;
-import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.InterproceduralCFG;
+import heros.incremental.UpdatableWrapper;
 import heros.solver.IDESolver;
 import heros.solver.Pair;
 import heros.solver.PathEdge;

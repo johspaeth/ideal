@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
 import heros.Flow;
@@ -13,6 +12,7 @@ import heros.IDETabulationProblem;
 import heros.InterproceduralCFG;
 import heros.JoinLattice;
 import heros.edgefunc.AllTop;
+import heros.incremental.UpdatableWrapper;
 import heros.solver.IPropagationController;
 import heros.solver.Scheduler;
 import ideal.debug.IDebugger;

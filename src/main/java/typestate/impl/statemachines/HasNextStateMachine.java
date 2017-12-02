@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import soot.Local;
 import soot.RefType;
 import soot.Scene;

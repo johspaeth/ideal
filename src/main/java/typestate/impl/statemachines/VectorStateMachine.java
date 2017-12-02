@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;

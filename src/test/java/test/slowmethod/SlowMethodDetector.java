@@ -13,7 +13,7 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.ifdssolver.IPathEdge;
 import boomerang.ifdssolver.IPropagationController;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;

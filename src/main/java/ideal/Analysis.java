@@ -8,7 +8,7 @@ import java.util.Set;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
