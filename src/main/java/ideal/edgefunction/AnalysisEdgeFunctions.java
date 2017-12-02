@@ -1,8 +1,8 @@
 package ideal.edgefunction;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunctions;
+import heros.incremental.UpdatableWrapper;
 import soot.SootMethod;
 import soot.Unit;
 

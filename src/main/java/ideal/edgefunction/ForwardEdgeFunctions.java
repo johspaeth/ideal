@@ -1,10 +1,10 @@
 package ideal.edgefunction;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
 import heros.edgefunc.AllTop;
+import heros.incremental.UpdatableWrapper;
 import ideal.PerSeedAnalysisContext;
 import soot.SootMethod;
 import soot.Unit;

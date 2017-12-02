@@ -5,14 +5,14 @@ import java.util.Collection;
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
-import boomerang.incremental.UpdatableWrapper;
+import heros.BiDiInterproceduralCFG;
+import heros.incremental.UpdatableWrapper;
 import heros.solver.IPropagationController;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.flowfunctions.StandardFlowFunctions;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
 public abstract class IDEALAnalysisDefinition<V> {
 

@@ -3,9 +3,9 @@ package typestate;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
+import heros.incremental.UpdatableWrapper;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;
 import soot.Unit;

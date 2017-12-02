@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import heros.solver.PathEdge;
 import ideal.PerSeedAnalysisContext;
 import soot.Local;

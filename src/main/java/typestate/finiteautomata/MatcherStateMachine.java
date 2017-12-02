@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import boomerang.BoomerangContext;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;

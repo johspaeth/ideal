@@ -6,8 +6,8 @@ import java.util.Set;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
 import heros.EdgeFunction;
+import heros.incremental.UpdatableWrapper;
 import heros.solver.PathEdge;
 import ideal.PerSeedAnalysisContext;
 import soot.Unit;

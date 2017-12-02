@@ -1,7 +1,7 @@
 package test;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 

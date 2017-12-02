@@ -2,13 +2,13 @@ package ideal;
 
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.BiDiInterproceduralCFG;
 import heros.EdgeFunction;
+import heros.incremental.UpdatableWrapper;
 import heros.solver.IPropagationController;
 import ideal.flowfunctions.StandardFlowFunctions;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
 public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDefinition<V> {
 	@Override

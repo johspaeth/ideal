@@ -1,7 +1,7 @@
 package ideal;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import soot.Unit;
 
 public interface IFactAtStatement {

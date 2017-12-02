@@ -3,7 +3,7 @@ package typestate;
 import java.util.Collection;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import ideal.DefaultIDEALAnalysisDefinition;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import soot.SootMethod;

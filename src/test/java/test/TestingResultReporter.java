@@ -6,7 +6,7 @@ import java.util.Set;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import boomerang.incremental.UpdatableWrapper;
+import heros.incremental.UpdatableWrapper;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
