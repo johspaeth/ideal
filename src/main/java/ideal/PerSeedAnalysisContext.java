@@ -16,6 +16,7 @@ import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
@@ -44,6 +45,8 @@ public class PerSeedAnalysisContext<V> {
 	private Multimap<Unit, AccessGraph> callSiteToStrongUpdates = HashMultimap.create();
 	private Set<Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, AccessGraph>> nullnessBranches = new HashSet<>();
 	private AnalysisSolver<V> solver;
+	private AnalysisSolver<V> phaseOneSolver;
+	private AnalysisSolver<V> phaseTwoSolver;
 	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
 	private AliasFinder boomerang;
 	private IDEALAnalysisDefinition<V> analysisDefinition;
@@ -209,17 +212,17 @@ public class PerSeedAnalysisContext<V> {
 	public void run() {
 		debugger().startWithSeed(seed);
 		startTime = Stopwatch.createStarted();
-		AnalysisSolver<V> solver = new AnalysisSolver<>(analysisDefinition, this);
-		setSolver(solver);
-		analysisDefinition.onStartWithSeed(seed,solver);
+		phaseOneSolver = new AnalysisSolver<>(analysisDefinition, this);
+		setSolver(phaseOneSolver);
+		analysisDefinition.onStartWithSeed(seed,phaseOneSolver);
 		try {
 //			System.out.println("================== STARTING PHASE 1 ==================");
-			phase1(solver);
+			phase1(phaseOneSolver);
 //			solver.destroy();
-			solver = new AnalysisSolver<>(analysisDefinition, this);
+			phaseTwoSolver = new AnalysisSolver<>(analysisDefinition, this);
 //			System.out.println("================== STARTING PHASE 2 ==================");
-			phase2(solver);
-			setSolver(solver);
+			phase2(phaseTwoSolver);
+			setSolver(phaseTwoSolver);
 		} catch (IDEALTimeoutException e) {
 			System.out.println("Timeout of IDEAL, Budget:" + analysisDefinition.analysisBudgetInSeconds());
 			debugger().onAnalysisTimeout(seed);
@@ -323,7 +326,8 @@ public class PerSeedAnalysisContext<V> {
 		analysisDefinition = null;
 		
 //		destroy the solver later on if update needs to be called from Analysis.java on each analysisContext.
-		solver.destroy();
+		phaseOneSolver.destroy();
+		phaseTwoSolver.destroy();
 	}
 
 	public void checkTimeout() {
@@ -339,8 +343,9 @@ public class PerSeedAnalysisContext<V> {
 		return analysisDefinition.enableNullPointOfAlias();
 	}
 	
-	public void updateSolverResults() {
-		solver.update();
+	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
+		phaseOneSolver.update(newCfg);
+		phaseTwoSolver.update(newCfg);
 	}
 
 }
