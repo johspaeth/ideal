@@ -13,9 +13,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
 import heros.InterproceduralCFG;
+import heros.incremental.UpdatableInterproceduralCFG;
 import heros.incremental.UpdatableWrapper;
 import heros.solver.IDESolver;
 import heros.solver.Pair;
@@ -126,7 +128,7 @@ public class AnalysisSolver<V>
 		return jumpFn.lookupByTarget(statement);
 	}
 	
-	public void updateAnalysis() {
-		this.update();
+	public void updateAnalysis(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
+		this.update(newCfg);
 	}
 }
