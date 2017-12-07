@@ -17,7 +17,6 @@ import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
 import heros.InterproceduralCFG;
-import heros.incremental.UpdatableInterproceduralCFG;
 import heros.incremental.UpdatableWrapper;
 import heros.solver.IDESolver;
 import heros.solver.Pair;
