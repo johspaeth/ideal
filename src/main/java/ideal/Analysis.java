@@ -7,6 +7,7 @@ import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
+import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.debug.IDebugger;
@@ -61,12 +62,12 @@ public class Analysis<V> {
 	public void analysisForSeed(IFactAtStatement seed){
 		System.out.println("\nseed in analysisForSeed " + seed.getStmt());
 		perSeedContexts.add(new PerSeedAnalysisContext<>(analysisDefinition, seed));
-		perSeedContexts.get(perSeedContexts.size()-1).run();
+		perSeedContexts.getLast().run();
 	}
 	
-	public void update() {
+	public void update(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
 		for(PerSeedAnalysisContext<V> contextSolver: perSeedContexts) {
-			contextSolver.updateSolverResults();
+			contextSolver.updateSolverResults(newCfg);
 			contextSolver.destroy();
 		}
 	}

@@ -1,9 +1,14 @@
 package test;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +56,7 @@ public class IdealIncrementalTest {
 	protected ExtendedICFG icfg;
 	protected SootMethod sootTestMethod;
 	private Analysis<TypestateDomainValue<ConcreteState>> analysis;
+	private Path codePath;
 
 	public IdealIncrementalTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -60,9 +66,6 @@ public class IdealIncrementalTest {
 	}
 	
 	public static void main(String args[]) {
-		System.out.println(args.length);
-		for(String temp: args)
-			System.out.println("arg " + temp);
 		if(args.length < 3) {
 			System.out.println("Invoke the program with the arguments path_of_initial_jar, path_of_updated_jar, class_name");
 			System.exit(1);
@@ -75,16 +78,43 @@ public class IdealIncrementalTest {
 	}
 	
 	private void computeResults() {
+		System.out.println("Analysing the updated code from path " + updatedCodePath);
+		try {
+			codePath = Files.createTempFile("updated", "code.jar");
+			Files.copy(Paths.get(updatedCodePath), codePath, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		soot.G.reset();
 		initializeSoot();
-		analyze();
-//		return results;
+		compute();
 	}
 	
-	private void analyze(){
+	private void updateResults() {
+		System.out.println("Analysing the initial code from path " + initialCodePath);
+		try {
+			codePath = Files.createTempFile("initial", "code.jar");
+			Files.copy(Paths.get(initialCodePath), codePath, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		soot.G.reset();
+		initializeSoot();
+		update();
+	}
+	
+	private void compute(){
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
-		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
-		PackManager.v().getPack("wjtp").add(transform);
+		Transform transformer = new Transform("wjtp.ifds", createAnalysisComputationTransformer());
+		PackManager.v().getPack("wjtp").add(transformer);
+		PackManager.v().getPack("cg").apply();
+		PackManager.v().getPack("wjtp").apply();
+	}
+	
+	private void update() {
+		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+		Transform transformer = new Transform("wjtp.ifds", createAnalysisUpdateTransformer());
+		PackManager.v().getPack("wjtp").add(transformer);
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
 	}
@@ -118,20 +148,35 @@ public class IdealIncrementalTest {
 		});
 	}
 	
-	private Transformer createAnalysisTransformer() {
+	private Transformer createAnalysisComputationTransformer() {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
-				executeAnalysis();
+				analysis = createAnalysis();
+				analysis.run();
+				//TODO: fetch the results of the analysis and set it to analysisResults
 			}
 		};
 	}
 	
-	protected void executeAnalysis() {
-		analysis = this.createAnalysis();
-		analysis.run();
-		patchGraph();
-		analysis.update();
+	private Transformer createAnalysisUpdateTransformer() {
+		return new SceneTransformer() {
+			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
+				analysis = createAnalysis();
+				analysis.run();
+				patchGraph();
+				try {
+					Files.copy(Paths.get(updatedCodePath), codePath, StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ExtendedICFG newCFG = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
+				analysis.update(newCFG);
+				//TODO: fetch the results of the analysis and set it to updateResults
+			}
+		};
 	}
 	
 	private void initializeSoot() {
@@ -140,7 +185,8 @@ public class IdealIncrementalTest {
 		Options.v().setPhaseOption("cg.spark", "on");
 		Options.v().setPhaseOption("cg.spark", "verbose:true");
 		Options.v().set_output_format(Options.output_format_none);
-		String sootCp = initialCodePath; //+ File.pathSeparator + updatedCodePath;
+		String sootCp;
+		sootCp = codePath.toString();
 		if (includeJDK()) {
 			String javaHome = System.getProperty("java.home");
 			if (javaHome == null || javaHome.equals(""))
@@ -167,6 +213,7 @@ public class IdealIncrementalTest {
 			// Options.v().setPhaseOption("cg", "all-reachable:true");
 		}
 
+//		Options.v().set_src_prec(Options.src_prec_java);
 		Options.v().set_exclude(excludedPackages());
 		Options.v().set_soot_classpath(sootCp);
 		
@@ -207,8 +254,11 @@ public class IdealIncrementalTest {
 	}
 
 	private boolean compareResultsofVersions() {
-		System.out.println("initial version " + initialCodePath);
+		System.out.println("-------------------------------------------------STEP 1-------------------------------------------------");
 		computeResults();
+		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
+		updateResults();
+		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
 		return false;
 	}
 	
