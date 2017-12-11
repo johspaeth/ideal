@@ -74,7 +74,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 
 	@Override
 	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
-		if (unit instanceof AssignStmt) {
+		if (unit.getContents() instanceof AssignStmt) {
 			AssignStmt stmt = (AssignStmt) unit;
 			if(stmt.containsInvokeExpr()){
 				if(keyStoreConstructor().contains(stmt.getInvokeExpr().getMethod())){

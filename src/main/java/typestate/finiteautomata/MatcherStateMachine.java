@@ -45,8 +45,8 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	public Set<Transition<State>> getCallToReturnTransitionsFor(AccessGraph d1, UpdatableWrapper<Unit> callSite, AccessGraph d2,
 			UpdatableWrapper<Unit> returnSite, AccessGraph d3) {
 		Set<Transition<State>> res = new HashSet<>();
-		if(callSite instanceof Stmt){
-			Stmt stmt = (Stmt) callSite;
+		if(callSite.getContents() instanceof Stmt){
+			Stmt stmt = (Stmt) callSite.getContents();
 			if(stmt.containsInvokeExpr() && stmt.getInvokeExpr() instanceof InstanceInvokeExpr){
 				SootMethod method = stmt.getInvokeExpr().getMethod();
 				InstanceInvokeExpr e = (InstanceInvokeExpr)stmt.getInvokeExpr();
@@ -114,8 +114,8 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		}
 		if (!matches)
 			return Collections.emptySet();
-		if (unit instanceof Stmt) {
-			Stmt stmt = (Stmt) unit;
+		if (unit.getContents() instanceof Stmt) {
+			Stmt stmt = (Stmt) unit.getContents();
 			if (stmt.containsInvokeExpr())
 				if (stmt.getInvokeExpr() instanceof InstanceInvokeExpr) {
 					InstanceInvokeExpr iie = (InstanceInvokeExpr) stmt.getInvokeExpr();
@@ -131,9 +131,9 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	}
 
 	protected Collection<AccessGraph> getLeftSideOf(UpdatableWrapper<Unit> unit) {
-		if (unit instanceof AssignStmt) {
+		if (unit.getContents() instanceof AssignStmt) {
 			Set<AccessGraph> out = new HashSet<>();
-			AssignStmt stmt = (AssignStmt) unit;
+			AssignStmt stmt = (AssignStmt) unit.getContents();
 			out.add(
 					new AccessGraph((Local) stmt.getLeftOp()));
 			return out;
@@ -145,9 +145,9 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 			Collection<UpdatableWrapper<SootMethod>> calledMethod, Set<SootMethod> set) {
 		for (UpdatableWrapper<SootMethod> callee : calledMethod) {
 			if (set.contains(callee.getContents())) {
-				if (unit instanceof Stmt) {
-					if (((Stmt) unit).getInvokeExpr() instanceof InstanceInvokeExpr) {
-						InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit).getInvokeExpr();
+				if (unit.getContents() instanceof Stmt) {
+					if (((Stmt) unit.getContents()).getInvokeExpr() instanceof InstanceInvokeExpr) {
+						InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit.getContents()).getInvokeExpr();
 						Local thisLocal = (Local) iie.getBase();
 						Set<AccessGraph> out = new HashSet<>();
 						out.add(new AccessGraph(thisLocal));
