@@ -96,7 +96,7 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		for (UpdatableWrapper<SootMethod> m : calledMethod) {
 			if (retrieveIteratorConstructors().contains(m.getContents())) {
-				if (unit instanceof AssignStmt) {
+				if (unit.getContents() instanceof AssignStmt) {
 					Set<AccessGraph> out = new HashSet<>();
 					AssignStmt stmt = (AssignStmt) unit;
 					out.add(new AccessGraph((Local) stmt.getLeftOp()));
