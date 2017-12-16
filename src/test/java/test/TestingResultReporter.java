@@ -17,7 +17,7 @@ public class TestingResultReporter<State> implements ResultReporter<TypestateDom
 	private Multimap<UpdatableWrapper<Unit>, Assertion> stmtToResults = HashMultimap.create();
 	public TestingResultReporter(Set<Assertion> expectedResults) {
 		for(Assertion e : expectedResults){
-			System.out.println("e " + e);
+//			System.out.println("e " + e);
 			if(e instanceof ComparableResult)
 				stmtToResults.put(((ComparableResult) e).getStmt(), e);
 		}
@@ -29,13 +29,13 @@ public class TestingResultReporter<State> implements ResultReporter<TypestateDom
 			if(e.getValue() instanceof ComparableResult){
 				ComparableResult expectedResults = (ComparableResult) e.getValue();
 				TypestateDomainValue<State> resultAt = solver.resultAt(e.getKey(), expectedResults.getAccessGraph());
-				System.out.println("--------------------------------TestingResultReporter-------------------------------------");
+				/*System.out.println("--------------------------------TestingResultReporter-------------------------------------");
 				System.out.println("e.getKey " + e.getKey());
 				System.out.println("expectedResults.getAccessGraph " + expectedResults.getAccessGraph());
 				System.out.println("e.getKey class " + e.getKey().getClass());
 				System.out.println("expectedResults.getAccessGraph class " + expectedResults.getAccessGraph().getClass());
 				System.out.println("resultAt " + resultAt);
-				System.out.println("--------------------------------TestingResultReporter-------------------------------------");
+				System.out.println("--------------------------------TestingResultReporter-------------------------------------");*/
 				if(resultAt != null)
 					expectedResults.computedResults(resultAt);
 			}
