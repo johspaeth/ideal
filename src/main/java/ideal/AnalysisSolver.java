@@ -13,7 +13,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
 import heros.InterproceduralCFG;
@@ -49,11 +48,8 @@ public class AnalysisSolver<V>
 	 * @param d2
 	 */
 	public void injectPhase1Seed(AccessGraph d1, UpdatableWrapper<Unit> curr, AccessGraph d2, EdgeFunction<V> func) {
-//		logger.debug("propagating UpdatableWrapper<Unit> " + curr);
-		System.out.println("--------------------------------------IDESolver run()--------------------------------------------------------------------------------");
 		super.propagate(d1, curr, d2, func, null, true);
 		runExecutorAndAwaitCompletion();
-		System.out.println("--------------------------------------IDESolver run()--------------------------------------------------------------------------------");
 	}
 
 	@Override
@@ -125,9 +121,5 @@ public class AnalysisSolver<V>
 
 	public Set<Cell<AccessGraph, AccessGraph, EdgeFunction<V>>> getPathEdgesAt(UpdatableWrapper<Unit> statement) {
 		return jumpFn.lookupByTarget(statement);
-	}
-	
-	public void updateAnalysis(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
-		this.update(newCfg);
 	}
 }

@@ -82,9 +82,9 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				Set<Assertion> expectedResults = parseExpectedQueryResults(icfg.wrap(sootTestMethod));
 				
-				for (Assertion expectedAssertion : expectedResults) {
+				/*for (Assertion expectedAssertion : expectedResults) {
 					System.out.println("expectedAssertion " + expectedAssertion);
-				}
+				}*/
 				
 				testingResultReporter = new TestingResultReporter<ConcreteState>(expectedResults);
 				
@@ -128,9 +128,9 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 		visited.add(m);
 		Body activeBody = m.getContents().getActiveBody();
 		
-		System.out.println("----------------------------------------------------");
+		/*System.out.println("----------------------------------------------------");
 		System.out.println(activeBody);
-		System.out.println("----------------------------------------------------");
+		System.out.println("----------------------------------------------------");*/
 		
 		for (UpdatableWrapper<Unit> callSite : icfg.getCallsFromWithin(m)) {
 			for (UpdatableWrapper<SootMethod> callee : icfg.getCalleesOfCallAt(callSite))
