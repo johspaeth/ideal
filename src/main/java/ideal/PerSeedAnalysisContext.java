@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
@@ -21,6 +23,7 @@ import boomerang.cfg.IExtendedICFG;
 import boomerang.context.IContextRequester;
 import heros.EdgeFunction;
 import heros.edgefunc.EdgeIdentity;
+import heros.incremental.CFGChangeSet;
 import heros.incremental.UpdatableWrapper;
 import heros.solver.Pair;
 import heros.solver.PathEdge;
@@ -83,6 +86,10 @@ public class PerSeedAnalysisContext<V> {
 	public boolean isInIDEPhase() {
 		return idePhase;
 	}
+	
+	public IFactAtStatement getSeed() {
+		return seed;
+	}
 
 	public void enableIDEPhase() {
 		idePhase = true;
@@ -121,11 +128,23 @@ public class PerSeedAnalysisContext<V> {
 	 * @return
 	 */
 	public boolean isStrongUpdate(Unit callSite, AccessGraph returnSideNode) {
-		return analysisDefinition.enableStrongUpdates()
+		boolean isStrongUpdate = analysisDefinition.enableStrongUpdates()
 				&& callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
+		/*if(callSite.toString().contains("open")) {
+			System.out.println("-----------------------------------------------------------isStrongUpdate()-------------------------------------------");
+			System.out.println("callSite " + callSite);
+			System.out.println("Access Graph " + returnSideNode);
+			System.out.println("isStrongUpdate " + isStrongUpdate);
+			System.out.println("-----------------------------------------------------------isStrongUpdate()-------------------------------------------");
+		}*/
+		return isStrongUpdate;
 	}
 
 	public void storeStrongUpdateAtCallSite(Unit callSite, Collection<AccessGraph> mayAliasSet) {
+		System.out.println("-----------------------------------------------------------storeStrongUpdateAtCallSite()-------------------------------------------");
+		System.out.println("callSite " + callSite);
+		System.out.println("mayAliasSet " + mayAliasSet);
+		System.out.println("-----------------------------------------------------------storeStrongUpdateAtCallSite()-------------------------------------------");
 		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
 	}
 
@@ -225,8 +244,8 @@ public class PerSeedAnalysisContext<V> {
 			setSolver(phaseTwoSolver);
 		} catch (IDEALTimeoutException e) {
 			System.out.println("Timeout of IDEAL, Budget:" + analysisDefinition.analysisBudgetInSeconds());
-			debugger().onAnalysisTimeout(seed);
-			reporter().onSeedTimeout(seed);
+//			debugger().onAnalysisTimeout(seed);
+//			reporter().onSeedTimeout(seed);
 		}
 		if(reporter() != null)
 			reporter().onSeedFinished(seed, solver);
@@ -268,6 +287,7 @@ public class PerSeedAnalysisContext<V> {
 				worklist.addAll(edges);
 				if (p instanceof ReturnEvent) {
 					ReturnEvent<V> returnEvent = (ReturnEvent<V>) p;
+					System.out.println("poas " + p);
 					for (PathEdge<UpdatableWrapper<Unit>, AccessGraph> edge : edges) {
 						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
 					}
@@ -289,12 +309,7 @@ public class PerSeedAnalysisContext<V> {
 		}
 		solver.runExecutorAndAwaitCompletion();
 		Map<UpdatableWrapper<Unit>, Set<AccessGraph>> map = new HashMap<UpdatableWrapper<Unit>, Set<AccessGraph>>();
-		System.out.println("class of seed " + seed.getClass());
-		System.out.println("class of seed.getStmt().class " + seed.getStmt().getClass());
 		for (UpdatableWrapper<Unit> sp : icfg().getStartPointsOf(icfg().getMethodOf(seed.getStmt()))) {
-			System.out.println("sp " + sp);
-			System.out.println("class of sp " + sp.getClass());
-			System.out.println("class of sp. " + sp.getContents().getClass());
 			map.put(sp, Collections.singleton(InternalAnalysisProblem.ZERO));
 		}
 		solver.computeValues(map);
@@ -343,9 +358,20 @@ public class PerSeedAnalysisContext<V> {
 		return analysisDefinition.enableNullPointOfAlias();
 	}
 	
-	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
-		phaseOneSolver.update(newCfg);
-		phaseTwoSolver.update(newCfg);
+	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg, CFGChangeSet cfgChangeSet) {
+		System.out.println(cfgChangeSet.isChangeSetComputed());
+		phaseOneSolver.update(newCfg, cfgChangeSet);
+		System.out.println("After phaseOne update " + cfgChangeSet.isChangeSetComputed());
+		phaseTwoSolver.update(newCfg, cfgChangeSet);
+		System.out.println("After phaseTwo update " + cfgChangeSet.isChangeSetComputed());
+	}
+	
+	public Table<UpdatableWrapper<Unit>, AccessGraph, V> phaseOneResults() {
+		return phaseOneSolver.allResults();
+	}
+	
+	public Table<UpdatableWrapper<Unit>, AccessGraph, V> phaseTwoResults() {
+		return phaseTwoSolver.allResults();
 	}
 
 }

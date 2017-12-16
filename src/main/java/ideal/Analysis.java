@@ -3,12 +3,17 @@ package ideal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
+import heros.incremental.CFGChangeSet;
 import heros.incremental.UpdatableWrapper;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
@@ -30,6 +35,11 @@ public class Analysis<V> {
 	private final IExtendedICFG<Unit, SootMethod> icfg;
 	protected final IDEALAnalysisDefinition<V> analysisDefinition;
 	private LinkedList<PerSeedAnalysisContext<V>> perSeedContexts;
+	protected Set<IFactAtStatement> initialSeeds;
+	private Map<UpdatableWrapper<Unit>, List<UpdatableWrapper<Unit>>> expiredEdges;
+	private Map<UpdatableWrapper<Unit>, List<UpdatableWrapper<Unit>>> newEdges;
+	private Set<UpdatableWrapper<Unit>> newNodes;
+	private Set<UpdatableWrapper<Unit>> expiredNodes;
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
 		this.analysisDefinition = analysisDefinition;
@@ -41,12 +51,12 @@ public class Analysis<V> {
 	public void run() {
 		printOptions();
 		WrappedSootField.TRACK_STMT = false;
-		Set<IFactAtStatement> initialSeeds = computeSeeds();
+		initialSeeds = computeSeeds();
 		
-		System.out.println("Initial seeds " + initialSeeds);
+		/*System.out.println("Initial seeds " + initialSeeds);
 		for (IFactAtStatement iFactAtStatement : initialSeeds) {
 			System.out.println("stmt " + iFactAtStatement.getStmt() + " AccessGraph " + iFactAtStatement.getFact());
-		}
+		}*/
 		
 		if (initialSeeds.isEmpty())
 			System.err.println("No seeds found!");
@@ -60,14 +70,17 @@ public class Analysis<V> {
 	}
 
 	public void analysisForSeed(IFactAtStatement seed){
-		System.out.println("\nseed in analysisForSeed " + seed.getStmt());
+//		System.out.println("\nseed in analysisForSeed " + seed.getStmt());
 		perSeedContexts.add(new PerSeedAnalysisContext<>(analysisDefinition, seed));
 		perSeedContexts.getLast().run();
 	}
 	
 	public void update(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
+		CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
+		System.out.println("updating " + perSeedContexts.size() + " perSeedContexts");
 		for(PerSeedAnalysisContext<V> contextSolver: perSeedContexts) {
-			contextSolver.updateSolverResults(newCfg);
+			contextSolver.updateSolverResults(newCfg, cfgChangeSet);
+			System.out.println("Analysis.update() " + cfgChangeSet.isChangeSetComputed());
 			contextSolver.destroy();
 		}
 	}
@@ -102,6 +115,22 @@ public class Analysis<V> {
 			}
 		}
 		return seeds;
+	}
+	
+	public List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseOneResults() {
+		List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseOneResults = new LinkedList<Table<UpdatableWrapper<Unit>, AccessGraph, V>>();
+		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
+			phaseOneResults.add(context.phaseOneResults());
+		}
+		return phaseOneResults;
+	}
+	
+	public List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseTwoResults() {
+		List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseTwoResults = new LinkedList<Table<UpdatableWrapper<Unit>, AccessGraph, V>>();
+		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
+			phaseTwoResults.add(context.phaseTwoResults());
+		}
+		return phaseTwoResults;
 	}
 
 }
