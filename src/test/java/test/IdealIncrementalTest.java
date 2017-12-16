@@ -17,10 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Table;
+import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.preanalysis.PreparationTransformer;
 import heros.BiDiInterproceduralCFG;
+import heros.incremental.UpdatableWrapper;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEDebugger;
@@ -57,6 +60,9 @@ public class IdealIncrementalTest {
 	protected SootMethod sootTestMethod;
 	private Analysis<TypestateDomainValue<ConcreteState>> analysis;
 	private Path codePath;
+	
+	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseTwo;
+	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseTwo;
 
 	public IdealIncrementalTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -148,13 +154,14 @@ public class IdealIncrementalTest {
 		});
 	}
 	
-	private Transformer createAnalysisComputationTransformer() {
+	private <V> Transformer createAnalysisComputationTransformer() {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis = createAnalysis();
 				analysis.run();
-				//TODO: fetch the results of the analysis and set it to analysisResults
+//				List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne = analysis.phaseOneResults();
+				computeResultsPhaseTwo = analysis.phaseTwoResults();
 			}
 		};
 	}
@@ -165,16 +172,16 @@ public class IdealIncrementalTest {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis = createAnalysis();
 				analysis.run();
-				patchGraph();
 				try {
 					Files.copy(Paths.get(updatedCodePath), codePath, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				patchGraph();
 				ExtendedICFG newCFG = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis.update(newCFG);
-				//TODO: fetch the results of the analysis and set it to updateResults
+//				List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne = analysis.phaseOneResults();
+				updateResultsPhaseTwo = analysis.phaseTwoResults();
 			}
 		};
 	}
@@ -237,7 +244,7 @@ public class IdealIncrementalTest {
 	}
 	
 	protected boolean includeJDK() {
-		return true;
+		return false;
 	}
 
 	public List<String> excludedPackages() {
@@ -259,9 +266,46 @@ public class IdealIncrementalTest {
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
 		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
+		compareResults();
 		return false;
 	}
 	
+	private <V> boolean compareResults() {
+		System.out.println("in compareResults");
+		System.out.println("computeResultsPhaseTwo.size " + computeResultsPhaseTwo.size());
+		System.out.println("updateResultsPhaseTwo.size " + updateResultsPhaseTwo.size());
+		System.out.println("computeResultsPhaseTwo " + computeResultsPhaseTwo);
+		System.out.println("updateResultsPhaseTwo " + updateResultsPhaseTwo);
+		
+		if(computeResultsPhaseTwo.size() != updateResultsPhaseTwo.size()) {
+			System.out.println("Number of Seeds do not match");
+			return false;
+		}
+		for(int seedCount = 0; seedCount < computeResultsPhaseTwo.size(); seedCount++) {
+			System.out.println("seedCount " + seedCount);
+			Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> computeTable = computeResultsPhaseTwo.get(seedCount);
+			Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> updateTable = updateResultsPhaseTwo.get(seedCount);
+			
+			System.out.println("computeTable.size " + computeTable.size());
+			System.out.println("updateTable.size " + updateTable.size());
+			
+			System.out.println("computeTable.rowSet() " + computeTable.rowKeySet());
+			System.out.println("updateTable.rowSet() " + updateTable.rowKeySet());
+			
+			/*if(computeTable.size() != updateTable.size())
+				return false;*/
+			Set<UpdatableWrapper<Unit>> unitKeySet = computeTable.rowKeySet();
+			for(UpdatableWrapper<Unit> curr: unitKeySet) {
+				Map<AccessGraph, TypestateDomainValue<ConcreteState>> tempComputeRow = updateTable.row(curr);
+				Map<AccessGraph, TypestateDomainValue<ConcreteState>> tempUpdateRow = updateTable.row(curr);
+				System.out.println(tempComputeRow.values());
+				System.out.println(tempUpdateRow.values());
+			}
+		}
+		
+		return false;
+	}
+
 	private void patchGraph() {
 		final boolean AGGRESSIVE_CHECKS = true;
 		
