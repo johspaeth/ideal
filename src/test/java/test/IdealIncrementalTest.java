@@ -63,6 +63,9 @@ public class IdealIncrementalTest {
 	
 	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseTwo;
 	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseTwo;
+	
+	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne;
+	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseOne;
 
 	public IdealIncrementalTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -110,7 +113,7 @@ public class IdealIncrementalTest {
 	}
 	
 	private void compute(){
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transformer = new Transform("wjtp.ifds", createAnalysisComputationTransformer());
 		PackManager.v().getPack("wjtp").add(transformer);
 		PackManager.v().getPack("cg").apply();
@@ -118,7 +121,7 @@ public class IdealIncrementalTest {
 	}
 	
 	private void update() {
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transformer = new Transform("wjtp.ifds", createAnalysisUpdateTransformer());
 		PackManager.v().getPack("wjtp").add(transformer);
 		PackManager.v().getPack("cg").apply();
@@ -160,7 +163,7 @@ public class IdealIncrementalTest {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis = createAnalysis();
 				analysis.run();
-//				List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne = analysis.phaseOneResults();
+				computeResultsPhaseOne = analysis.phaseOneResults();
 				computeResultsPhaseTwo = analysis.phaseTwoResults();
 			}
 		};
@@ -180,7 +183,7 @@ public class IdealIncrementalTest {
 				patchGraph();
 				ExtendedICFG newCFG = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis.update(newCFG);
-//				List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne = analysis.phaseOneResults();
+				updateResultsPhaseOne = analysis.phaseOneResults();
 				updateResultsPhaseTwo = analysis.phaseTwoResults();
 			}
 		};
@@ -272,6 +275,12 @@ public class IdealIncrementalTest {
 	
 	private <V> boolean compareResults() {
 		System.out.println("in compareResults");
+		
+		System.out.println("computeResultsPhaseTwo.size " + computeResultsPhaseOne.size());
+		System.out.println("updateResultsPhaseTwo.size " + updateResultsPhaseOne.size());
+		System.out.println("computeResultsPhaseTwo " + computeResultsPhaseOne);
+		System.out.println("updateResultsPhaseTwo " + updateResultsPhaseOne);
+		
 		System.out.println("computeResultsPhaseTwo.size " + computeResultsPhaseTwo.size());
 		System.out.println("updateResultsPhaseTwo.size " + updateResultsPhaseTwo.size());
 		System.out.println("computeResultsPhaseTwo " + computeResultsPhaseTwo);
@@ -296,7 +305,7 @@ public class IdealIncrementalTest {
 				return false;*/
 			Set<UpdatableWrapper<Unit>> unitKeySet = computeTable.rowKeySet();
 			for(UpdatableWrapper<Unit> curr: unitKeySet) {
-				Map<AccessGraph, TypestateDomainValue<ConcreteState>> tempComputeRow = updateTable.row(curr);
+				Map<AccessGraph, TypestateDomainValue<ConcreteState>> tempComputeRow = computeTable.row(curr);
 				Map<AccessGraph, TypestateDomainValue<ConcreteState>> tempUpdateRow = updateTable.row(curr);
 				System.out.println(tempComputeRow.values());
 				System.out.println(tempUpdateRow.values());
