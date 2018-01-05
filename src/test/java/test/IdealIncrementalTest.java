@@ -275,8 +275,8 @@ public class IdealIncrementalTest {
 	
 	private <V> boolean compareResults() {
 		boolean compareFlag = false; 
-		System.out.println("computeResultsPhaseTwo " + computeResultsPhaseTwo);
-		System.out.println("updateResultsPhaseTwo " + updateResultsPhaseTwo);
+		System.out.println("computeResults " + computeResultsPhaseTwo);
+		System.out.println("updateResults  " + updateResultsPhaseTwo);
 		System.out.println();
 		
 		if(computeResultsPhaseTwo.size() != updateResultsPhaseTwo.size()) {
