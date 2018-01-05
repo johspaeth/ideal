@@ -18,10 +18,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
+
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
-import boomerang.preanalysis.PreparationTransformer;
 import heros.BiDiInterproceduralCFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.Analysis;
@@ -181,8 +182,8 @@ public class IdealIncrementalTest {
 					e.printStackTrace();
 				}
 				patchGraph();
-				ExtendedICFG newCFG = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
-				analysis.update(newCFG);
+				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
+				analysis.update(icfg);
 				updateResultsPhaseOne = analysis.phaseOneResults();
 				updateResultsPhaseTwo = analysis.phaseTwoResults();
 			}
@@ -220,7 +221,7 @@ public class IdealIncrementalTest {
 		} else {
 			Options.v().set_no_bodies_for_excluded(true);
 			Options.v().set_allow_phantom_refs(true);
-			// Options.v().setPhaseOption("cg", "all-reachable:true");
+			 Options.v().setPhaseOption("cg", "all-reachable:true");
 		}
 
 //		Options.v().set_src_prec(Options.src_prec_java);
@@ -269,50 +270,49 @@ public class IdealIncrementalTest {
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
 		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
-		compareResults();
-		return false;
+		return compareResults();
 	}
 	
 	private <V> boolean compareResults() {
-		System.out.println("in compareResults");
-		
-		System.out.println("computeResultsPhaseTwo.size " + computeResultsPhaseOne.size());
-		System.out.println("updateResultsPhaseTwo.size " + updateResultsPhaseOne.size());
-		System.out.println("computeResultsPhaseTwo " + computeResultsPhaseOne);
-		System.out.println("updateResultsPhaseTwo " + updateResultsPhaseOne);
-		
-		System.out.println("computeResultsPhaseTwo.size " + computeResultsPhaseTwo.size());
-		System.out.println("updateResultsPhaseTwo.size " + updateResultsPhaseTwo.size());
+		boolean compareFlag = false; 
 		System.out.println("computeResultsPhaseTwo " + computeResultsPhaseTwo);
 		System.out.println("updateResultsPhaseTwo " + updateResultsPhaseTwo);
+		System.out.println();
 		
 		if(computeResultsPhaseTwo.size() != updateResultsPhaseTwo.size()) {
 			System.out.println("Number of Seeds do not match");
 			return false;
 		}
 		for(int seedCount = 0; seedCount < computeResultsPhaseTwo.size(); seedCount++) {
-			System.out.println("seedCount " + seedCount);
 			Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> computeTable = computeResultsPhaseTwo.get(seedCount);
 			Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> updateTable = updateResultsPhaseTwo.get(seedCount);
 			
-			System.out.println("computeTable.size " + computeTable.size());
-			System.out.println("updateTable.size " + updateTable.size());
+			if(computeTable.size() != updateTable.size()) {
+				System.out.println("completed comparing the compute and update results and the results are " + (compareFlag ? "equal" : "not equal"));
+				return compareFlag;
+			}
+			else
+				compareFlag = true;
 			
-			System.out.println("computeTable.rowSet() " + computeTable.rowKeySet());
-			System.out.println("updateTable.rowSet() " + updateTable.rowKeySet());
+			Set<Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeTableCellSet = computeTable.cellSet();
+			Set<Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateTableCellSet = updateTable.cellSet();
 			
-			/*if(computeTable.size() != updateTable.size())
-				return false;*/
-			Set<UpdatableWrapper<Unit>> unitKeySet = computeTable.rowKeySet();
-			for(UpdatableWrapper<Unit> curr: unitKeySet) {
-				Map<AccessGraph, TypestateDomainValue<ConcreteState>> tempComputeRow = computeTable.row(curr);
-				Map<AccessGraph, TypestateDomainValue<ConcreteState>> tempUpdateRow = updateTable.row(curr);
-				System.out.println(tempComputeRow.values());
-				System.out.println(tempUpdateRow.values());
+			for (Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> computeCell : computeTableCellSet) {
+				boolean present = false;
+				for (Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> updateCell : updateTableCellSet) {
+					if(computeCell.toString().contentEquals(updateCell.toString())) {
+						present = true;
+						break;
+					}
+				}
+				if(!present) {
+					compareFlag = false;
+					break;
+				}
 			}
 		}
-		
-		return false;
+		System.out.println("completed comparing the compute and update results and the results are " + (compareFlag ? "equal" : "not equal"));
+		return compareFlag;
 	}
 
 	private void patchGraph() {
