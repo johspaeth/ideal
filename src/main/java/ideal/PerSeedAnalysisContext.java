@@ -4,11 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -93,6 +90,10 @@ public class PerSeedAnalysisContext<V> {
 
 	public void enableIDEPhase() {
 		idePhase = true;
+	}
+	
+	public void disableIDEPhase() {
+		idePhase = false;
 	}
 
 	/**
@@ -244,8 +245,8 @@ public class PerSeedAnalysisContext<V> {
 			setSolver(phaseTwoSolver);
 		} catch (IDEALTimeoutException e) {
 			System.out.println("Timeout of IDEAL, Budget:" + analysisDefinition.analysisBudgetInSeconds());
-//			debugger().onAnalysisTimeout(seed);
-//			reporter().onSeedTimeout(seed);
+			debugger().onAnalysisTimeout(seed);
+			reporter().onSeedTimeout(seed);
 		}
 		if(reporter() != null)
 			reporter().onSeedFinished(seed, solver);
@@ -346,8 +347,8 @@ public class PerSeedAnalysisContext<V> {
 	}
 
 	public void checkTimeout() {
-		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
-			throw new IDEALTimeoutException();
+//		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
+//			throw new IDEALTimeoutException();
 	}
 
 	public IDebugger<V> debugger() {
@@ -358,12 +359,12 @@ public class PerSeedAnalysisContext<V> {
 		return analysisDefinition.enableNullPointOfAlias();
 	}
 	
-	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg, CFGChangeSet cfgChangeSet) {
-		System.out.println(cfgChangeSet.isChangeSetComputed());
+	@SuppressWarnings("unchecked")
+	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg, @SuppressWarnings("rawtypes") CFGChangeSet cfgChangeSet) {
+		disableIDEPhase();
 		phaseOneSolver.update(newCfg, cfgChangeSet);
-		System.out.println("After phaseOne update " + cfgChangeSet.isChangeSetComputed());
+		enableIDEPhase();
 		phaseTwoSolver.update(newCfg, cfgChangeSet);
-		System.out.println("After phaseTwo update " + cfgChangeSet.isChangeSetComputed());
 	}
 	
 	public Table<UpdatableWrapper<Unit>, AccessGraph, V> phaseOneResults() {

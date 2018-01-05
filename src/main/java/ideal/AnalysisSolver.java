@@ -81,7 +81,7 @@ public class AnalysisSolver<V>
 
 		public ContextRequester(AccessGraph d1, UpdatableWrapper<Unit> stmt) {
 			this.d1 = d1;
-			methodToStartFact.put(icfg.getMethodOf(stmt).getContents(), d1);
+			methodToStartFact.put(icfg().getMethodOf(stmt).getContents(), d1);
 		}
 
 		@Override
@@ -89,14 +89,14 @@ public class AnalysisSolver<V>
 			if (d1.equals(zeroValue)) {
 				return true;
 			}
-			Collection<UpdatableWrapper<Unit>> startPoints = icfg.getStartPointsOf(context.icfg().wrap(callee));
+			Collection<UpdatableWrapper<Unit>> startPoints = icfg().getStartPointsOf(context.icfg().wrap(callee));
 
 			for (UpdatableWrapper<Unit> sp : startPoints) {
 				for (AccessGraph g : new HashSet<>(methodToStartFact.get(callee))) {
 					Map<UpdatableWrapper<Unit>, Set<Pair<AccessGraph, AccessGraph>>> inc = incoming(g, sp);
 					for (Set<Pair<AccessGraph, AccessGraph>> in : inc.values()) {
 						for (Pair<AccessGraph, AccessGraph> e : in) {
-							methodToStartFact.put(icfg.getMethodOf(context.icfg().wrap(callSite)).getContents(), e.getO2());
+							methodToStartFact.put(icfg().getMethodOf(context.icfg().wrap(callSite)).getContents(), e.getO2());
 						}
 					}
 					if (inc.containsKey(context.icfg().wrap(callSite)))

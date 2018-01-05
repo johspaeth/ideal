@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Table;
@@ -36,10 +35,6 @@ public class Analysis<V> {
 	protected final IDEALAnalysisDefinition<V> analysisDefinition;
 	private LinkedList<PerSeedAnalysisContext<V>> perSeedContexts;
 	protected Set<IFactAtStatement> initialSeeds;
-	private Map<UpdatableWrapper<Unit>, List<UpdatableWrapper<Unit>>> expiredEdges;
-	private Map<UpdatableWrapper<Unit>, List<UpdatableWrapper<Unit>>> newEdges;
-	private Set<UpdatableWrapper<Unit>> newNodes;
-	private Set<UpdatableWrapper<Unit>> expiredNodes;
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
 		this.analysisDefinition = analysisDefinition;
@@ -76,12 +71,12 @@ public class Analysis<V> {
 	}
 	
 	public void update(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
+		@SuppressWarnings("rawtypes")
 		CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
 		System.out.println("updating " + perSeedContexts.size() + " perSeedContexts");
 		for(PerSeedAnalysisContext<V> contextSolver: perSeedContexts) {
 			contextSolver.updateSolverResults(newCfg, cfgChangeSet);
-			System.out.println("Analysis.update() " + cfgChangeSet.isChangeSetComputed());
-			contextSolver.destroy();
+//			contextSolver.destroy();
 		}
 	}
 	
