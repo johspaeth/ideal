@@ -52,7 +52,7 @@ import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 import typestate.impl.statemachines.FileMustBeClosedStateMachine;
 
-public class IdealIncrementalTest {
+public class IncrementalIDEALTest {
 	
 	private String initialCodePath;
 	private String updatedCodePath;
@@ -68,7 +68,7 @@ public class IdealIncrementalTest {
 	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne;
 	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseOne;
 
-	public IdealIncrementalTest(String initialCodePath, String updatedCodePath, String testClassName)
+	public IncrementalIDEALTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
 		this.initialCodePath = initialCodePath;
 		this.updatedCodePath = updatedCodePath;
@@ -83,8 +83,8 @@ public class IdealIncrementalTest {
 		String initialVersion = args[0];
 		String updatedVersion = args[1];
 		String testClassName = args[2];
-		IdealIncrementalTest test = new IdealIncrementalTest(initialVersion, updatedVersion, testClassName);
-		test.compareResultsofVersions();
+		IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
+		test.runTestAndCompareResults();
 	}
 	
 	private void computeResults() {
@@ -264,7 +264,7 @@ public class IdealIncrementalTest {
 		return excludedPackages;
 	}
 
-	private boolean compareResultsofVersions() {
+	public boolean runTestAndCompareResults() {
 		System.out.println("-------------------------------------------------STEP 1-------------------------------------------------");
 		computeResults();
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
