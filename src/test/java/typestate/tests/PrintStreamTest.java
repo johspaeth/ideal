@@ -6,9 +6,9 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.impl.statemachines.PrintStreamStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.impl.statemachines.PrintStreamStateMachine;
 
 public class PrintStreamTest extends IDEALTestingFramework {
 

@@ -1,18 +1,14 @@
 package ideal.debug;
 
-import java.util.Map;
 import java.util.Set;
 
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
-import heros.EdgeFunction;
+import boomerang.ap.AliasResults;
 import heros.InterproceduralCFG;
 import heros.solver.IDEDebugger;
-import heros.solver.Pair;
 import heros.solver.PathEdge;
-import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
-import ideal.IFactAtStatement;
+import ideal.ap.AnalysisSolver;
+import ideal.ap.IFactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;

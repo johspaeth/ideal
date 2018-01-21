@@ -9,9 +9,9 @@ import java.security.cert.CertificateException;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.impl.statemachines.KeyStoreStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.impl.statemachines.KeyStoreStateMachine;
 
 public class KeystoreTest extends IDEALTestingFramework {
 

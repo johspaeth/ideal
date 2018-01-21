@@ -4,11 +4,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import boomerang.AliasFinder;
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import heros.solver.PathEdge;
-import ideal.PerSeedAnalysisContext;
+import ideal.ap.PerSeedAnalysisContext;
 import soot.Local;
 import soot.Unit;
 
@@ -37,7 +35,7 @@ public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 	}
 
 	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
-		AccessGraph accessGraph = new AccessGraph(base, base.getType());
+		AccessGraph accessGraph = new AccessGraph(base);
 		Collection<AccessGraph> results = tsanalysis.aliasesFor(accessGraph, curr, d1).mayAliasSet();
 		return results;
 	}

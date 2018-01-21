@@ -6,12 +6,12 @@ import java.util.Set;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
-import ideal.IFactAtStatement;
-import ideal.ResultReporter;
+import ideal.ap.AnalysisSolver;
+import ideal.ap.FactAtStatement;
+import ideal.ap.IFactAtStatement;
+import ideal.ap.ResultReporter;
 import soot.Unit;
-import typestate.TypestateDomainValue;
+import typestate.ap.TypestateDomainValue;
 
 public class TestingResultReporter<State> implements ResultReporter<TypestateDomainValue<State>>{
 	private Multimap<Unit, Assertion> stmtToResults = HashMultimap.create();

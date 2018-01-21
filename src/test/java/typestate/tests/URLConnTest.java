@@ -6,9 +6,9 @@ import java.net.HttpURLConnection;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.impl.statemachines.URLConnStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.impl.statemachines.URLConnStateMachine;
 
 public class URLConnTest extends IDEALTestingFramework {
 

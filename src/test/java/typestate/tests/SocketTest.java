@@ -9,10 +9,10 @@ import org.junit.Test;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.TypestateDomainValue;
-import typestate.impl.statemachines.SocketStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.TypestateDomainValue;
+import typestate.ap.impl.statemachines.SocketStateMachine;
 
 public class SocketTest extends IDEALTestingFramework {
 

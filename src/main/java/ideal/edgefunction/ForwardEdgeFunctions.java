@@ -6,7 +6,7 @@ import heros.EdgeFunctions;
 import heros.edgefunc.AllBottom;
 import heros.edgefunc.AllTop;
 import heros.edgefunc.EdgeIdentity;
-import ideal.PerSeedAnalysisContext;
+import ideal.ap.PerSeedAnalysisContext;
 import soot.SootMethod;
 import soot.Unit;
 

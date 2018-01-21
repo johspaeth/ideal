@@ -10,8 +10,8 @@ import com.google.common.collect.Lists;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
-import ideal.Analysis;
-import ideal.ResultReporter;
+import ideal.ap.Analysis;
+import ideal.ap.ResultReporter;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import soot.Body;
@@ -26,10 +26,10 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.ExpectedResults.InternalState;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
-import typestate.ConcreteState;
-import typestate.TypestateAnalysisProblem;
-import typestate.TypestateChangeFunction;
-import typestate.TypestateDomainValue;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateAnalysisProblem;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.TypestateDomainValue;
 
 public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 	protected IExtendedICFG icfg;
@@ -138,7 +138,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			if (!(param instanceof Local))
 				continue;
 			Local queryVar = (Local) param;
-			AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+			AccessGraph val = new AccessGraph(queryVar);
 			if (invocationName.startsWith("mayBeIn")) {
 				if (invocationName.contains("Error"))
 					queries.add(new MayBe(stmt, val, InternalState.ERROR));

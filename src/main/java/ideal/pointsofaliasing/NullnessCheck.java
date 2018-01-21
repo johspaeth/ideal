@@ -3,10 +3,10 @@ package ideal.pointsofaliasing;
 import java.util.Collection;
 import java.util.Collections;
 
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.ap.AliasResults;
 import heros.solver.PathEdge;
-import ideal.PerSeedAnalysisContext;
+import ideal.ap.PerSeedAnalysisContext;
 import soot.Unit;
 
 public class NullnessCheck<V> extends AbstractPointOfAlias<V> {

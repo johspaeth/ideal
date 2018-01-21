@@ -2,11 +2,11 @@ package ideal.debug;
 
 import java.util.Set;
 
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.ap.AliasResults;
 import heros.solver.PathEdge;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
+import ideal.ap.AnalysisSolver;
+import ideal.ap.IFactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;

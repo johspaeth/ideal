@@ -2,7 +2,7 @@ package test;
 
 import boomerang.accessgraph.AccessGraph;
 import soot.Unit;
-import typestate.TypestateDomainValue;
+import typestate.ap.TypestateDomainValue;
 
 public abstract class ExpectedResults<State> implements Assertion, ComparableResult<State>{
 	final Unit unit;

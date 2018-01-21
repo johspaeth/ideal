@@ -6,16 +6,15 @@ import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
 
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.ap.AliasResults;
 import boomerang.cfg.IExtendedICFG;
 import heros.debug.visualization.ExplodedSuperGraph;
-import heros.debug.visualization.ExplodedSuperGraph.ESGNode;
 import heros.debug.visualization.IDEToJSON;
 import heros.debug.visualization.IDEToJSON.Direction;
 import heros.solver.PathEdge;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
+import ideal.ap.AnalysisSolver;
+import ideal.ap.IFactAtStatement;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;

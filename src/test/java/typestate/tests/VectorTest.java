@@ -5,9 +5,9 @@ import java.util.Vector;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.impl.statemachines.VectorStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.impl.statemachines.VectorStateMachine;
 
 @SuppressWarnings("deprecation")
 public class VectorTest extends IDEALTestingFramework {

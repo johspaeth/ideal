@@ -3,9 +3,9 @@ package typestate.tests;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.impl.statemachines.FileMustBeClosedStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.impl.statemachines.FileMustBeClosedStateMachine;
 import typestate.test.helper.File;
 @SuppressWarnings("deprecation")
 public class FileMustBeClosedInterfaceTest extends IDEALTestingFramework {

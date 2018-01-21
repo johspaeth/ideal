@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
+import boomerang.ap.AliasResults;
 import heros.solver.PathEdge;
-import ideal.PerSeedAnalysisContext;
+import ideal.ap.PerSeedAnalysisContext;
 import soot.Unit;
 
 public class CallSite<V> extends AbstractPointOfAlias<V> {

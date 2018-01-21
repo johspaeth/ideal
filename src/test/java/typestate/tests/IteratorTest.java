@@ -8,9 +8,9 @@ import java.util.List;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.impl.statemachines.HasNextStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.impl.statemachines.HasNextStateMachine;
 
 public class IteratorTest extends IDEALTestingFramework {
 

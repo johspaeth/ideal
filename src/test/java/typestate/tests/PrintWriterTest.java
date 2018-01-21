@@ -6,9 +6,9 @@ import java.io.PrintWriter;
 import org.junit.Test;
 
 import test.IDEALTestingFramework;
-import typestate.ConcreteState;
-import typestate.TypestateChangeFunction;
-import typestate.impl.statemachines.PrintWriterStateMachine;
+import typestate.ap.ConcreteState;
+import typestate.ap.TypestateChangeFunction;
+import typestate.ap.impl.statemachines.PrintWriterStateMachine;
 
 public class PrintWriterTest extends IDEALTestingFramework {
 

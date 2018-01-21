@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.ap.AliasResults;
 import heros.EdgeFunction;
 import heros.solver.PathEdge;
-import ideal.PerSeedAnalysisContext;
+import ideal.ap.PerSeedAnalysisContext;
 import soot.Unit;
 
 public class ReturnEvent<V> extends Event<V> {
