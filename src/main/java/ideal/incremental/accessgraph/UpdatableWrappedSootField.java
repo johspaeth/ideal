@@ -1,5 +1,7 @@
 package ideal.incremental.accessgraph;
 
+import heros.incremental.UpdatableWrapper;
+
 import soot.SootField;
 import soot.Unit;
 
@@ -11,10 +13,10 @@ import soot.Unit;
  */
 public class UpdatableWrappedSootField {
   private SootField field;
-  private Unit stmt;
+  private UpdatableWrapper<Unit> stmt;
   public static boolean TRACK_STMT = true;
 
-  public UpdatableWrappedSootField(SootField f, Unit s) {
+  public UpdatableWrappedSootField(SootField f, UpdatableWrapper<Unit> s) {
     this.field = f;
     this.stmt = (TRACK_STMT ? s : null);
   }

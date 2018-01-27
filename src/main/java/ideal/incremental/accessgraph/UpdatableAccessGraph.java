@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import heros.incremental.UpdatableWrapper;
+
 import soot.Local;
 import soot.SootField;
 import soot.Type;
@@ -39,7 +41,7 @@ public class UpdatableAccessGraph {
 	/**
 	 * The allocation site to which this access graph points-to.
 	 */
-	private Unit allocationSite;
+	private UpdatableWrapper<Unit> allocationSite;
 
 	private boolean isNullAllocsite;
 
@@ -56,7 +58,7 @@ public class UpdatableAccessGraph {
 		this(val,  null, null, false);
 	}
 
-	public UpdatableAccessGraph(Local val, Unit allocsite,boolean isNullAllocsite) {
+	public UpdatableAccessGraph(Local val, UpdatableWrapper<Unit> allocsite,boolean isNullAllocsite) {
 		this(val, null, allocsite, isNullAllocsite);
 	}
 
@@ -90,7 +92,7 @@ public class UpdatableAccessGraph {
 		this(val, (f == null || f.length == 0 ? null : new UpdatableFieldGraph(f)), null, false);
 	}
 
-	protected UpdatableAccessGraph(Local value, UpdatableIFieldGraph fieldGraph, Unit sourceStmt, boolean isNullAllocsite) {
+	protected UpdatableAccessGraph(Local value, UpdatableIFieldGraph fieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean isNullAllocsite) {
 		this.value = value;
 		this.isNullAllocsite = isNullAllocsite;
 //		if(apgs == null){
@@ -338,7 +340,7 @@ public class UpdatableAccessGraph {
 	 * @return The allocation site, this access graph points to. Can be null, if
 	 *         the base variable is a parameter of the current method.
 	 */
-	public Unit getSourceStmt() {
+	public UpdatableWrapper<Unit> getSourceStmt() {
 		return allocationSite;
 	}
 
@@ -350,7 +352,7 @@ public class UpdatableAccessGraph {
 	 *            The statement, typically the allocation site.
 	 * @return The derived access graph
 	 */
-	public UpdatableAccessGraph deriveWithAllocationSite(Unit stmt, boolean isNullAllocsite) {
+	public UpdatableAccessGraph deriveWithAllocationSite(UpdatableWrapper<Unit> stmt, boolean isNullAllocsite) {
 		return new UpdatableAccessGraph(value, fieldGraph, stmt, isNullAllocsite);
 	}
 
