@@ -1,4 +1,4 @@
-package typestate.test.helper;
+package typestate.ap.impl.statemachines;
 public class File {
   public void open() {
 

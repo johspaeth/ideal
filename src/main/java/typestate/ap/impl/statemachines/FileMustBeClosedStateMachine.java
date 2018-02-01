@@ -12,7 +12,6 @@ import typestate.ap.finiteautomata.MatcherStateMachine;
 import typestate.ap.finiteautomata.MatcherTransition;
 import typestate.ap.finiteautomata.MatcherTransition.Parameter;
 import typestate.ap.finiteautomata.MatcherTransition.Type;
-import typestate.test.helper.File;
 
 public class FileMustBeClosedStateMachine extends MatcherStateMachine<ConcreteState>{
 

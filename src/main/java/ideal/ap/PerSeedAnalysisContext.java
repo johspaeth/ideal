@@ -223,6 +223,10 @@ public class PerSeedAnalysisContext<V> {
 			System.out.println("Timeout of IDEAL, Budget:" + analysisDefinition.analysisBudgetInSeconds());
 			debugger().onAnalysisTimeout(seed);
 			reporter().onSeedTimeout(seed);
+		} catch(StackOverflowError e) {
+			System.out.println("Timeout of IDEAL, Budget:" + analysisDefinition.analysisBudgetInSeconds());
+			debugger().onAnalysisTimeout(seed);
+			reporter().onSeedTimeout(seed);	
 		}
 		reporter().onSeedFinished(seed, solver);
 		debugger().onSeedFinished(seed, solver);
