@@ -28,7 +28,7 @@ public class UpdatableAccessGraph {
 	/**
 	 * The local variable at which the field graph is rooted.
 	 */
-	private final Local value;
+	private final UpdatableWrapper<Local> value;
 
 
 	/**
@@ -48,11 +48,11 @@ public class UpdatableAccessGraph {
 
 	public AccessGraph getAccessGraph() {
 		if(null == fieldGraph && null == getSourceStmt())
-			return new AccessGraph(value);
+			return new AccessGraph(value.getContents());
 		else if(null == fieldGraph && null != getSourceStmt())
-			return new AccessGraph(value, getSourceStmt().getContents(), isNullAllocsite);
+			return new AccessGraph(value.getContents(), getSourceStmt().getContents(), isNullAllocsite);
 		else
-			return new AccessGraph(value, fieldGraph.getFieldGraph(), getSourceStmt().getContents(), isNullAllocsite);
+			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), getSourceStmt().getContents(), isNullAllocsite);
 	}
 	
 	/*public UpdatableAccessGraph(UpdatableWrapper<Unit> base, UpdatableIFieldGraph IFieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean hasNullAllocationSite) {
@@ -68,11 +68,11 @@ public class UpdatableAccessGraph {
 	 * @param t
 	 *            The type of the base
 	 */
-	public UpdatableAccessGraph(Local val) {
+	public UpdatableAccessGraph(UpdatableWrapper<Local> val) {
 		this(val,  null, null, false);
 	}
 
-	public UpdatableAccessGraph(Local val, UpdatableWrapper<Unit> allocsite,boolean isNullAllocsite) {
+	public UpdatableAccessGraph(UpdatableWrapper<Local> val, UpdatableWrapper<Unit> allocsite,boolean isNullAllocsite) {
 		this(val, null, allocsite, isNullAllocsite);
 	}
 
@@ -87,7 +87,7 @@ public class UpdatableAccessGraph {
 	 * @param field
 	 *            the first field access
 	 */
-	public UpdatableAccessGraph(Local val,  UpdatableWrappedSootField field) {
+	public UpdatableAccessGraph(UpdatableWrapper<Local> val,  UpdatableWrappedSootField field) {
 		this(val, new UpdatableFieldGraph(field), null,false);
 	}
 
@@ -102,11 +102,11 @@ public class UpdatableAccessGraph {
 	 * @param field
 	 *            An array of field accesses
 	 */
-	public UpdatableAccessGraph(Local val, UpdatableWrappedSootField[] f) {
+	public UpdatableAccessGraph(UpdatableWrapper<Local> val, UpdatableWrappedSootField[] f) {
 		this(val, (f == null || f.length == 0 ? null : new UpdatableFieldGraph(f)), null, false);
 	}
 
-	public UpdatableAccessGraph(Local value, UpdatableIFieldGraph fieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean isNullAllocsite) {
+	public UpdatableAccessGraph(UpdatableWrapper<Local> value, UpdatableIFieldGraph fieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean isNullAllocsite) {
 		this.value = value;
 		this.isNullAllocsite = isNullAllocsite;
 //		if(apgs == null){
@@ -131,7 +131,7 @@ public class UpdatableAccessGraph {
 	 * 
 	 * @return The local variable at which the graph is rooted.
 	 */
-	public Local getBase() {
+	public UpdatableWrapper<Local> getBase() {
 		return value;
 	}
 
@@ -220,7 +220,7 @@ public class UpdatableAccessGraph {
 	 *            The new type to be used.
 	 * @return The access graph
 	 */
-	public UpdatableAccessGraph deriveWithNewLocal(Local local) {
+	public UpdatableAccessGraph deriveWithNewLocal(UpdatableWrapper<Local> local) {
 		return new UpdatableAccessGraph(local, fieldGraph, allocationSite,isNullAllocsite);
 	}
 

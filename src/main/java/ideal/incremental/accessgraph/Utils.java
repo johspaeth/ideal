@@ -7,6 +7,7 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.IFieldGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
+import heros.incremental.UpdatableWrapper;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -15,14 +16,14 @@ public class Utils {
 	
 	public static UpdatableAccessGraph getUpdatableAccessGraph(AccessGraph ag, IExtendedICFG<Unit, SootMethod> icfg) {
 		IFieldGraph fieldGraph = ag.getFieldGraph();
-		Unit sourceStmt = ag.getSourceStmt();
-		Local base = ag.getBase();
+		UpdatableWrapper<Unit> sourceStmt = icfg.wrap(ag.getSourceStmt());
+		UpdatableWrapper<Local> base = icfg.wrap(ag.getBase());
 		if(null == fieldGraph && null == sourceStmt)
 			return new UpdatableAccessGraph(base);
 		else if(null == fieldGraph && null != sourceStmt)
-			return new UpdatableAccessGraph(base, icfg.wrap(sourceStmt), ag.hasNullAllocationSite());
+			return new UpdatableAccessGraph(base, sourceStmt, ag.hasNullAllocationSite());
 		else
-			return new UpdatableAccessGraph(base, Utils.getUpdatableFieldGraph(fieldGraph.getFields(), icfg), icfg.wrap(sourceStmt), ag.hasNullAllocationSite());
+			return new UpdatableAccessGraph(base, Utils.getUpdatableFieldGraph(fieldGraph.getFields(), icfg), sourceStmt, ag.hasNullAllocationSite());
 	}
 	
 	public static Collection<UpdatableAccessGraph> getUpdatableAccessGraph(Collection<AccessGraph> accessGraphs, IExtendedICFG<Unit, SootMethod> icfg) {
