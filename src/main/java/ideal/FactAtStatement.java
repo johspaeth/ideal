@@ -1,20 +1,20 @@
 package ideal;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Unit;
 
 public class FactAtStatement implements IFactAtStatement {
 
-	private AccessGraph fact;
+	private UpdatableAccessGraph fact;
 	private UpdatableWrapper<Unit> u;
 
-	public FactAtStatement(UpdatableWrapper<Unit> u, AccessGraph fact) {
+	public FactAtStatement(UpdatableWrapper<Unit> u, UpdatableAccessGraph fact) {
 		this.u = u;
 		this.fact = fact;
 	}
 
-	public AccessGraph getFact() {
+	public UpdatableAccessGraph getFact() {
 		return fact;
 	}
 

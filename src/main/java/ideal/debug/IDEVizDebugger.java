@@ -14,6 +14,7 @@ import heros.debug.visualization.IDEToJSON.Direction;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
@@ -26,11 +27,11 @@ import soot.jimple.Stmt;
 
 public class IDEVizDebugger<V> implements IDebugger<V> {
 
-	private IDEToJSON<SootMethod, Unit, AccessGraph, V, BiDiInterproceduralCFG<Unit,SootMethod>> ideToJSON;
+	private IDEToJSON<SootMethod, Unit, UpdatableAccessGraph, V, BiDiInterproceduralCFG<Unit,SootMethod>> ideToJSON;
 	private BiDiInterproceduralCFG<Unit, SootMethod> icfg;
 
 	public IDEVizDebugger(File file, BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
-		this.ideToJSON = new IDEToJSON<SootMethod, Unit, AccessGraph, V, BiDiInterproceduralCFG<Unit, SootMethod>> (file, icfg){
+		this.ideToJSON = new IDEToJSON<SootMethod, Unit, UpdatableAccessGraph, V, BiDiInterproceduralCFG<Unit, SootMethod>> (file, icfg){
 			@Override
 			public String getShortLabel(Unit u) {
 				return IDEVizDebugger.this.getShortLabel(u);
@@ -54,9 +55,9 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, AccessGraph> summary) {
+	public void addSummary(SootMethod methodToSummary, PathEdge<Unit, UpdatableAccessGraph> summary) {
 		for (Unit callSite : icfg.getCallersOf(methodToSummary)) {
-			ExplodedSuperGraph<SootMethod, Unit, AccessGraph, V> cfg = getESG(callSite);
+			ExplodedSuperGraph<SootMethod, Unit, UpdatableAccessGraph, V> cfg = getESG(callSite);
 			for (Unit start : icfg.getStartPointsOf(methodToSummary)) {
 				cfg.addSummary(cfg.new ESGNode(start, summary.factAtSource()), cfg.new ESGNode(summary.getTarget(),summary.factAtTarget()));
 			}
@@ -64,53 +65,53 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void normalFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
+	public void normalFlow(Unit start, UpdatableAccessGraph startFact, Unit target, UpdatableAccessGraph targetFact) {
 		getESG(start).normalFlow(start, startFact, target, targetFact);
 	}
 
-	private ExplodedSuperGraph<SootMethod, Unit, AccessGraph, V> getESG(Unit unit) {
+	private ExplodedSuperGraph<SootMethod, Unit, UpdatableAccessGraph, V> getESG(Unit unit) {
 		return ideToJSON.getOrCreateESG(icfg.getMethodOf(unit), Direction.Forward);
 	}
 
 	@Override
-	public void callFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
+	public void callFlow(Unit start, UpdatableAccessGraph startFact, Unit target, UpdatableAccessGraph targetFact) {
 		getESG(start).callFlow(start, startFact, target, targetFact);;
 	}
 
 	@Override
-	public void callToReturn(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
+	public void callToReturn(Unit start, UpdatableAccessGraph startFact, Unit target, UpdatableAccessGraph targetFact) {
 		getESG(start).callToReturn(start, startFact, target, targetFact);
 	}
 
 	@Override
-	public void returnFlow(Unit start, AccessGraph startFact, Unit target, AccessGraph targetFact) {
+	public void returnFlow(Unit start, UpdatableAccessGraph startFact, Unit target, UpdatableAccessGraph targetFact) {
 		getESG(target).returnFlow(start, startFact, target, targetFact);
 	}
 
 	@Override
-	public void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target) {
+	public void indirectFlowAtCall(UpdatableAccessGraph source, Unit curr, UpdatableAccessGraph target) {
 		// ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
 		// cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr,
 		// target), "indirectFlow"));
 	}
 
 	@Override
-	public void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target) {
+	public void indirectFlowAtWrite(UpdatableAccessGraph source, Unit curr, UpdatableAccessGraph target) {
 		// ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf( curr));
 		// cfg.addEdge(new ESGEdge(new ESGNode(curr, source), new ESGNode(curr,
 		// target), "indirectFlow"));
 	}
 
 	@Override
-	public void killAsOfStrongUpdate(AccessGraph d1, Unit callSite, AccessGraph callNode, Unit returnSite,
-			AccessGraph returnSiteNode) {
+	public void killAsOfStrongUpdate(UpdatableAccessGraph d1, Unit callSite, UpdatableAccessGraph callNode, Unit returnSite,
+			UpdatableAccessGraph returnSiteNode) {
 //		ExplodedSuperGraph cfg = generateCFG(icfg.getMethodOf(callSite));
 //		cfg.addTopEdge(
 //				new ESGEdge(new ESGNode(callSite, callNode), new ESGNode(returnSite, returnSiteNode), "topEdge"));
 	}
 
 	@Override
-	public void setValue(Unit start, AccessGraph startFact, V value) {
+	public void setValue(Unit start, UpdatableAccessGraph startFact, V value) {
 		getESG(start).setValue(getESG(start).new ESGNode(start, startFact), value);
 	}
 
@@ -139,7 +140,7 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void finishWithSeed(PathEdge<Unit, AccessGraph> seed, boolean timeout, boolean isInErrorState,
+	public void finishWithSeed(PathEdge<Unit, UpdatableAccessGraph> seed, boolean timeout, boolean isInErrorState,
 			AnalysisSolver<V> solver) {
 
 	}
@@ -155,17 +156,17 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void startForwardPhase(Set<PathEdge<Unit, AccessGraph>> worklist) {
+	public void startForwardPhase(Set<PathEdge<Unit, UpdatableAccessGraph>> worklist) {
 
 	}
 
 	@Override
-	public void onAliasesComputed(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1, AliasResults res) {
+	public void onAliasesComputed(UpdatableAccessGraph boomerangAccessGraph, Unit curr, UpdatableAccessGraph d1, AliasResults res) {
 
 	}
 
 	@Override
-	public void onAliasTimeout(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
+	public void onAliasTimeout(UpdatableAccessGraph boomerangAccessGraph, Unit curr, UpdatableAccessGraph d1) {
 
 	}
 
@@ -175,7 +176,7 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void detectedStrongUpdate(Unit callSite, AccessGraph receivesUpdate) {
+	public void detectedStrongUpdate(Unit callSite, UpdatableAccessGraph receivesUpdate) {
 
 	}
 
@@ -190,7 +191,7 @@ public class IDEVizDebugger<V> implements IDebugger<V> {
 	}
 
 	@Override
-	public void onNormalPropagation(AccessGraph sourceFact, Unit curr, Unit succ, AccessGraph d2) {
+	public void onNormalPropagation(UpdatableAccessGraph sourceFact, Unit curr, Unit succ, UpdatableAccessGraph d2) {
 
 	}
 

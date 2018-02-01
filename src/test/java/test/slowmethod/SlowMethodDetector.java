@@ -17,6 +17,7 @@ import heros.incremental.UpdatableWrapper;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 import test.ConcreteState;
@@ -92,11 +93,11 @@ public abstract class SlowMethodDetector extends IDEALTestingFramework {
 			}
 
 			@Override
-			public heros.solver.IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController() {
-				return new heros.solver.IPropagationController<UpdatableWrapper<Unit>, AccessGraph>() {
+			public heros.solver.IPropagationController<UpdatableWrapper<Unit>, UpdatableAccessGraph> propagationController() {
+				return new heros.solver.IPropagationController<UpdatableWrapper<Unit>, UpdatableAccessGraph>() {
 
 					@Override
-					public boolean continuePropagate(AccessGraph d1, UpdatableWrapper<Unit> n, AccessGraph d2) {
+					public boolean continuePropagate(UpdatableAccessGraph d1, UpdatableWrapper<Unit> n, UpdatableAccessGraph d2) {
 						return SlowMethodDetector.this.isWithinAllowedMethod(n.getContents());
 					}
 				};

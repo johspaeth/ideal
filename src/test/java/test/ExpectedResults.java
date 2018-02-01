@@ -1,12 +1,12 @@
 package test;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Unit;
 
 public abstract class ExpectedResults<State> implements Assertion, ComparableResult<State>{
 	final UpdatableWrapper<Unit> unit;
-	final AccessGraph accessGraph;
+	final UpdatableAccessGraph accessGraph;
 	final InternalState state;
 	protected boolean satisfied;
 	protected boolean imprecise;
@@ -14,7 +14,7 @@ public abstract class ExpectedResults<State> implements Assertion, ComparableRes
 	enum InternalState{
 		ERROR, ACCEPTING;
 	}
-	ExpectedResults(UpdatableWrapper<Unit> unit, AccessGraph accessGraph, InternalState state){
+	ExpectedResults(UpdatableWrapper<Unit> unit, UpdatableAccessGraph accessGraph, InternalState state){
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 		this.state = state;
@@ -27,7 +27,7 @@ public abstract class ExpectedResults<State> implements Assertion, ComparableRes
 		return imprecise;
 	}
 
-	public AccessGraph getAccessGraph() {
+	public UpdatableAccessGraph getAccessGraph() {
 		return accessGraph;
 	}
 	public UpdatableWrapper<Unit> getStmt() {

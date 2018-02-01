@@ -9,12 +9,13 @@ import heros.solver.IDEDebugger;
 import heros.solver.PathEdge;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import ideal.pointsofaliasing.PointOfAlias;
 import soot.SootMethod;
 import soot.Unit;
 
 public interface IDebugger<V>
-		extends IDEDebugger<Unit, AccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
+		extends IDEDebugger<Unit, UpdatableAccessGraph, SootMethod, V, InterproceduralCFG<Unit, SootMethod>> {
 
 	void beforeAnalysis();
 
@@ -28,34 +29,34 @@ public interface IDebugger<V>
 
 	void finishPhase2WithSeed(IFactAtStatement seed, AnalysisSolver<V> solver);
 
-	void finishWithSeed(PathEdge<Unit, AccessGraph> seed, boolean timeout, boolean isInErrorState,
+	void finishWithSeed(PathEdge<Unit, UpdatableAccessGraph> seed, boolean timeout, boolean isInErrorState,
 			AnalysisSolver<V> solver);
 
 	void afterAnalysis();
 
 	void startAliasPhase(Set<PointOfAlias<V>> pointsOfAlias);
 
-	void startForwardPhase(Set<PathEdge<Unit, AccessGraph>> worklist);
+	void startForwardPhase(Set<PathEdge<Unit, UpdatableAccessGraph>> worklist);
 
-	void onAliasesComputed(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1, AliasResults res);
+	void onAliasesComputed(UpdatableAccessGraph boomerangAccessGraph, Unit curr, UpdatableAccessGraph d1, AliasResults res);
 
-	void onAliasTimeout(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1);
+	void onAliasTimeout(UpdatableAccessGraph boomerangAccessGraph, Unit curr, UpdatableAccessGraph d1);
 
 	void beforeAlias(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1);
 
-	void killAsOfStrongUpdate(AccessGraph d1, Unit callSite, AccessGraph callNode, Unit returnSite,
-			AccessGraph returnSideNode2);
+	void killAsOfStrongUpdate(UpdatableAccessGraph d1, Unit callSite, UpdatableAccessGraph callNode, Unit returnSite,
+			UpdatableAccessGraph returnSideNode2);
 
-	void detectedStrongUpdate(Unit callSite, AccessGraph receivesUpdate);
+	void detectedStrongUpdate(Unit callSite, UpdatableAccessGraph receivesUpdate);
 
 	void onAnalysisTimeout(IFactAtStatement seed);
 
 	void solvePOA(PointOfAlias<V> p);
 
-	void onNormalPropagation(AccessGraph d1, Unit curr, Unit succ, AccessGraph source);
+	void onNormalPropagation(UpdatableAccessGraph d1, Unit curr, Unit succ, UpdatableAccessGraph source);
 
-	void indirectFlowAtWrite(AccessGraph source, Unit curr, AccessGraph target);
+	void indirectFlowAtWrite(UpdatableAccessGraph source, Unit curr, UpdatableAccessGraph target);
 
-	void indirectFlowAtCall(AccessGraph source, Unit curr, AccessGraph target);
+	void indirectFlowAtCall(UpdatableAccessGraph source, Unit curr, UpdatableAccessGraph target);
 
 }

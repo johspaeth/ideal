@@ -6,17 +6,17 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.accessgraph.AccessGraph;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootMethod;
 
-public class ResultCollection<V> implements Iterable<Cell<SootMethod, AccessGraph, V>> {
-	private Table<SootMethod, AccessGraph, V> resultTable = HashBasedTable.create();
+public class ResultCollection<V> implements Iterable<Cell<SootMethod, UpdatableAccessGraph, V>> {
+	private Table<SootMethod, UpdatableAccessGraph, V> resultTable = HashBasedTable.create();
 	private Join<V> join;
 
 	public ResultCollection(Join<V> join){
 		this.join = join;
 	}
-	public void put(SootMethod m, AccessGraph g, V v) {
+	public void put(SootMethod m, UpdatableAccessGraph g, V v) {
 		if (v == null)
 			throw new RuntimeException("Value v must not be null");
 		V v2 = resultTable.get(m, g);
@@ -31,7 +31,7 @@ public class ResultCollection<V> implements Iterable<Cell<SootMethod, AccessGrap
 	}
 
 	@Override
-	public Iterator<Cell<SootMethod, AccessGraph, V>> iterator() {
+	public Iterator<Cell<SootMethod, UpdatableAccessGraph, V>> iterator() {
 		return resultTable.cellSet().iterator();
 	}
 

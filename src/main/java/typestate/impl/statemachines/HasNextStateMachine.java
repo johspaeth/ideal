@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Local;
 import soot.RefType;
 import soot.Scene;
@@ -93,13 +93,13 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
+	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		for (UpdatableWrapper<SootMethod> m : calledMethod) {
 			if (retrieveIteratorConstructors().contains(m.getContents())) {
 				if (unit.getContents() instanceof AssignStmt) {
-					Set<AccessGraph> out = new HashSet<>();
+					Set<UpdatableAccessGraph> out = new HashSet<>();
 					AssignStmt stmt = (AssignStmt) unit;
-					out.add(new AccessGraph((Local) stmt.getLeftOp()));
+					out.add(new UpdatableAccessGraph((Local) stmt.getLeftOp()));
 					return out;
 				}
 			}
@@ -109,8 +109,8 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	}
 
 	@Override
-	public Set<Transition<ConcreteState>> getReturnTransitionsFor(AccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
-			UpdatableWrapper<Unit> exitStmt, AccessGraph exitNode, UpdatableWrapper<Unit> returnSite, AccessGraph retNode) {
+	public Set<Transition<ConcreteState>> getReturnTransitionsFor(UpdatableAccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
+			UpdatableWrapper<Unit> exitStmt, UpdatableAccessGraph exitNode, UpdatableWrapper<Unit> returnSite, UpdatableAccessGraph retNode) {
 //		if (retrieveHasNextMethods().contains(calleeMethod)) {
 //			if (icfg.getMethodOf(callSite).getSignature().contains("java.lang.Object next()"))
 //				return Collections.emptySet();

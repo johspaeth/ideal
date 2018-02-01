@@ -3,23 +3,23 @@ package typestate;
 import java.util.Collection;
 import java.util.Set;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 import typestate.finiteautomata.Transition;
 
 public interface TypestateChangeFunction<State> {
-	Set<? extends Transition<State>> getReturnTransitionsFor(AccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
-			UpdatableWrapper<Unit> exitStmt, AccessGraph exitNode, UpdatableWrapper<Unit> returnSite, AccessGraph retNode);
+	Set<? extends Transition<State>> getReturnTransitionsFor(UpdatableAccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
+			UpdatableWrapper<Unit> exitStmt, UpdatableAccessGraph exitNode, UpdatableWrapper<Unit> returnSite, UpdatableAccessGraph retNode);
 
-	Collection<AccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt, Collection<UpdatableWrapper<SootMethod>> optional);
+	Collection<UpdatableAccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt, Collection<UpdatableWrapper<SootMethod>> optional);
 
-	Set<? extends Transition<State>> getCallTransitionsFor(AccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
-			AccessGraph srcNode, AccessGraph destNode);
+	Set<? extends Transition<State>> getCallTransitionsFor(UpdatableAccessGraph callerD1, UpdatableWrapper<Unit> callSite, UpdatableWrapper<SootMethod> calleeMethod,
+			UpdatableAccessGraph srcNode, UpdatableAccessGraph destNode);
 
-	Set<? extends Transition<State>> getCallToReturnTransitionsFor(AccessGraph d1, UpdatableWrapper<Unit> callSite, AccessGraph d2,
-			UpdatableWrapper<Unit> returnSite, AccessGraph d3);
+	Set<? extends Transition<State>> getCallToReturnTransitionsFor(UpdatableAccessGraph d1, UpdatableWrapper<Unit> callSite, UpdatableAccessGraph d2,
+			UpdatableWrapper<Unit> returnSite, UpdatableAccessGraph d3);
 
 	TypestateDomainValue<State> getBottomElement();
 

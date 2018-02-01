@@ -1,13 +1,13 @@
 package test;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 
 public class MayBe extends ExpectedResults<ConcreteState> {
 
-	MayBe(UpdatableWrapper<Unit> unit, AccessGraph accessGraph, InternalState state) {
+	MayBe(UpdatableWrapper<Unit> unit, UpdatableAccessGraph accessGraph, InternalState state) {
 		super(unit, accessGraph, state);
 	}
 	public String toString(){

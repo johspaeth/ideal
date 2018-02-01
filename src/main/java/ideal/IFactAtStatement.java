@@ -1,11 +1,11 @@
 package ideal;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Unit;
 
 public interface IFactAtStatement {
-	public AccessGraph getFact();
+	public UpdatableAccessGraph getFact();
 
 	public UpdatableWrapper<Unit> getStmt();
 }

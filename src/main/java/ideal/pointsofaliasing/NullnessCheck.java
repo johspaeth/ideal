@@ -4,20 +4,20 @@ import java.util.Collection;
 import java.util.Collections;
 
 import boomerang.AliasResults;
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
 import heros.solver.PathEdge;
 import ideal.PerSeedAnalysisContext;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Unit;
 
 public class NullnessCheck<V> extends AbstractPointOfAlias<V> {
-	public NullnessCheck(AccessGraph callerD1, UpdatableWrapper<Unit> stmt, AccessGraph callerD2, UpdatableWrapper<Unit> returnSite) {
+	public NullnessCheck(UpdatableAccessGraph callerD1, UpdatableWrapper<Unit> stmt, UpdatableAccessGraph callerD2, UpdatableWrapper<Unit> returnSite) {
 		super(callerD1, stmt, callerD2, returnSite);
 	}
 
 	@Override
-	public Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
-		AliasResults results = tsanalysis.aliasesFor(d2, curr.getContents(), d1);
+	public Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
+		AliasResults results = tsanalysis.aliasesFor(d2, curr, d1);
 		if (results.withoutNullAllocationSites().keySet().size() <= 1) {
 			tsanalysis.storeComputedNullnessFlow(this, results.withoutNullAllocationSites());
 		}
@@ -38,7 +38,7 @@ public class NullnessCheck<V> extends AbstractPointOfAlias<V> {
 	}
 
 	@Override
-	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
+	public Collection<UpdatableAccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
 		return Collections.emptySet();
 	}
 

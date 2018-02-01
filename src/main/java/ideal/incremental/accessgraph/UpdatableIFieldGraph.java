@@ -3,6 +3,8 @@ package ideal.incremental.accessgraph;
 import java.util.Collection;
 import java.util.Set;
 
+import boomerang.accessgraph.IFieldGraph;
+
 public interface UpdatableIFieldGraph {
 	Set<UpdatableIFieldGraph> popFirstField();
 	Set<UpdatableIFieldGraph> popLastField();
@@ -14,4 +16,5 @@ public interface UpdatableIFieldGraph {
 	Collection<UpdatableWrappedSootField> getExitNode();
 	boolean shouldOverApproximate();
 	UpdatableIFieldGraph overapproximation();
+	IFieldGraph getFieldGraph();
 }

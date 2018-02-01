@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Local;
 import soot.SootClass;
 import soot.SootMethod;
@@ -73,13 +73,13 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
+	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
 		if (unit.getContents() instanceof AssignStmt) {
 			AssignStmt stmt = (AssignStmt) unit;
 			if(stmt.containsInvokeExpr()){
 				if(keyStoreConstructor().contains(stmt.getInvokeExpr().getMethod())){
-					Set<AccessGraph> out = new HashSet<>();
-					out.add(new AccessGraph((Local) stmt.getLeftOp()));
+					Set<UpdatableAccessGraph> out = new HashSet<>();
+					out.add(new UpdatableAccessGraph((Local) stmt.getLeftOp()));
 					return out;
 				}
 			}

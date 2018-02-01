@@ -7,7 +7,6 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import boomerang.AliasFinder;
-import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.forward.AbstractFlowFunctions;
 import heros.FlowFunction;
@@ -16,6 +15,8 @@ import heros.flowfunc.Identity;
 import heros.incremental.UpdatableWrapper;
 import ideal.Analysis;
 import ideal.PerSeedAnalysisContext;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.UpdatableWrappedSootField;
 import ideal.pointsofaliasing.CallSite;
 import ideal.pointsofaliasing.InstanceFieldWrite;
 import ideal.pointsofaliasing.NullnessCheck;
@@ -53,7 +54,7 @@ import soot.jimple.Stmt;
  *
  */
 public class StandardFlowFunctions<V> extends AbstractFlowFunctions
-		implements FlowFunctions<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>> {
+		implements FlowFunctions<UpdatableWrapper<Unit>, UpdatableAccessGraph, UpdatableWrapper<SootMethod>> {
 	private final PerSeedAnalysisContext<V> context;
 	public StandardFlowFunctions(PerSeedAnalysisContext<V> context) {
 		this.context = context;
@@ -61,12 +62,12 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 	
 	@Override
-	public FlowFunction<AccessGraph> getNormalFlowFunction(final AccessGraph sourceFact, final UpdatableWrapper<Unit> curr,
+	public FlowFunction<UpdatableAccessGraph> getNormalFlowFunction(final UpdatableAccessGraph sourceFact, final UpdatableWrapper<Unit> curr,
 			final UpdatableWrapper<Unit> succ) {
-		return new FlowFunction<AccessGraph>() {
+		return new FlowFunction<UpdatableAccessGraph>() {
 
 			@Override
-			public Set<AccessGraph> computeTargets(AccessGraph source) {
+			public Set<UpdatableAccessGraph> computeTargets(UpdatableAccessGraph source) {
 
 				if(curr.getContents() instanceof IdentityStmt){
 					IdentityStmt identityStmt = (IdentityStmt) curr.getContents();
@@ -81,7 +82,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						Local leftOp = (Local) identityStmt.getLeftOp();
 						// e = d;
 						if (!source.isStatic()){
-							HashSet<AccessGraph> out = new HashSet<AccessGraph>();
+							HashSet<UpdatableAccessGraph> out = new HashSet<UpdatableAccessGraph>();
 							out.add(source);
 							out.add(source.deriveWithNewLocal((Local) leftOp));
 							return out;
@@ -120,7 +121,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 				Value leftOp = as.getLeftOp();
 				Value rightOp = as.getRightOp();
 
-				HashSet<AccessGraph> out = new HashSet<AccessGraph>();
+				HashSet<UpdatableAccessGraph> out = new HashSet<UpdatableAccessGraph>();
 				out.add(source);
 
 				if (rightOp instanceof Constant || rightOp instanceof NewExpr) {
@@ -148,7 +149,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 							SootField field = fr.getField();
 
 							if (source.baseAndFirstFieldMatches(base, field)) {
-								Set<AccessGraph> popFirstField = source.popFirstField();
+								Set<UpdatableAccessGraph> popFirstField = source.popFirstField();
 								out.addAll(popFirstField);
 							} else {
 								return Collections.emptySet();
@@ -189,10 +190,10 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						if (base instanceof Local) {
 							Local lBase = (Local) base;
 
-							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase);
-							WrappedSootField newFirstField = new WrappedSootField(field, curr.getContents());
+							UpdatableAccessGraph withNewLocal = source.deriveWithNewLocal(lBase);
+							UpdatableWrappedSootField newFirstField = new UpdatableWrappedSootField(field, curr);
 							if (!pointsToSetEmpty(lBase)) {
-								AccessGraph newAp = withNewLocal.prependField(newFirstField);
+								UpdatableAccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
 								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as),
 										lBase, newAp, succ);
@@ -210,9 +211,9 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						if (base instanceof Local) {
 							Local lBase = (Local) base;
 
-							AccessGraph withNewLocal = source.deriveWithNewLocal(lBase);
-							AccessGraph newAp = withNewLocal.prependField(
-									new WrappedSootField(AliasFinder.ARRAY_FIELD, curr.getContents()));
+							UpdatableAccessGraph withNewLocal = source.deriveWithNewLocal(lBase);
+							UpdatableAccessGraph newAp = withNewLocal.prependField(
+									new UpdatableWrappedSootField(AliasFinder.ARRAY_FIELD, curr));
 							out.add(newAp);
 							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as), lBase,
 									newAp, succ);
@@ -226,12 +227,12 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						// d.f = e;
 						StaticFieldRef fr = (StaticFieldRef) leftOp;
 						SootField field = fr.getField();
-						AccessGraph newAp = source
-								.prependField(new WrappedSootField(field, curr.getContents())).makeStatic();
+						UpdatableAccessGraph newAp = source
+								.prependField(new UpdatableWrappedSootField(field, curr)).makeStatic();
 
 						if(newAp.hasSetBasedFieldGraph()){
 							newAp = source.dropTail()
-									.prependField(new WrappedSootField(field, curr.getContents())).makeStatic();
+									.prependField(new UpdatableWrappedSootField(field, curr)).makeStatic();
 							out.add(newAp);
 						}
 						out.add(newAp);
@@ -246,8 +247,8 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						// e = a.f && source == a.f.*
 						// replace in source
 						if (leftOp instanceof Local && !source.baseMatches(leftOp)) {
-							for(WrappedSootField firstField : source.getFirstField()){
-								AccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) leftOp);
+							for(UpdatableWrappedSootField firstField : source.getFirstField()){
+								UpdatableAccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) leftOp);
 								out.addAll(deriveWithNewLocal.popFirstField());
 							}
 						}
@@ -256,9 +257,9 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					ArrayRef arrayRef = (ArrayRef) rightOp;
 					if (source.baseAndFirstFieldMatches(arrayRef.getBase(), AliasFinder.ARRAY_FIELD)) {
 
-						Set<AccessGraph> withoutFirstField = source.popFirstField();
-						for (AccessGraph a : withoutFirstField) {
-							for(WrappedSootField firstField : source.getFirstField()){
+						Set<UpdatableAccessGraph> withoutFirstField = source.popFirstField();
+						for (UpdatableAccessGraph a : withoutFirstField) {
+							for(UpdatableWrappedSootField firstField : source.getFirstField()){
 								out.add(a.deriveWithNewLocal((Local) leftOp));
 							}
 						}
@@ -267,9 +268,9 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					StaticFieldRef sfr = (StaticFieldRef) rightOp;
 					if (source.isStatic() && source.firstFieldMustMatch(sfr.getField())) {
 						if (leftOp instanceof Local) {
-							Set<AccessGraph> withoutFirstField = source.popFirstField();
-							for (AccessGraph a : withoutFirstField) {
-								for(WrappedSootField firstField : source.getFirstField()){
+							Set<UpdatableAccessGraph> withoutFirstField = source.popFirstField();
+							for (UpdatableAccessGraph a : withoutFirstField) {
+								for(UpdatableWrappedSootField firstField : source.getFirstField()){
 									out.add(a.deriveWithNewLocal((Local) leftOp));
 								}
 							}
@@ -283,15 +284,15 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 
-	protected boolean isFirstFieldUsedTransitivelyInMethod(AccessGraph source, final UpdatableWrapper<SootMethod> callee) {
-        for(WrappedSootField wrappedField :  source.getFirstField()){
+	protected boolean isFirstFieldUsedTransitivelyInMethod(UpdatableAccessGraph source, final UpdatableWrapper<SootMethod> callee) {
+        for(UpdatableWrappedSootField wrappedField :  source.getFirstField()){
       	  if(context.icfg().isStaticFieldUsed(callee.getContents(), wrappedField.getField()))
       		  return true;
         }
 		return false;
 	}
 	@Override
-	public FlowFunction<AccessGraph> getCallFlowFunction(final AccessGraph d1, final UpdatableWrapper<Unit> callSite,
+	public FlowFunction<UpdatableAccessGraph> getCallFlowFunction(final UpdatableAccessGraph d1, final UpdatableWrapper<Unit> callSite,
 			final UpdatableWrapper<SootMethod> callee) {
 		assert callee != null;
 		final Local[] paramLocals = new Local[callee.getContents().getParameterCount()];
@@ -299,11 +300,11 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 			paramLocals[i] = callee.getContents().getActiveBody().getParameterLocal(i);
 
 		final Local thisLocal = callee.getContents().isStatic() ? null : callee.getContents().getActiveBody().getThisLocal();
-		return new FlowFunction<AccessGraph>() {
+		return new FlowFunction<UpdatableAccessGraph>() {
 			@Override
-			public Set<AccessGraph> computeTargets(AccessGraph source) {
+			public Set<UpdatableAccessGraph> computeTargets(UpdatableAccessGraph source) {
 				assert source != null;
-				Set<AccessGraph> out = new HashSet<>();
+				Set<UpdatableAccessGraph> out = new HashSet<>();
 				Stmt is = (Stmt) callSite.getContents();
 				source = source.deriveWithoutAllocationSite();
 				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic()) {
@@ -333,7 +334,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 						if (source.baseMatches(iIExpr.getBase())) {
 							if (d1 != null && d1.hasAllocationSite() && source.getFieldCount() < 1) {
-								Unit sourceStmt = d1.getSourceStmt();
+								Unit sourceStmt = d1.getSourceStmt().getContents();
 								if (sourceStmt instanceof AssignStmt) {
 									AssignStmt as = (AssignStmt) sourceStmt;
 									Value rightOp = as.getRightOp();
@@ -355,7 +356,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 								}
 							}
 							if(!pointsToSetEmpty(thisLocal)){
-								AccessGraph replacedThisValue = source.deriveWithNewLocal(thisLocal);
+								UpdatableAccessGraph replacedThisValue = source.deriveWithNewLocal(thisLocal);
 								out.add(replacedThisValue);
 							}
 						}
@@ -371,23 +372,23 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	@Override
-	public FlowFunction<AccessGraph> getReturnFlowFunction(final AccessGraph callerD1, final AccessGraph calleeD1, final UpdatableWrapper<Unit> callSite,
-			final AccessGraph callerCallSiteFact, final UpdatableWrapper<SootMethod> callee, final UpdatableWrapper<Unit> exitStmt, final UpdatableWrapper<Unit> returnSite) {
+	public FlowFunction<UpdatableAccessGraph> getReturnFlowFunction(final UpdatableAccessGraph callerD1, final UpdatableAccessGraph calleeD1, final UpdatableWrapper<Unit> callSite,
+			final UpdatableAccessGraph callerCallSiteFact, final UpdatableWrapper<SootMethod> callee, final UpdatableWrapper<Unit> exitStmt, final UpdatableWrapper<Unit> returnSite) {
 		final Local[] paramLocals = new Local[callee.getContents().getParameterCount()];
 		for (int i = 0; i < callee.getContents().getParameterCount(); i++)
 			paramLocals[i] = callee.getContents().getActiveBody().getParameterLocal(i);
 		final Local thisLocal = callee.getContents().isStatic() ? null : callee.getContents().getActiveBody().getThisLocal();
-		return new FlowFunction<AccessGraph>() {
+		return new FlowFunction<UpdatableAccessGraph>() {
 			
 
 			@Override
-			public Set<AccessGraph> computeTargets(AccessGraph source) {
+			public Set<UpdatableAccessGraph> computeTargets(UpdatableAccessGraph source) {
 				// mapping of fields of AccessPath those will be killed in
 				// callToReturn
 				if (Analysis.ENABLE_STATIC_FIELDS && source.isStatic())
 					return Collections.singleton(source);
 
-				HashSet<AccessGraph> out = new HashSet<AccessGraph>();
+				HashSet<UpdatableAccessGraph> out = new HashSet<UpdatableAccessGraph>();
 				if (callSite.getContents() instanceof Stmt) {
 					Stmt is = (Stmt) callSite.getContents();
 
@@ -400,7 +401,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 								if (arg instanceof Local) {
 									if(pointsToSetEmpty((Local) arg))
 										return Collections.emptySet();
-									AccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) arg);
+									UpdatableAccessGraph deriveWithNewLocal = source.deriveWithNewLocal((Local) arg);
 									
 									out.add(deriveWithNewLocal);
 									CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,deriveWithNewLocal,
@@ -422,7 +423,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 								if(pointsToSetEmpty((Local) newBase))
 									return Collections.emptySet();
 								if (pointsToSetCompatible(newBase, source.getBase())) {
-									AccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase());
+									UpdatableAccessGraph possibleAccessPath = source.deriveWithNewLocal((Local) iIExpr.getBase());
 									out.add(possibleAccessPath);
 									
 									CallSite<V> callSitePOA = new CallSite<>(callerD1, callSite, callerCallSiteFact,possibleAccessPath,
@@ -453,8 +454,8 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					}
 				}
 				if(context.isInIDEPhase()){
-					Set<AccessGraph> indirectFlows = new HashSet<>();
-					for(AccessGraph d3 : out){
+					Set<UpdatableAccessGraph> indirectFlows = new HashSet<>();
+					for(UpdatableAccessGraph d3 : out){
 						indirectFlows.addAll(context.getFlowAtPointOfAlias(new ReturnEvent<V>(exitStmt, source, callSite, d3, returnSite, callerD1, null)));
 					}
 					out.addAll(indirectFlows);
@@ -471,7 +472,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	}
 
 	@Override
-	public FlowFunction<AccessGraph> getCallToReturnFlowFunction(final AccessGraph sourceFact, final UpdatableWrapper<Unit> callStmt,
+	public FlowFunction<UpdatableAccessGraph> getCallToReturnFlowFunction(final UpdatableAccessGraph sourceFact, final UpdatableWrapper<Unit> callStmt,
 			final UpdatableWrapper<Unit> returnSite, final boolean hasCallees) {
 //		if (!hasCallees) {
 //			return Identity.v();
@@ -485,10 +486,10 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 		}
 
 		final InvokeExpr invokeExpr = callSite.getInvokeExpr();
-		return new FlowFunction<AccessGraph>() {
+		return new FlowFunction<UpdatableAccessGraph>() {
 			@Override
-			public Set<AccessGraph> computeTargets(AccessGraph source) {
-				if(context.isStrongUpdate(callStmt.getContents(), source)){
+			public Set<UpdatableAccessGraph> computeTargets(UpdatableAccessGraph source) {
+				if(context.isStrongUpdate(callStmt, source)){
 					return  Sets.newHashSet();
 				}
 				if(hasCallees){

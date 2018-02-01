@@ -5,26 +5,28 @@ import java.util.HashSet;
 import java.util.Set;
 
 import boomerang.AliasResults;
-import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import heros.incremental.UpdatableWrapper;
 import heros.solver.PathEdge;
 import ideal.PerSeedAnalysisContext;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.UpdatableWrappedSootField;
+import ideal.incremental.accessgraph.Utils;
 import soot.Unit;
 
 public class CallSite<V> extends AbstractPointOfAlias<V> {
 
-	private AccessGraph callerCallSiteFact;
+	private UpdatableAccessGraph callerCallSiteFact;
 
-	public CallSite(AccessGraph callerD1, UpdatableWrapper<Unit> stmt, AccessGraph callerCallSiteFact, AccessGraph callerD2,
+	public CallSite(UpdatableAccessGraph callerD1, UpdatableWrapper<Unit> stmt, UpdatableAccessGraph callerCallSiteFact, UpdatableAccessGraph callerD2,
 			UpdatableWrapper<Unit> returnSite) {
 		super(callerD1, stmt, callerD2, returnSite);
 		this.callerCallSiteFact = callerCallSiteFact;
 	}
 
 	@Override
-	public Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
-		Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> res = new HashSet<>();
+	public Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
+		Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> res = new HashSet<>();
 
 		if (d2.getFieldCount() > 0 && !callerCallSiteFact.equals(d2)) {
 			res.addAll(unbalancedReturn(tsanalysis));
@@ -32,15 +34,15 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		return res;
 	}
 
-	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
-		Collection<WrappedSootField> lastFields = d2.getLastField();
-		Set<AccessGraph> popLastField = d2.popLastField();
-		Set<AccessGraph> res = new HashSet<>();
-		for (AccessGraph withoutLast : popLastField) {
-			AliasResults results = tsanalysis.aliasesFor(withoutLast, curr.getContents(), d1);
-			for (AccessGraph mayAliasingAccessGraph : results.mayAliasSet()) {
-				for (WrappedSootField lastField : lastFields) {
-					AccessGraph g = mayAliasingAccessGraph.appendFields(new WrappedSootField[] { lastField });
+	public Collection<UpdatableAccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
+		Collection<UpdatableWrappedSootField> lastFields = d2.getLastField();
+		Set<UpdatableAccessGraph> popLastField = d2.popLastField();
+		Set<UpdatableAccessGraph> res = new HashSet<>();
+		for (UpdatableAccessGraph withoutLast : popLastField) {
+			AliasResults results = tsanalysis.aliasesFor(withoutLast, curr, d1);
+			for (UpdatableAccessGraph mayAliasingAccessGraph : Utils.getUpdatableAccessGraph(results.mayAliasSet(), tsanalysis.icfg())) {
+				for (UpdatableWrappedSootField lastField : lastFields) {
+					UpdatableAccessGraph g = mayAliasingAccessGraph.appendFields(new UpdatableWrappedSootField[] { lastField });
 					res.add(g);
 					tsanalysis.debugger().indirectFlowAtCall(withoutLast, curr.getContents(), g);
 				}
@@ -50,10 +52,10 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		return res;
 	}
 
-	private Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> unbalancedReturn(PerSeedAnalysisContext<V> tsanalysis) {
-		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> res = new HashSet<>();
-		for (AccessGraph g : getIndirectFlowTargets(tsanalysis)) {
-			res.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(d1, succ, g));
+	private Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> unbalancedReturn(PerSeedAnalysisContext<V> tsanalysis) {
+		Set<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> res = new HashSet<>();
+		for (UpdatableAccessGraph g : getIndirectFlowTargets(tsanalysis)) {
+			res.add(new PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>(d1, succ, g));
 		}
 		return res;
 	}
