@@ -50,7 +50,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 			if(stmt.containsInvokeExpr() && stmt.getInvokeExpr() instanceof InstanceInvokeExpr){
 				SootMethod method = stmt.getInvokeExpr().getMethod();
 				InstanceInvokeExpr e = (InstanceInvokeExpr)stmt.getInvokeExpr();
-				if(e.getBase().equals(d2.getBase())){
+				if(e.getBase().equals(d2.getBase().getContents())){
 					for (MatcherTransition<State> trans : transition) {
 						if(trans.matches(method) && trans.getType().equals(Type.OnCallToReturn)){
 							res.add(trans);
@@ -68,7 +68,7 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 			for (MatcherTransition<State> trans : transition) {
 				if (trans.matches(method.getContents()) && trans.getType().equals(type)) {
 					Parameter param = trans.getParam();
-					if (param.equals(Parameter.This) && BoomerangContext.isThisValue(method.getContents(), node.getBase()))
+					if (param.equals(Parameter.This) && BoomerangContext.isThisValue(method.getContents(), node.getBase().getContents()))
 						res.add(new Transition<State>(trans.from(), trans.to()));
 					if (param.equals(Parameter.Param1)
 							&& method.getContents().getActiveBody().getParameterLocal(0).equals(node.getBase()))
