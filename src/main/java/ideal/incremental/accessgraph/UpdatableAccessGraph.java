@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
 
 import soot.Local;
@@ -45,6 +46,19 @@ public class UpdatableAccessGraph {
 
 	private boolean isNullAllocsite;
 
+	public AccessGraph getAccessGraph() {
+		if(null == fieldGraph && null == getSourceStmt())
+			return new AccessGraph(value);
+		else if(null == fieldGraph && null != getSourceStmt())
+			return new AccessGraph(value, getSourceStmt().getContents(), isNullAllocsite);
+		else
+			return new AccessGraph(value, fieldGraph.getFieldGraph(), getSourceStmt().getContents(), isNullAllocsite);
+	}
+	
+	/*public UpdatableAccessGraph(UpdatableWrapper<Unit> base, UpdatableIFieldGraph IFieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean hasNullAllocationSite) {
+		this(base, IFieldGraph, sourceStmt, hasNullAllocationSite);
+	}*/
+	
 	/**
 	 * Constructs an access graph with empty field graph, but specified base
 	 * (local) variable.
@@ -92,7 +106,7 @@ public class UpdatableAccessGraph {
 		this(val, (f == null || f.length == 0 ? null : new UpdatableFieldGraph(f)), null, false);
 	}
 
-	protected UpdatableAccessGraph(Local value, UpdatableIFieldGraph fieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean isNullAllocsite) {
+	public UpdatableAccessGraph(Local value, UpdatableIFieldGraph fieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean isNullAllocsite) {
 		this.value = value;
 		this.isNullAllocsite = isNullAllocsite;
 //		if(apgs == null){

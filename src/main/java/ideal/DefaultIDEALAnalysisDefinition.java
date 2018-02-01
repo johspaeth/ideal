@@ -1,12 +1,12 @@
 package ideal;
 
 import boomerang.BoomerangOptions;
-import boomerang.accessgraph.AccessGraph;
 import heros.BiDiInterproceduralCFG;
 import heros.EdgeFunction;
 import heros.incremental.UpdatableWrapper;
 import heros.solver.IPropagationController;
 import ideal.flowfunctions.StandardFlowFunctions;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -55,11 +55,11 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	}
 	
 	@Override
-	public IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController() {
-		return new IPropagationController<UpdatableWrapper<Unit>,AccessGraph>(){
+	public IPropagationController<UpdatableWrapper<Unit>, UpdatableAccessGraph> propagationController() {
+		return new IPropagationController<UpdatableWrapper<Unit>,UpdatableAccessGraph>(){
 
 			@Override
-			public boolean continuePropagate(AccessGraph d1, UpdatableWrapper<Unit> n, AccessGraph d2) {
+			public boolean continuePropagate(UpdatableAccessGraph d1, UpdatableWrapper<Unit> n, UpdatableAccessGraph d2) {
 				return true;
 			}};
 	}
@@ -75,12 +75,12 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	public NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler(){
 		return new NonIdentityEdgeFlowHandler<V>() {
 			@Override
-			public void onCallToReturnFlow(AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite,
-					AccessGraph d1, EdgeFunction<V> func) {
+			public void onCallToReturnFlow(UpdatableAccessGraph d2, UpdatableWrapper<Unit> callSite, UpdatableAccessGraph d3, UpdatableWrapper<Unit> returnSite,
+					UpdatableAccessGraph d1, EdgeFunction<V> func) {
 			}
 
 			@Override
-			public void onReturnFlow(AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1,
+			public void onReturnFlow(UpdatableAccessGraph d2, UpdatableWrapper<Unit> callSite, UpdatableAccessGraph d3, UpdatableWrapper<Unit> returnSite, UpdatableAccessGraph d1,
 					EdgeFunction<V> func) {
 			}
 		};

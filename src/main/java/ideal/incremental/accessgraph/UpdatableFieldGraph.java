@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import boomerang.accessgraph.FieldGraph;
+import boomerang.accessgraph.WrappedSootField;
 import soot.SootField;
 
 /**
@@ -28,13 +30,14 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 			return "EMPTY_GRAPH";
 		};
 	};
+	
 
-	UpdatableFieldGraph(UpdatableWrappedSootField[] fields) {
+	public UpdatableFieldGraph(UpdatableWrappedSootField[] fields) {
 		assert fields != null && fields.length > 0;
 		this.fields = new LinkedList<>(Arrays.asList(fields));
 	}
 
-	UpdatableFieldGraph(UpdatableWrappedSootField f) {
+	public UpdatableFieldGraph(UpdatableWrappedSootField f) {
 		assert f != null;
 		this.fields = new LinkedList<>();
 		this.fields.add(f);
@@ -46,6 +49,27 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 
 	private UpdatableFieldGraph() {
 		this.fields = new LinkedList<>();
+	}
+	
+	/*public UpdatableFieldGraph(WrappedSootField[] fields) {
+		assert fields != null && fields.length > 0;
+		
+		UpdatableWrappedSootField[] updatableFields = new UpdatableWrappedSootField[fields.length];
+		int i = 0;
+		for (WrappedSootField wrappedSootField : fields) {
+			updatableFields[i++] = new UpdatableWrappedSootField(fields[i].getField(), fields[i].getStmt());
+		}
+		
+		this.fields = new LinkedList<>(Arrays.asList(fields));
+	}*/
+
+	public FieldGraph getFieldGraph() {
+		WrappedSootField[] fields = new WrappedSootField[this.fields.size()];
+		int i = 0;
+		for (UpdatableWrappedSootField updatableWrappedSootField : this.fields) {
+			fields[i++] = updatableWrappedSootField.getWrappedSootField();
+		}
+		return new FieldGraph(fields);
 	}
 
 	/**

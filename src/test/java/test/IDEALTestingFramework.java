@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 
-import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import heros.BiDiInterproceduralCFG;
@@ -16,6 +15,7 @@ import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEDebugger;
 import ideal.debug.IDebugger;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -151,7 +151,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 			if (!(param instanceof Local))
 				continue;
 			Local queryVar = (Local) param;
-			AccessGraph val = new AccessGraph(queryVar);
+			UpdatableAccessGraph val = new UpdatableAccessGraph(queryVar);
 			if (invocationName.startsWith("mayBeIn")) {
 				if (invocationName.contains("Error"))
 					queries.add(new MayBe(icfg.wrap((Unit) stmt), val, InternalState.ERROR));

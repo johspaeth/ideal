@@ -5,28 +5,29 @@ import java.util.HashSet;
 import java.util.Set;
 
 import boomerang.AliasResults;
-import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.incremental.UpdatableWrapper;
 import heros.solver.PathEdge;
 import ideal.PerSeedAnalysisContext;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.Utils;
 import soot.Unit;
 
 public class ReturnEvent<V> extends Event<V> {
 
 	private boolean isStrongUpdate;
 	private Unit exitStmt;
-	private AccessGraph d2;
-	private Unit callSite;
-	private AccessGraph d3;
+	private UpdatableAccessGraph d2;
+	private UpdatableWrapper<Unit> callSite;
+	private UpdatableAccessGraph d3;
 	private UpdatableWrapper<Unit> returnSite;
-	private AccessGraph d1;
+	private UpdatableAccessGraph d1;
 	private EdgeFunction<V> func;
 
-	public ReturnEvent(UpdatableWrapper<Unit> exitStmt, AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite, AccessGraph d1, EdgeFunction<V> func) {
+	public ReturnEvent(UpdatableWrapper<Unit> exitStmt, UpdatableAccessGraph d2, UpdatableWrapper<Unit> callSite, UpdatableAccessGraph d3, UpdatableWrapper<Unit> returnSite, UpdatableAccessGraph d1, EdgeFunction<V> func) {
 		this.exitStmt = exitStmt.getContents();
 		this.d2 = d2;
-		this.callSite = callSite.getContents();
+		this.callSite = callSite;
 		this.d3 = d3;
 		this.returnSite = returnSite;
 		this.d1 = d1;
@@ -83,19 +84,19 @@ public class ReturnEvent<V> extends Event<V> {
 	}
 
 	@Override
-	public Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
-		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> res = new HashSet<>();
-		for (AccessGraph mayAliasingAccessGraph : getIndirectFlowTargets(tsanalysis)) {
-			res.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(d1, returnSite,mayAliasingAccessGraph));
+	public Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> getPathEdges(PerSeedAnalysisContext<V> tsanalysis) {
+		Set<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> res = new HashSet<>();
+		for (UpdatableAccessGraph mayAliasingAccessGraph : getIndirectFlowTargets(tsanalysis)) {
+			res.add(new PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>(d1, returnSite,mayAliasingAccessGraph));
 		}
 		return res;
 	}
 
 	@Override
-	public Collection<AccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
+	public Collection<UpdatableAccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
 		AliasResults results = tsanalysis.aliasesFor(d3, callSite, d1);
 		checkMustAlias(results,tsanalysis);
-		Collection<AccessGraph> mayAliasSet = results.mayAliasSet();
+		Collection<UpdatableAccessGraph> mayAliasSet = Utils.getUpdatableAccessGraph(results.mayAliasSet(), tsanalysis.icfg());
 		tsanalysis.storeFlowAtPointOfAlias(this, mayAliasSet);
 		return mayAliasSet;
 	}
@@ -104,7 +105,7 @@ public class ReturnEvent<V> extends Event<V> {
 			PerSeedAnalysisContext<V> context) {
 		boolean isStrongUpdate = !results.queryTimedout() && results.keySet().size() == 1;
 		if(isStrongUpdate)
-			context.storeStrongUpdateAtCallSite(callSite, results.mayAliasSet());
+			context.storeStrongUpdateAtCallSite(callSite, Utils.getUpdatableAccessGraph(results.mayAliasSet(), context.icfg()));
 	}
 
 	@Override
@@ -113,7 +114,7 @@ public class ReturnEvent<V> extends Event<V> {
 	}
 
 	@Override
-	Unit getCallsite() {
+	UpdatableWrapper<Unit> getCallsite() {
 		return callSite;
 	}
 

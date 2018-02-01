@@ -1,5 +1,6 @@
 package ideal.incremental.accessgraph;
 
+import boomerang.accessgraph.WrappedSootField;
 import heros.incremental.UpdatableWrapper;
 
 import soot.SootField;
@@ -21,8 +22,12 @@ public class UpdatableWrappedSootField {
     this.stmt = (TRACK_STMT ? s : null);
   }
 
-  public SootField getField() {
+public SootField getField() {
     return field;
+  }
+  
+  public WrappedSootField getWrappedSootField() {
+	  return new WrappedSootField(this.field, this.stmt.getContents());
   }
 
 

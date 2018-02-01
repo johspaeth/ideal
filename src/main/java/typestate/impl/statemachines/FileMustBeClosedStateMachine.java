@@ -2,8 +2,8 @@ package typestate.impl.statemachines;
 
 import java.util.Collection;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootMethod;
 import soot.Unit;
 import test.ConcreteState;
@@ -35,7 +35,7 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine<ConcreteSt
 
 
   @Override
-  public Collection<AccessGraph> generateSeed(UpdatableWrapper<SootMethod> method,UpdatableWrapper<Unit> unit,
+  public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method,UpdatableWrapper<Unit> unit,
       Collection<UpdatableWrapper<SootMethod>> calledMethod) {
     return generateAtAllocationSiteOf(unit, File.class);
   }

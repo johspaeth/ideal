@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
 import heros.Flow;
@@ -21,20 +20,21 @@ import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
 import ideal.edgefunction.ForwardEdgeFunctions;
 import ideal.flowfunctions.StandardFlowFunctions;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import ideal.pointsofaliasing.ReturnEvent;
 import soot.SootMethod;
 import soot.Unit;
 
 public class InternalAnalysisProblem<V> implements
-IDETabulationProblem<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> {
+IDETabulationProblem<UpdatableWrapper<Unit>, UpdatableAccessGraph, UpdatableWrapper<SootMethod>, V, InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>>> {
 
 	private InterproceduralCFG<UpdatableWrapper<Unit>, UpdatableWrapper<SootMethod>> icfg;
 	private PerSeedAnalysisContext<V> context;
 	private AnalysisEdgeFunctions<V> edgeFunctions;
-	private IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController;
+	private IPropagationController<UpdatableWrapper<Unit>, UpdatableAccessGraph> propagationController;
 	private NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler;
 	private StandardFlowFunctions<V> flowFunctions;
-	public final static AccessGraph ZERO = new AccessGraph(null){
+	public final static UpdatableAccessGraph ZERO = new UpdatableAccessGraph(null){
 		public String toString(){
 			return "{ZERO}";
 		}
@@ -70,7 +70,7 @@ IDETabulationProblem<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootM
 	}
 
 	@Override
-	public FlowFunctions<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>> flowFunctions() {
+	public FlowFunctions<UpdatableWrapper<Unit>, UpdatableAccessGraph, UpdatableWrapper<SootMethod>> flowFunctions() {
 		return flowFunctions;
 	}
 
@@ -80,23 +80,23 @@ IDETabulationProblem<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootM
 	}
 
 	@Override
-	public Map<UpdatableWrapper<Unit>, Set<AccessGraph>> initialSeeds() {
+	public Map<UpdatableWrapper<Unit>, Set<UpdatableAccessGraph>> initialSeeds() {
 		IFactAtStatement seed = context.getSeed();
 		UpdatableWrapper<Unit> stmt = seed.getStmt();
-		Set<AccessGraph> factSet = new HashSet<>();
+		Set<UpdatableAccessGraph> factSet = new HashSet<>();
 		factSet.add(seed.getFact());
-		Map<UpdatableWrapper<Unit>, Set<AccessGraph>> initialSeed = new HashMap<>();
+		Map<UpdatableWrapper<Unit>, Set<UpdatableAccessGraph>> initialSeed = new HashMap<>();
 		initialSeed.put(stmt, factSet);
 		return initialSeed;
 	}
 
 	@Override
-	public AccessGraph zeroValue() {
+	public UpdatableAccessGraph zeroValue() {
 		return ZERO;
 	}
 
 	@Override
-	public EdgeFunctions<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootMethod>, V> edgeFunctions() {
+	public EdgeFunctions<UpdatableWrapper<Unit>, UpdatableAccessGraph, UpdatableWrapper<SootMethod>, V> edgeFunctions() {
 		return new ForwardEdgeFunctions<>(context, edgeFunctions);
 	}
 
@@ -142,20 +142,20 @@ IDETabulationProblem<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootM
 	}
 
 	@Override
-	public Flow<UpdatableWrapper<Unit>, AccessGraph, V> flowWrapper() {
-		return new Flow<UpdatableWrapper<Unit>,AccessGraph,V>(){
+	public Flow<UpdatableWrapper<Unit>, UpdatableAccessGraph, V> flowWrapper() {
+		return new Flow<UpdatableWrapper<Unit>,UpdatableAccessGraph,V>(){
 
 
 			@Override
-			public void nonIdentityCallToReturnFlow( AccessGraph d2,UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite,
-					AccessGraph d1, EdgeFunction<V> func) {
+			public void nonIdentityCallToReturnFlow( UpdatableAccessGraph d2,UpdatableWrapper<Unit> callSite, UpdatableAccessGraph d3, UpdatableWrapper<Unit> returnSite,
+					UpdatableAccessGraph d1, EdgeFunction<V> func) {
 				//TODO search for aliases and update results.
 				InternalAnalysisProblem.this.nonIdentityEdgeFlowHandler.onCallToReturnFlow(d2,callSite,d3,returnSite,d1,func);
 			}
 
 			@Override
-			public void nonIdentityReturnFlow(UpdatableWrapper<Unit> exitStmt,AccessGraph d2, UpdatableWrapper<Unit> callSite, AccessGraph d3, UpdatableWrapper<Unit> returnSite,
-					AccessGraph d1, EdgeFunction<V> func) {
+			public void nonIdentityReturnFlow(UpdatableWrapper<Unit> exitStmt,UpdatableAccessGraph d2, UpdatableWrapper<Unit> callSite, UpdatableAccessGraph d3, UpdatableWrapper<Unit> returnSite,
+					UpdatableAccessGraph d1, EdgeFunction<V> func) {
 				InternalAnalysisProblem.this.nonIdentityEdgeFlowHandler.onReturnFlow(d2,callSite,d3,returnSite,d1,func);
 				if(!context.isInIDEPhase())
 					context.addPOA(new ReturnEvent<V>(exitStmt,d2, callSite, d3, returnSite, d1, func));
@@ -168,7 +168,7 @@ IDETabulationProblem<UpdatableWrapper<Unit>, AccessGraph, UpdatableWrapper<SootM
 	}
 
 	@Override
-	public IPropagationController<UpdatableWrapper<Unit>, AccessGraph> propagationController() {
+	public IPropagationController<UpdatableWrapper<Unit>, UpdatableAccessGraph> propagationController() {
 		return propagationController;
 	}
 

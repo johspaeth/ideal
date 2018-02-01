@@ -1,16 +1,16 @@
 package ideal.pointsofaliasing;
 
-import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Unit;
 
 public abstract class AbstractPointOfAlias<V> implements PointOfAlias<V>{
-  protected AccessGraph d2;
+  protected UpdatableAccessGraph d2;
   protected UpdatableWrapper<Unit> curr;
   protected UpdatableWrapper<Unit> succ;
-  protected AccessGraph d1;
+  protected UpdatableAccessGraph d1;
 
-  public AbstractPointOfAlias(AccessGraph d1, UpdatableWrapper<Unit> stmt, AccessGraph d2, UpdatableWrapper<Unit> succ) {
+  public AbstractPointOfAlias(UpdatableAccessGraph d1, UpdatableWrapper<Unit> stmt, UpdatableAccessGraph d2, UpdatableWrapper<Unit> succ) {
     this.d1 = d1;
     this.curr = stmt;
     this.d2 = d2;

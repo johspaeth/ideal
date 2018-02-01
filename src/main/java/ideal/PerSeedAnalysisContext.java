@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.base.Stopwatch;
@@ -15,6 +16,7 @@ import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.accessgraph.FieldGraph;
 import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.IContextRequester;
@@ -27,6 +29,10 @@ import heros.solver.PathEdge;
 import heros.utilities.DefaultValueMap;
 import ideal.debug.IDebugger;
 import ideal.edgefunction.AnalysisEdgeFunctions;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.UpdatableFieldGraph;
+import ideal.incremental.accessgraph.UpdatableWrappedSootField;
+import ideal.incremental.accessgraph.Utils;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
@@ -41,19 +47,19 @@ public class PerSeedAnalysisContext<V> {
 	 */
 	private Set<PointOfAlias<V>> poas = new HashSet<>();
 	private boolean idePhase;
-	private Multimap<PointOfAlias<V>, AccessGraph> callSiteToFlows = HashMultimap.create();
-	private Multimap<Unit, AccessGraph> callSiteToStrongUpdates = HashMultimap.create();
-	private Set<Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, AccessGraph>> nullnessBranches = new HashSet<>();
+	private Multimap<PointOfAlias<V>, UpdatableAccessGraph> callSiteToFlows = HashMultimap.create();
+	private Multimap<UpdatableWrapper<Unit>, UpdatableAccessGraph> callSiteToStrongUpdates = HashMultimap.create();
+	private Set<Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, UpdatableAccessGraph>> nullnessBranches = new HashSet<>();
 	private AnalysisSolver<V> solver;
 	private AnalysisSolver<V> phaseOneSolver;
 	private AnalysisSolver<V> phaseTwoSolver;
-	private Multimap<Unit, AccessGraph> eventAtCallSite = HashMultimap.create();
+	private Multimap<Unit, UpdatableAccessGraph> eventAtCallSite = HashMultimap.create();
 	private AliasFinder boomerang;
 	private IDEALAnalysisDefinition<V> analysisDefinition;
 	private Stopwatch startTime;
 	private IFactAtStatement seed;
 	private Set<PointOfAlias<V>> seenPOA = new HashSet<>();
-	private Map<PathEdge<UpdatableWrapper<Unit>, AccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
+	private Map<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>, EdgeFunction<V>> pathEdgeToEdgeFunc = new HashMap<>();
 
 	public PerSeedAnalysisContext(IDEALAnalysisDefinition<V> analysisDefinition, IFactAtStatement seed) {
 		this.seed = seed;
@@ -83,7 +89,7 @@ public class PerSeedAnalysisContext<V> {
 	public boolean isInIDEPhase() {
 		return idePhase;
 	}
-	
+
 	public IFactAtStatement getSeed() {
 		return seed;
 	}
@@ -91,7 +97,7 @@ public class PerSeedAnalysisContext<V> {
 	public void enableIDEPhase() {
 		idePhase = true;
 	}
-	
+
 	public void disableIDEPhase() {
 		idePhase = false;
 	}
@@ -103,7 +109,7 @@ public class PerSeedAnalysisContext<V> {
 	 *            The call site POA object.
 	 * @return
 	 */
-	public Collection<AccessGraph> getFlowAtPointOfAlias(PointOfAlias<V> cs) {
+	public Collection<UpdatableAccessGraph> getFlowAtPointOfAlias(PointOfAlias<V> cs) {
 		if (!isInIDEPhase())
 			throw new RuntimeException("This can only be applied in the kill phase");
 		return callSiteToFlows.get(cs);
@@ -116,7 +122,7 @@ public class PerSeedAnalysisContext<V> {
 	 * @param instanceFieldWrite
 	 * @param outFlows
 	 */
-	public void storeFlowAtPointOfAlias(PointOfAlias<V> instanceFieldWrite, Collection<AccessGraph> outFlows) {
+	public void storeFlowAtPointOfAlias(PointOfAlias<V> instanceFieldWrite, Collection<UpdatableAccessGraph> outFlows) {
 		callSiteToFlows.putAll(instanceFieldWrite, outFlows);
 	}
 
@@ -128,7 +134,7 @@ public class PerSeedAnalysisContext<V> {
 	 * @param returnSideNode
 	 * @return
 	 */
-	public boolean isStrongUpdate(Unit callSite, AccessGraph returnSideNode) {
+	public boolean isStrongUpdate(UpdatableWrapper<Unit> callSite, UpdatableAccessGraph returnSideNode) {
 		boolean isStrongUpdate = analysisDefinition.enableStrongUpdates()
 				&& callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
 		/*if(callSite.toString().contains("open")) {
@@ -141,7 +147,7 @@ public class PerSeedAnalysisContext<V> {
 		return isStrongUpdate;
 	}
 
-	public void storeStrongUpdateAtCallSite(Unit callSite, Collection<AccessGraph> mayAliasSet) {
+	public void storeStrongUpdateAtCallSite(UpdatableWrapper<Unit> callSite, Collection<UpdatableAccessGraph> mayAliasSet) {
 		System.out.println("-----------------------------------------------------------storeStrongUpdateAtCallSite()-------------------------------------------");
 		System.out.println("callSite " + callSite);
 		System.out.println("mayAliasSet " + mayAliasSet);
@@ -149,14 +155,14 @@ public class PerSeedAnalysisContext<V> {
 		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
 	}
 
-	public boolean isNullnessBranch(Unit curr, Unit succ, AccessGraph returnSideNode) {
-		Pair<Pair<Unit, Unit>, AccessGraph> key = new Pair<>(new Pair<Unit, Unit>(curr, succ), returnSideNode);
+	public boolean isNullnessBranch(Unit curr, Unit succ, UpdatableAccessGraph returnSideNode) {
+		Pair<Pair<Unit, Unit>, UpdatableAccessGraph> key = new Pair<>(new Pair<Unit, Unit>(curr, succ), returnSideNode);
 		return nullnessBranches.contains(key);
 	}
 
 	public void storeComputedNullnessFlow(NullnessCheck<V> nullnessCheck, AliasResults results) {
-		for (AccessGraph receivesUpdate : results.mayAliasSet()) {
-			nullnessBranches.add(new Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, AccessGraph>(
+		for (UpdatableAccessGraph receivesUpdate : Utils.getUpdatableAccessGraph(results.mayAliasSet(), analysisDefinition.eIcfg())) {
+			nullnessBranches.add(new Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, UpdatableAccessGraph>(
 					new Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>(nullnessCheck.getCurr(), nullnessCheck.getSucc()), receivesUpdate));
 		}
 	}
@@ -165,7 +171,7 @@ public class PerSeedAnalysisContext<V> {
 		return analysisDefinition.eIcfg();
 	}
 
-	public IContextRequester getContextRequestorFor(final AccessGraph d1, final UpdatableWrapper<Unit> stmt) {
+	public IContextRequester getContextRequestorFor(final UpdatableAccessGraph d1, final UpdatableWrapper<Unit> stmt) {
 		return solver.getContextRequestorFor(d1, stmt);
 	}
 
@@ -174,18 +180,36 @@ public class PerSeedAnalysisContext<V> {
 		@Override
 		protected AliasResults createItem(PerSeedAnalysisContext<V>.BoomerangQuery key) {
 			try {
+				IExtendedICFG<Unit, SootMethod> icfg = analysisDefinition.eIcfg();
+				UpdatableAccessGraph updatableAccessGraph = Utils.getUpdatableAccessGraph(key.getAp(), icfg);
 				boomerang.startQuery();
 				AliasResults res = boomerang
-						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, analysisDefinition.eIcfg().wrap(key.getStmt())))
+						//						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, analysisDefinition.eIcfg().wrap(key.getStmt())))
+						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(updatableAccessGraph, analysisDefinition.eIcfg().wrap(key.getStmt())))
 						.withoutNullAllocationSites();
-				analysisDefinition.debugger().onAliasesComputed(key.getAp(), key.getStmt(), key.d1, res);
-				if (res.queryTimedout()) {
-					analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
-				}
-				return res;
+				/*analysisDefinition.debugger().onAliasesComputed(
+						key.getAp(), 
+						key.getStmt(), 
+						new UpdatableAccessGraph(
+								key.d1.getBase(), 
+								new UpdatableFieldGraph(
+										Utils.wrappedToUpdatable(
+												key.d1.getFieldGraph().getFields(),
+												analysisDefinition.eIcfg()
+												)
+										),
+										analysisDefinition.eIcfg().wrap(key.d1.getSourceStmt()),
+										key.d1.hasNullAllocationSite()
+									),
+								res
+								);*/
+						if (res.queryTimedout()) {
+//							analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+						}
+						return res;
 			} catch (Exception e) {
 				e.printStackTrace();
-				analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+//				analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
 				checkTimeout();
 				return new AliasResults();
 			}
@@ -236,11 +260,11 @@ public class PerSeedAnalysisContext<V> {
 		setSolver(phaseOneSolver);
 		analysisDefinition.onStartWithSeed(seed,phaseOneSolver);
 		try {
-//			System.out.println("================== STARTING PHASE 1 ==================");
+			//			System.out.println("================== STARTING PHASE 1 ==================");
 			phase1(phaseOneSolver);
-//			solver.destroy();
+			//			solver.destroy();
 			phaseTwoSolver = new AnalysisSolver<>(analysisDefinition, this);
-//			System.out.println("================== STARTING PHASE 2 ==================");
+			//			System.out.println("================== STARTING PHASE 2 ==================");
 			phase2(phaseTwoSolver);
 			setSolver(phaseTwoSolver);
 		} catch (IDEALTimeoutException e) {
@@ -250,8 +274,8 @@ public class PerSeedAnalysisContext<V> {
 		}
 		if(reporter() != null)
 			reporter().onSeedFinished(seed, solver);
-//		destroy();
-//		solver.destroy();
+		//		destroy();
+		//		solver.destroy();
 	}
 
 	private ResultReporter<V> reporter() {
@@ -260,17 +284,17 @@ public class PerSeedAnalysisContext<V> {
 
 	private void phase1(AnalysisSolver<V> solver) {
 		debugger().startPhase1WithSeed(seed, solver);
-		Set<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> worklist = new HashSet<>();
+		Set<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> worklist = new HashSet<>();
 		if (icfg().isExitStmt(seed.getStmt())) {
-			worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact()));
+			worklist.add(new PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>(InternalAnalysisProblem.ZERO, seed.getStmt(), seed.getFact()));
 		} else {
 			for (UpdatableWrapper<Unit> u : icfg().getSuccsOf(seed.getStmt())) {
-				worklist.add(new PathEdge<UpdatableWrapper<Unit>, AccessGraph>(InternalAnalysisProblem.ZERO, u, seed.getFact()));
+				worklist.add(new PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>(InternalAnalysisProblem.ZERO, u, seed.getFact()));
 			}
 		}
 		while (!worklist.isEmpty()) {
-//			debugger().startForwardPhase(worklist);
-			for (PathEdge<UpdatableWrapper<Unit>, AccessGraph> s : worklist) {
+			//			debugger().startForwardPhase(worklist);
+			for (PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph> s : worklist) {
 				EdgeFunction<V> func = pathEdgeToEdgeFunc.get(s);
 				if (func == null)
 					func = EdgeIdentity.v();
@@ -284,12 +308,12 @@ public class PerSeedAnalysisContext<V> {
 					continue;
 				seenPOA.add(p);
 				debugger().solvePOA(p);
-				Collection<PathEdge<UpdatableWrapper<Unit>, AccessGraph>> edges = p.getPathEdges(this);
+				Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> edges = p.getPathEdges(this);
 				worklist.addAll(edges);
 				if (p instanceof ReturnEvent) {
 					ReturnEvent<V> returnEvent = (ReturnEvent<V>) p;
 					System.out.println("poas " + p);
-					for (PathEdge<UpdatableWrapper<Unit>, AccessGraph> edge : edges) {
+					for (PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph> edge : edges) {
 						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
 					}
 				}
@@ -309,27 +333,27 @@ public class PerSeedAnalysisContext<V> {
 			}
 		}
 		solver.runExecutorAndAwaitCompletion();
-		Map<UpdatableWrapper<Unit>, Set<AccessGraph>> map = new HashMap<UpdatableWrapper<Unit>, Set<AccessGraph>>();
+		Map<UpdatableWrapper<Unit>, Set<UpdatableAccessGraph>> map = new HashMap<UpdatableWrapper<Unit>, Set<UpdatableAccessGraph>>();
 		for (UpdatableWrapper<Unit> sp : icfg().getStartPointsOf(icfg().getMethodOf(seed.getStmt()))) {
 			map.put(sp, Collections.singleton(InternalAnalysisProblem.ZERO));
 		}
 		solver.computeValues(map);
 		analysisDefinition.onFinishWithSeed(seed,solver);
-//		debugger().finishPhase2WithSeed(seed, solver);
+		//		debugger().finishPhase2WithSeed(seed, solver);
 	}
 
-	public AliasResults aliasesFor(AccessGraph boomerangAccessGraph, Unit curr, AccessGraph d1) {
+	public AliasResults aliasesFor(UpdatableAccessGraph boomerangAccessGraph, UpdatableWrapper<Unit> curr, UpdatableAccessGraph d1) {
 		if (!analysisDefinition.enableAliasing())
 			return new AliasResults();
-//		checkTimeout();
+		//		checkTimeout();
 		if (boomerang == null)
 			boomerang = new AliasFinder(analysisDefinition.boomerangOptions());
 		if (!boomerangAccessGraph.isStatic()
 				&& Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase()).isEmpty())
 			return new AliasResults();
 
-		analysisDefinition.debugger().beforeAlias(boomerangAccessGraph, curr, d1);
-		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph, curr, d1));
+		analysisDefinition.debugger().beforeAlias(boomerangAccessGraph.getAccessGraph(), curr.getContents(), d1.getAccessGraph());
+		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph.getAccessGraph(), curr.getContents(), d1.getAccessGraph()));
 	}
 
 	public void destroy() {
@@ -340,15 +364,15 @@ public class PerSeedAnalysisContext<V> {
 		nullnessBranches = null;
 		eventAtCallSite.clear();
 		analysisDefinition = null;
-		
-//		destroy the solver later on if update needs to be called from Analysis.java on each analysisContext.
+
+		//		destroy the solver later on if update needs to be called from Analysis.java on each analysisContext.
 		phaseOneSolver.destroy();
 		phaseTwoSolver.destroy();
 	}
 
 	public void checkTimeout() {
-//		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
-//			throw new IDEALTimeoutException();
+		//		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
+		//			throw new IDEALTimeoutException();
 	}
 
 	public IDebugger<V> debugger() {
@@ -358,7 +382,7 @@ public class PerSeedAnalysisContext<V> {
 	public boolean enableNullPointAlias() {
 		return analysisDefinition.enableNullPointOfAlias();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg, @SuppressWarnings("rawtypes") CFGChangeSet cfgChangeSet) {
 		disableIDEPhase();
@@ -366,12 +390,12 @@ public class PerSeedAnalysisContext<V> {
 		enableIDEPhase();
 		phaseTwoSolver.update(newCfg, cfgChangeSet);
 	}
-	
-	public Table<UpdatableWrapper<Unit>, AccessGraph, V> phaseOneResults() {
+
+	public Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V> phaseOneResults() {
 		return phaseOneSolver.allResults();
 	}
-	
-	public Table<UpdatableWrapper<Unit>, AccessGraph, V> phaseTwoResults() {
+
+	public Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V> phaseTwoResults() {
 		return phaseTwoSolver.allResults();
 	}
 

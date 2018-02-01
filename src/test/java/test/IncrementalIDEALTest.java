@@ -20,7 +20,6 @@ import java.util.Set;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import heros.BiDiInterproceduralCFG;
@@ -29,6 +28,7 @@ import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEDebugger;
 import ideal.debug.IDebugger;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.G;
 import soot.MethodOrMethodContext;
 import soot.PackManager;
@@ -62,11 +62,11 @@ public class IncrementalIDEALTest {
 	private Analysis<TypestateDomainValue<ConcreteState>> analysis;
 	private Path codePath;
 	
-	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseTwo;
-	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseTwo;
+	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseTwo;
+	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseTwo;
 	
-	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne;
-	List<Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseOne;
+	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne;
+	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseOne;
 
 	public IncrementalIDEALTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -284,8 +284,8 @@ public class IncrementalIDEALTest {
 			return false;
 		}
 		for(int seedCount = 0; seedCount < computeResultsPhaseTwo.size(); seedCount++) {
-			Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> computeTable = computeResultsPhaseTwo.get(seedCount);
-			Table<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> updateTable = updateResultsPhaseTwo.get(seedCount);
+			Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeTable = computeResultsPhaseTwo.get(seedCount);
+			Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateTable = updateResultsPhaseTwo.get(seedCount);
 			
 			if(computeTable.size() != updateTable.size()) {
 				System.out.println("completed comparing the compute and update results and the results are " + (compareFlag ? "equal" : "not equal"));
@@ -294,12 +294,12 @@ public class IncrementalIDEALTest {
 			else
 				compareFlag = true;
 			
-			Set<Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> computeTableCellSet = computeTable.cellSet();
-			Set<Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>>> updateTableCellSet = updateTable.cellSet();
+			Set<Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeTableCellSet = computeTable.cellSet();
+			Set<Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateTableCellSet = updateTable.cellSet();
 			
-			for (Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> computeCell : computeTableCellSet) {
+			for (Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeCell : computeTableCellSet) {
 				boolean present = false;
-				for (Cell<UpdatableWrapper<Unit>, AccessGraph, TypestateDomainValue<ConcreteState>> updateCell : updateTableCellSet) {
+				for (Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateCell : updateTableCellSet) {
 					if(computeCell.toString().contentEquals(updateCell.toString())) {
 						present = true;
 						break;

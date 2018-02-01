@@ -8,13 +8,13 @@ import java.util.Set;
 
 import com.google.common.collect.Table;
 
-import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.CFGChangeSet;
 import heros.incremental.UpdatableWrapper;
 import ideal.debug.IDebugger;
+import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
@@ -105,23 +105,23 @@ public class Analysis<V> {
 		for (Unit u : method.getContents().getActiveBody().getUnits()) {
 			Collection<UpdatableWrapper<SootMethod>> calledMethods = (Collection<UpdatableWrapper<SootMethod>>) (icfg.isCallStmt(icfg.wrap(u)) ? icfg.getCalleesOfCallAt(icfg.wrap(u))
 					: new HashSet<UpdatableWrapper<SootMethod>>());
-			for (AccessGraph fact : analysisDefinition.generate(method, icfg.wrap(u), calledMethods)) {
+			for (UpdatableAccessGraph fact : analysisDefinition.generate(method, icfg.wrap(u), calledMethods)) {
 				seeds.add(new FactAtStatement(icfg.wrap(u),fact));
 			}
 		}
 		return seeds;
 	}
 	
-	public List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseOneResults() {
-		List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseOneResults = new LinkedList<Table<UpdatableWrapper<Unit>, AccessGraph, V>>();
+	public List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults() {
+		List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults = new LinkedList<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>>();
 		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
 			phaseOneResults.add(context.phaseOneResults());
 		}
 		return phaseOneResults;
 	}
 	
-	public List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseTwoResults() {
-		List<Table<UpdatableWrapper<Unit>, AccessGraph, V>> phaseTwoResults = new LinkedList<Table<UpdatableWrapper<Unit>, AccessGraph, V>>();
+	public List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults() {
+		List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults = new LinkedList<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>>();
 		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
 			phaseTwoResults.add(context.phaseTwoResults());
 		}
