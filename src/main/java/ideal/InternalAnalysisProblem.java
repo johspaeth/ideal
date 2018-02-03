@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import boomerang.accessgraph.AccessGraph;
 import heros.EdgeFunction;
 import heros.EdgeFunctions;
 import heros.Flow;
@@ -35,6 +36,12 @@ IDETabulationProblem<UpdatableWrapper<Unit>, UpdatableAccessGraph, UpdatableWrap
 	private NonIdentityEdgeFlowHandler<V> nonIdentityEdgeFlowHandler;
 	private StandardFlowFunctions<V> flowFunctions;
 	public final static UpdatableAccessGraph ZERO = new UpdatableAccessGraph(null){
+		public String toString(){
+			return "{ZERO}";
+		}
+	};
+	
+	public final static AccessGraph ZERO1 = new AccessGraph(null){
 		public String toString(){
 			return "{ZERO}";
 		}

@@ -2,6 +2,7 @@ package typestate;
 
 import java.util.Collection;
 
+import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.DefaultIDEALAnalysisDefinition;
 import ideal.edgefunction.AnalysisEdgeFunctions;
@@ -26,8 +27,8 @@ public abstract class TypestateAnalysisProblem<State> extends DefaultIDEALAnalys
 	public abstract TypestateChangeFunction<State> createTypestateChangeFunction();
 
 	@Override
-	public Collection<UpdatableAccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt, Collection<UpdatableWrapper<SootMethod>> optional) {
-		return getOrCreateTransitionFunctions().generate(method, stmt, optional);
+	public Collection<UpdatableAccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt, Collection<UpdatableWrapper<SootMethod>> optional, IExtendedICFG<Unit, SootMethod> icfg) {
+		return getOrCreateTransitionFunctions().generate(method, stmt, optional, icfg);
 	}
 
 }

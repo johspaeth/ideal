@@ -352,7 +352,8 @@ public class PerSeedAnalysisContext<V> {
 				&& Scene.v().getPointsToAnalysis().reachingObjects(boomerangAccessGraph.getBase().getContents()).isEmpty())
 			return new AliasResults();
 
-		analysisDefinition.debugger().beforeAlias(boomerangAccessGraph.getAccessGraph(), curr.getContents(), d1.getAccessGraph());
+		//analysisDefinition.debugger().beforeAlias(boomerangAccessGraph.getAccessGraph(), curr.getContents(), d1.getAccessGraph());
+		System.out.println("d1 " + d1.toString());
 		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph.getAccessGraph(), curr.getContents(), d1.getAccessGraph()));
 	}
 
