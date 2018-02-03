@@ -105,7 +105,7 @@ public class Analysis<V> {
 		for (Unit u : method.getContents().getActiveBody().getUnits()) {
 			Collection<UpdatableWrapper<SootMethod>> calledMethods = (Collection<UpdatableWrapper<SootMethod>>) (icfg.isCallStmt(icfg.wrap(u)) ? icfg.getCalleesOfCallAt(icfg.wrap(u))
 					: new HashSet<UpdatableWrapper<SootMethod>>());
-			for (UpdatableAccessGraph fact : analysisDefinition.generate(method, icfg.wrap(u), calledMethods)) {
+			for (UpdatableAccessGraph fact : analysisDefinition.generate(method, icfg.wrap(u), calledMethods, icfg)) {
 				seeds.add(new FactAtStatement(icfg.wrap(u),fact));
 			}
 		}

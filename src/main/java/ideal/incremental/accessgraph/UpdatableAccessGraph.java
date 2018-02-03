@@ -7,7 +7,7 @@ import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
 import heros.incremental.UpdatableWrapper;
-
+import ideal.InternalAnalysisProblem;
 import soot.Local;
 import soot.SootField;
 import soot.Type;
@@ -47,12 +47,15 @@ public class UpdatableAccessGraph {
 	private boolean isNullAllocsite;
 
 	public AccessGraph getAccessGraph() {
+		if(null == fieldGraph && null == getSourceStmt() && null == value) {
+			return InternalAnalysisProblem.ZERO1;
+		}
 		if(null == fieldGraph && null == getSourceStmt())
 			return new AccessGraph(value.getContents());
 		else if(null == fieldGraph && null != getSourceStmt())
-			return new AccessGraph(value.getContents(), getSourceStmt().getContents(), isNullAllocsite);
+			return new AccessGraph(value.getContents(), getSourceStmt().getContents(), hasAllocationSite());
 		else
-			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), getSourceStmt().getContents(), isNullAllocsite);
+			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), getSourceStmt().getContents(), hasAllocationSite());
 	}
 	
 	/*public UpdatableAccessGraph(UpdatableWrapper<Unit> base, UpdatableIFieldGraph IFieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean hasNullAllocationSite) {
@@ -283,7 +286,7 @@ public class UpdatableAccessGraph {
 	 */
 	public boolean baseMatches(Value local) {
 		assert local != null;
-		return value == local;
+		return value.getContents() == local;
 	}
 
 	/**
@@ -449,9 +452,9 @@ public class UpdatableAccessGraph {
 
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.hashCode());
+		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.getFieldGraph().hashCode());
+		result = prime * result + ((value == null) ? 0 : value.getContents().hashCode());
+		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.getContents().hashCode());
 		this.hashCode = result;
 
 		return this.hashCode;
@@ -468,17 +471,17 @@ public class UpdatableAccessGraph {
 		if (value == null) {
 			if (other.value != null)
 				return false;
-		} else if (!value.equals(other.value))
+		} else if (!value.getContents().equals(other.value.getContents()))
 			return false;
 		if (allocationSite == null) {
 			if (other.allocationSite != null)
 				return false;
-		} else if (!allocationSite.equals(other.allocationSite))
+		} else if (!allocationSite.getContents().equals(other.allocationSite.getContents()))
 			return false;
 		if (fieldGraph == null) {
 			if (other.fieldGraph != null)
 				return false;
-		} else if (!fieldGraph.equals(other.fieldGraph))
+		} else if (!fieldGraph.getFieldGraph().equals(other.fieldGraph.getFieldGraph()))
 			return false;
 		assert this.hashCode() == obj.hashCode();
 		return true;

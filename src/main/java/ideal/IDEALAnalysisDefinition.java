@@ -30,7 +30,7 @@ public abstract class IDEALAnalysisDefinition<V> {
 	 *            method for the call site.
 	 * @return
 	 */
-	public abstract Collection<UpdatableAccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt, Collection<UpdatableWrapper<SootMethod>> calledMethod);
+	public abstract Collection<UpdatableAccessGraph> generate(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt, Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg);
 
 	/**
 	 * This function must generate and return the AnalysisEdgeFunctions that are

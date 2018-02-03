@@ -8,6 +8,7 @@ import boomerang.accessgraph.IFieldGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
+import ideal.InternalAnalysisProblem;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -15,15 +16,17 @@ import soot.Unit;
 public class Utils {
 	
 	public static UpdatableAccessGraph getUpdatableAccessGraph(AccessGraph ag, IExtendedICFG<Unit, SootMethod> icfg) {
-		IFieldGraph fieldGraph = ag.getFieldGraph();
-		UpdatableWrapper<Unit> sourceStmt = icfg.wrap(ag.getSourceStmt());
-		UpdatableWrapper<Local> base = icfg.wrap(ag.getBase());
-		if(null == fieldGraph && null == sourceStmt)
-			return new UpdatableAccessGraph(base);
-		else if(null == fieldGraph && null != sourceStmt)
-			return new UpdatableAccessGraph(base, sourceStmt, ag.hasNullAllocationSite());
+//		IFieldGraph fieldGraph = ag.getFieldGraph();
+//		UpdatableWrapper<Unit> sourceStmt = icfg.wrap(ag.getSourceStmt());
+//		UpdatableWrapper<Local> base = icfg.wrap(ag.getBase());
+		/*if(null == ag.getFieldGraph() && null == ag.getSourceStmt() && null == ag.getBase())
+			return InternalAnalysisProblem.ZERO;*/
+		if(null == ag.getFieldGraph() && null == ag.getSourceStmt())
+			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()));
+		else if(null == ag.getFieldGraph() && null != ag.getSourceStmt())
+			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()), icfg.wrap(ag.getSourceStmt()), ag.hasAllocationSite());
 		else
-			return new UpdatableAccessGraph(base, Utils.getUpdatableFieldGraph(fieldGraph.getFields(), icfg), sourceStmt, ag.hasNullAllocationSite());
+			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()), Utils.getUpdatableFieldGraph(ag.getFieldGraph().getFields(), icfg), icfg.wrap(ag.getSourceStmt()), ag.hasAllocationSite());
 	}
 	
 	public static Collection<UpdatableAccessGraph> getUpdatableAccessGraph(Collection<AccessGraph> accessGraphs, IExtendedICFG<Unit, SootMethod> icfg) {
