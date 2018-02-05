@@ -4,13 +4,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import test.ConcreteState;
-import test.IDEALTestingFramework;
 import test.slowmethod.SlowMethodDetector;
 import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;

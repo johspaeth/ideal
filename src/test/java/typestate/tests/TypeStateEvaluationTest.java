@@ -2,6 +2,9 @@ package typestate.tests;
 
 import org.junit.Test;
 
+import boomerang.cfg.IExtendedICFG;
+import soot.SootMethod;
+import soot.Unit;
 import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;

@@ -21,6 +21,8 @@ public class Utils {
 			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()));
 		else if(null == ag.getFieldGraph() && null != ag.getSourceStmt())
 			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()), icfg.wrap(ag.getSourceStmt()), ag.hasAllocationSite());
+		else if(null == ag.getSourceStmt() && null != ag.getFieldGraph())
+			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()), Utils.getUpdatableFieldGraph(ag.getFieldGraph().getFields(), icfg), null, ag.hasAllocationSite());
 		else
 			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()), Utils.getUpdatableFieldGraph(ag.getFieldGraph().getFields(), icfg), icfg.wrap(ag.getSourceStmt()), ag.hasAllocationSite());
 	}
@@ -37,7 +39,14 @@ public class Utils {
 		UpdatableWrappedSootField updatableWrappedSootFields[] = new UpdatableWrappedSootField[wrappedSootFields.length];
 		int i = 0;
 		for (WrappedSootField wrappedSootField : wrappedSootFields) {
-			updatableWrappedSootFields[i++] = new UpdatableWrappedSootField(wrappedSootField.getField(), icfg.wrap(wrappedSootField.getStmt()));
+			if(wrappedSootField.getField() == null)
+				updatableWrappedSootFields[i++] = new UpdatableWrappedSootField(null, icfg.wrap(wrappedSootField.getStmt()));
+			else if(null == wrappedSootField.getStmt())
+				updatableWrappedSootFields[i++] = new UpdatableWrappedSootField(icfg.wrap(wrappedSootField.getField()), null);
+			else if(null == wrappedSootField || (wrappedSootField.getField() == null && wrappedSootField.getStmt() == null))
+				updatableWrappedSootFields[i++] = new UpdatableWrappedSootField(null, null);
+			else
+				updatableWrappedSootFields[i++] = new UpdatableWrappedSootField(icfg.wrap(wrappedSootField.getField()), icfg.wrap(wrappedSootField.getStmt()));
 		}
 		return new UpdatableFieldGraph(updatableWrappedSootFields);
 	}
