@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.cfg.ExtendedICFG;
+import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootClass;
@@ -113,11 +114,11 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
-			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
 		for (SootMethod cons : constructor()) {
 			//TODO GetContents in order to compare
 			if (calledMethod.contains(cons)) {
-				return getLeftSideOf(unit);
+				return getLeftSideOf(unit, icfg);
 			}
 		}
 		return Collections.emptySet();

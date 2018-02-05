@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Scene;
@@ -91,9 +92,9 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
-			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
 		
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors());
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), icfg);
 	}
 
 

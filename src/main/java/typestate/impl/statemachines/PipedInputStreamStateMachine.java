@@ -3,6 +3,7 @@ package typestate.impl.statemachines;
 import java.util.Collection;
 import java.util.Set;
 
+import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootMethod;
@@ -46,8 +47,8 @@ public class PipedInputStreamStateMachine extends MatcherStateMachine<ConcreteSt
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
-			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
-		return generateAtAllocationSiteOf(unit, java.io.PipedInputStream.class);
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
+		return generateAtAllocationSiteOf(unit, java.io.PipedInputStream.class, icfg);
 	}
 
 	@Override

@@ -265,12 +265,13 @@ public class IncrementalIDEALTest {
 	}
 
 	public boolean runTestAndCompareResults() {
-		System.out.println("-------------------------------------------------STEP 1-------------------------------------------------");
-		computeResults();
+//		System.out.println("-------------------------------------------------STEP 1-------------------------------------------------");
+//		computeResults();
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
-		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
-		return compareResults();
+//		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
+//		return compareResults();
+		return false;
 	}
 	
 	private <V> boolean compareResults() {
