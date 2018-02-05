@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.Local;
@@ -93,13 +94,13 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	}
 
 	@Override
-	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod) {
+	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
 		for (UpdatableWrapper<SootMethod> m : calledMethod) {
 			if (retrieveIteratorConstructors().contains(m.getContents())) {
 				if (unit.getContents() instanceof AssignStmt) {
 					Set<UpdatableAccessGraph> out = new HashSet<>();
 					AssignStmt stmt = (AssignStmt) unit;
-					out.add(new UpdatableAccessGraph((Local) stmt.getLeftOp()));
+					out.add(new UpdatableAccessGraph(icfg.wrap((Local) stmt.getLeftOp())));
 					return out;
 				}
 			}

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootClass;
@@ -64,8 +65,8 @@ public class PrintWriterStateMachine extends MatcherStateMachine<ConcreteState>
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
-			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
-		return generateAtAllocationSiteOf(unit, java.io.PrintWriter.class);
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
+		return generateAtAllocationSiteOf(unit, java.io.PrintWriter.class, icfg);
 	}
 
 	@Override

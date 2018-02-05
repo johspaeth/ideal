@@ -4,12 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.accessgraph.IFieldGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
-import heros.incremental.UpdatableWrapper;
-import ideal.InternalAnalysisProblem;
-import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 

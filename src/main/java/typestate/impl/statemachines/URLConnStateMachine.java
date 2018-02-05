@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
 import soot.SootClass;
@@ -48,8 +49,8 @@ public class URLConnStateMachine extends MatcherStateMachine<ConcreteState> impl
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
-			Collection<UpdatableWrapper<SootMethod>> calledMethod) {
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, connect());
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, connect(), icfg);
 	}
 
 	@Override
