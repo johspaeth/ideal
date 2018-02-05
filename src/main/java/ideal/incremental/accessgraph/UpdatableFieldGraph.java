@@ -69,7 +69,8 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 		for (UpdatableWrappedSootField updatableWrappedSootField : this.fields) {
 			fields[i++] = updatableWrappedSootField.getWrappedSootField();
 		}
-		return new FieldGraph(fields);
+		return fields.length > 0 ? new FieldGraph(fields) :  FieldGraph.EMPTY_GRAPH;
+//		return new FieldGraph(fields);
 	}
 
 	/**
@@ -139,9 +140,9 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	boolean hasLoops() {
 		Set<SootField> sootFields = new HashSet<>();
 		for (UpdatableWrappedSootField f : this.fields) {
-			if (sootFields.contains(f.getField()))
+			if (sootFields.contains(f.getField().getContents()))
 				return true;
-			sootFields.add(f.getField());
+			sootFields.add(f.getField().getContents());
 		}
 		return false;
 	}
@@ -172,7 +173,7 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+		result = prime * result + ((fields == null) ? 0 : this.getFieldGraph().hashCode());
 		return result;
 	}
 
@@ -186,9 +187,9 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 			return false;
 		UpdatableFieldGraph other = (UpdatableFieldGraph) obj;
 		if (fields == null) {
-			if (other.fields != null)
+			if (other.getFieldGraph().getFields() != null)
 				return false;
-		} else if (!fields.equals(other.fields))
+		} else if (!this.getFieldGraph().getFields().equals(other.getFieldGraph().getFields()))
 			return false;
 		return true;
 	}

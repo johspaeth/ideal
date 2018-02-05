@@ -13,21 +13,21 @@ import soot.Unit;
  *
  */
 public class UpdatableWrappedSootField {
-  private SootField field;
+  private UpdatableWrapper<SootField> field;
   private UpdatableWrapper<Unit> stmt;
   public static boolean TRACK_STMT = true;
 
-  public UpdatableWrappedSootField(SootField f, UpdatableWrapper<Unit> s) {
+  public UpdatableWrappedSootField(UpdatableWrapper<SootField> f, UpdatableWrapper<Unit> s) {
     this.field = f;
     this.stmt = (TRACK_STMT ? s : null);
   }
 
-public SootField getField() {
+public UpdatableWrapper<SootField> getField() {
     return field;
   }
   
   public WrappedSootField getWrappedSootField() {
-	  return new WrappedSootField(this.field, this.stmt.getContents());
+	  return new WrappedSootField(this.field.getContents(), this.stmt.getContents());
   }
 
 
@@ -35,8 +35,8 @@ public SootField getField() {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((field == null) ? 0 : field.hashCode());
-    result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
+    result = prime * result + ((field == null) ? 0 : field.getContents().hashCode());
+    result = prime * result + ((stmt == null) ? 0 : stmt.getContents().hashCode());
     return result;
   }
 
@@ -63,7 +63,7 @@ public SootField getField() {
   }
 
   public String toString() {
-    return field.getName().toString();
+    return field.getContents().getName().toString();
   }
 
 }

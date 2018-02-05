@@ -192,7 +192,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 							Local lBase = (Local) base;
 
 							UpdatableAccessGraph withNewLocal = source.deriveWithNewLocal(icfg.wrap(lBase));
-							UpdatableWrappedSootField newFirstField = new UpdatableWrappedSootField(field, curr);
+							UpdatableWrappedSootField newFirstField = new UpdatableWrappedSootField(icfg.wrap(field), curr);
 							if (!pointsToSetEmpty(lBase)) {
 								UpdatableAccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
@@ -214,7 +214,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 							UpdatableAccessGraph withNewLocal = source.deriveWithNewLocal(icfg.wrap(lBase));
 							UpdatableAccessGraph newAp = withNewLocal.prependField(
-									new UpdatableWrappedSootField(AliasFinder.ARRAY_FIELD, curr));
+									new UpdatableWrappedSootField(icfg.wrap(AliasFinder.ARRAY_FIELD), curr));
 							out.add(newAp);
 							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as), lBase,
 									newAp, succ);
@@ -229,11 +229,11 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						StaticFieldRef fr = (StaticFieldRef) leftOp;
 						SootField field = fr.getField();
 						UpdatableAccessGraph newAp = source
-								.prependField(new UpdatableWrappedSootField(field, curr)).makeStatic();
+								.prependField(new UpdatableWrappedSootField(icfg.wrap(field), curr)).makeStatic();
 
 						if(newAp.hasSetBasedFieldGraph()){
 							newAp = source.dropTail()
-									.prependField(new UpdatableWrappedSootField(field, curr)).makeStatic();
+									.prependField(new UpdatableWrappedSootField(icfg.wrap(field), curr)).makeStatic();
 							out.add(newAp);
 						}
 						out.add(newAp);
@@ -287,7 +287,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 	protected boolean isFirstFieldUsedTransitivelyInMethod(UpdatableAccessGraph source, final UpdatableWrapper<SootMethod> callee) {
         for(UpdatableWrappedSootField wrappedField :  source.getFirstField()){
-      	  if(context.icfg().isStaticFieldUsed(callee.getContents(), wrappedField.getField()))
+      	  if(context.icfg().isStaticFieldUsed(callee.getContents(), wrappedField.getField().getContents()))
       		  return true;
         }
 		return false;

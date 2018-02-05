@@ -2,7 +2,6 @@ package typestate.finiteautomata;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import soot.MethodOrMethodContext;
@@ -10,7 +9,6 @@ import soot.Scene;
 import soot.SootMethod;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
-import test.ConcreteState;
 
 public class MatcherTransition<State> extends Transition<State> {
 	private Collection<SootMethod> matchingMethods = new HashSet<>();
