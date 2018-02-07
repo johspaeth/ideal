@@ -40,34 +40,34 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 
 	}
 
-	public HasNextStateMachine() {
-		addTransition(new MatcherTransition<ConcreteState>(States.NONE, retrieveIteratorConstructors(), Parameter.This, States.INIT,
-				Type.None));
+	public HasNextStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, retrieveIteratorConstructors(icfg), Parameter.This, States.INIT,
+				Type.None, icfg));
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.INIT, retrieveNextMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveNextMethods(), Parameter.This, States.ERROR,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveNextMethods(), Parameter.This, States.INIT,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.INIT, retrieveHasNextMethods(), Parameter.This, States.HASNEXT,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveHasNextMethods(), Parameter.This, States.HASNEXT,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveHasNextMethods(), Parameter.This, States.ERROR,
-				Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.INIT, retrieveNextMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveNextMethods(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveNextMethods(icfg), Parameter.This, States.INIT,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, retrieveHasNextMethods(icfg), Parameter.This, States.HASNEXT,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveHasNextMethods(icfg), Parameter.This, States.HASNEXT,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveHasNextMethods(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
 	}
 
-	private Set<SootMethod> retrieveHasNextMethods() {
+	private Set<UpdatableWrapper<SootMethod>> retrieveHasNextMethods(IExtendedICFG<Unit, SootMethod> icfg) {
 		if (hasNextMethods == null)
 			hasNextMethods = selectMethodByName(getImplementersOfIterator("java.util.Iterator"), "hasNext");
-		return hasNextMethods;
+		return icfg.wrap(hasNextMethods);
 	}
 
-	private Set<SootMethod> retrieveNextMethods() {
-		return selectMethodByName(getImplementersOfIterator("java.util.Iterator"), "next");
+	private Set<UpdatableWrapper<SootMethod>> retrieveNextMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return icfg.wrap(selectMethodByName(getImplementersOfIterator("java.util.Iterator"), "next"));
 	}
 
-	private Set<SootMethod> retrieveIteratorConstructors() {
+	private Set<UpdatableWrapper<SootMethod>> retrieveIteratorConstructors(IExtendedICFG<Unit, SootMethod> icfg) {
 		Set<SootMethod> selectMethodByName = selectMethodByName(Scene.v().getClasses(), "iterator");
 		Set<SootMethod> res = new HashSet<>();
 		for (SootMethod m : selectMethodByName) {
@@ -80,7 +80,7 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 				}
 			}
 		}
-		return res;
+		return icfg.wrap(res);
 	}
 
 	private List<SootClass> getImplementersOfIterator(String className) {
@@ -96,7 +96,7 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit, Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
 		for (UpdatableWrapper<SootMethod> m : calledMethod) {
-			if (retrieveIteratorConstructors().contains(m.getContents())) {
+			if (retrieveIteratorConstructors(icfg).contains(m)) {
 				if (unit.getContents() instanceof AssignStmt) {
 					Set<UpdatableAccessGraph> out = new HashSet<>();
 					AssignStmt stmt = (AssignStmt) unit;

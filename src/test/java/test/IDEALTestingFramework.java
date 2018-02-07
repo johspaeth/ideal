@@ -38,7 +38,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 	private IDebugger<TypestateDomainValue<ConcreteState>> debugger;
 	protected TestingResultReporter<ConcreteState> testingResultReporter;
 
-	protected abstract TypestateChangeFunction<ConcreteState> createTypestateChangeFunction();
+	protected abstract TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg);
 
 	protected Analysis<TypestateDomainValue<ConcreteState>> createAnalysis() {
 		return new Analysis<TypestateDomainValue<ConcreteState>>(new TypestateAnalysisProblem<ConcreteState>() {
@@ -59,7 +59,7 @@ public abstract class IDEALTestingFramework extends AbstractTestingFramework{
 
 			@Override
 			public TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-				return IDEALTestingFramework.this.createTypestateChangeFunction();
+				return IDEALTestingFramework.this.createTypestateChangeFunction(icfg);
 			}
 
 			@Override

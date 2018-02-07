@@ -461,7 +461,9 @@ public class UpdatableAccessGraph {
 		this.hashCode = result;
 
 		return this.hashCode;*/
-		return this.getAccessGraph().hashCode();
+//		return this.getAccessGraph().hashCode();
+		
+		return 1;
 	}
 
 	@Override

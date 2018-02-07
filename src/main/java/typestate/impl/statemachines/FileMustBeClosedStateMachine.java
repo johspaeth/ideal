@@ -27,10 +27,10 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine<ConcreteSt
 
   }
 
-  public FileMustBeClosedStateMachine() {
-    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn));
-    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));
-    addTransition(new MatcherTransition<ConcreteState>(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn));
+  public FileMustBeClosedStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn, icfg));
+    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+    addTransition(new MatcherTransition<ConcreteState>(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
   }
 
 
