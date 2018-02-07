@@ -30,15 +30,15 @@ public class SocketStateMachine extends MatcherStateMachine<ConcreteState> imple
 			return this == ERROR;
 		}
 	}
-	public SocketStateMachine() {
+	public SocketStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.NONE, socketConstructor(), Parameter.This, States.INIT, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.INIT, connect(), Parameter.This, States.CONNECTED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.INIT, useMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, useMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.NONE, socketConstructor(icfg), Parameter.This, States.INIT, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, useMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, useMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 
-	private Set<SootMethod> socketConstructor() {
+	private Set<UpdatableWrapper<SootMethod>> socketConstructor(IExtendedICFG<Unit, SootMethod> icfg) {
 		List<SootClass> subclasses = getSubclassesOf("java.net.Socket");
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
@@ -46,23 +46,23 @@ public class SocketStateMachine extends MatcherStateMachine<ConcreteState> imple
 				if (m.isConstructor())
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
-	private Set<SootMethod> connect() {
-		return selectMethodByName(getSubclassesOf("java.net.Socket"), "connect");
+	private Set<UpdatableWrapper<SootMethod>> connect(IExtendedICFG<Unit, SootMethod> icfg) {
+		return icfg.wrap(selectMethodByName(getSubclassesOf("java.net.Socket"), "connect"));
 	}
 
-	private Set<SootMethod> useMethods() {
+	private Set<UpdatableWrapper<SootMethod>> useMethods(IExtendedICFG<Unit, SootMethod> icfg) {
 		List<SootClass> subclasses = getSubclassesOf("java.net.Socket");
-		Set<SootMethod> connectMethod = connect();
+		Set<UpdatableWrapper<SootMethod>> connectMethod = connect(icfg);
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
 			for (SootMethod m : c.getMethods())
 				if (m.isPublic() && !connectMethod.contains(m) && !m.isStatic())
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
 	@Override

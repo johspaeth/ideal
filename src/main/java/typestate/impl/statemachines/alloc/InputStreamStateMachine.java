@@ -32,23 +32,23 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 		}
 	}
 
-	InputStreamStateMachine() {
+	InputStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, readMethods(), Parameter.This, States.OPEN, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, closeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, readMethods(icfg), Parameter.This, States.OPEN, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, closeMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, nativeReadMethods(), Parameter.This, States.ERROR, Type.OnCallToReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, nativeReadMethods(), Parameter.This, States.ERROR, Type.OnCallToReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, nativeReadMethods(), Parameter.This, States.OPEN, Type.OnCallToReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, nativeReadMethods(icfg), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, nativeReadMethods(icfg), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, nativeReadMethods(icfg), Parameter.This, States.OPEN, Type.OnCallToReturn, icfg));
 	}
 
 
-	private Set<SootMethod> nativeReadMethods() {
+	private Set<UpdatableWrapper<SootMethod>> nativeReadMethods(IExtendedICFG<Unit, SootMethod> icfg) {
 		List<SootClass> subclasses = getSubclassesOf("java.io.InputStream");
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
@@ -56,7 +56,7 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 				if (m.isNative() && m.toString().contains("read()"))
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
 
@@ -71,12 +71,12 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 		return out;
 	}
 
-	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getImplementersOf("java.io.InputStream"), "close");
+	private Set<UpdatableWrapper<SootMethod>> closeMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return icfg.wrap(selectMethodByName(getImplementersOf("java.io.InputStream"), "close"));
 	}
 
-	private Set<SootMethod> readMethods() {
-		return selectMethodByName(getImplementersOf("java.io.InputStream"), "read");
+	private Set<UpdatableWrapper<SootMethod>> readMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return icfg.wrap(selectMethodByName(getImplementersOf("java.io.InputStream"), "read"));
 	}
 
 

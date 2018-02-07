@@ -26,7 +26,7 @@ public class ForwardEdgeFunctions<V> implements EdgeFunctions<UpdatableWrapper<U
   public EdgeFunction<V> getNormalEdgeFunction(UpdatableAccessGraph d1, UpdatableWrapper<Unit> curr,
 		  UpdatableAccessGraph currNode, UpdatableWrapper<Unit> succ, UpdatableAccessGraph succNode) {
 
-    if (context.isNullnessBranch(curr.getContents(), succ.getContents(), currNode)) {
+    if (context.isNullnessBranch(curr, succ, currNode)) {
       return ALL_TOP;
     }
     return edgeFunctions.getNormalEdgeFunction(d1, curr, currNode, succ, succNode);

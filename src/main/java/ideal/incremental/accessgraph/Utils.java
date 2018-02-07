@@ -6,6 +6,7 @@ import java.util.HashSet;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
+import heros.incremental.UpdatableWrapper;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -50,4 +51,13 @@ public class Utils {
 		}
 		return new UpdatableFieldGraph(updatableWrappedSootFields);
 	}
+	
+	public static Collection<SootMethod> getSootMethods(Collection<UpdatableWrapper<SootMethod>> updatableMethods) {
+		Collection<SootMethod> sootMethods = new HashSet<>(updatableMethods.size());
+		for (UpdatableWrapper<SootMethod> updatableSootMethod : updatableMethods) {
+			sootMethods.add(updatableSootMethod.getContents());
+		}
+		return sootMethods;
+	}
+	
 }

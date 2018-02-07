@@ -151,8 +151,8 @@ public class PerSeedAnalysisContext<V> {
 		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
 	}
 
-	public boolean isNullnessBranch(Unit curr, Unit succ, UpdatableAccessGraph returnSideNode) {
-		Pair<Pair<Unit, Unit>, UpdatableAccessGraph> key = new Pair<>(new Pair<Unit, Unit>(curr, succ), returnSideNode);
+	public boolean isNullnessBranch(UpdatableWrapper<Unit> curr, UpdatableWrapper<Unit> succ, UpdatableAccessGraph returnSideNode) {
+		Pair<Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>, UpdatableAccessGraph> key = new Pair<>(new Pair<UpdatableWrapper<Unit>, UpdatableWrapper<Unit>>(curr, succ), returnSideNode);
 		return nullnessBranches.contains(key);
 	}
 
