@@ -28,7 +28,7 @@ import typestate.finiteautomata.Transition;
 
 public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  implements TypestateChangeFunction<ConcreteState> {
 
-	private Set<SootMethod> hasNextMethods;
+	private Set<UpdatableWrapper<SootMethod>> hasNextMethods;
 
 	public static enum States implements ConcreteState {
 		NONE, INIT, HASNEXT, ERROR;
@@ -59,38 +59,38 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 
 	private Set<UpdatableWrapper<SootMethod>> retrieveHasNextMethods(IExtendedICFG<Unit, SootMethod> icfg) {
 		if (hasNextMethods == null)
-			hasNextMethods = selectMethodByName(getImplementersOfIterator("java.util.Iterator"), "hasNext");
-		return icfg.wrap(hasNextMethods);
+			hasNextMethods = selectMethodByName(getImplementersOfIterator("java.util.Iterator", icfg), "hasNext", icfg);
+		return hasNextMethods;
 	}
 
 	private Set<UpdatableWrapper<SootMethod>> retrieveNextMethods(IExtendedICFG<Unit, SootMethod> icfg) {
-		return icfg.wrap(selectMethodByName(getImplementersOfIterator("java.util.Iterator"), "next"));
+		return selectMethodByName(getImplementersOfIterator("java.util.Iterator", icfg), "next", icfg);
 	}
 
 	private Set<UpdatableWrapper<SootMethod>> retrieveIteratorConstructors(IExtendedICFG<Unit, SootMethod> icfg) {
-		Set<SootMethod> selectMethodByName = selectMethodByName(Scene.v().getClasses(), "iterator");
+		Set<UpdatableWrapper<SootMethod>> selectMethodByName = selectMethodByName(icfg.wrap(Scene.v().getClasses()), "iterator", icfg);
 		Set<SootMethod> res = new HashSet<>();
-		for (SootMethod m : selectMethodByName) {
-			if (m.getReturnType() instanceof RefType) {
-				RefType refType = (RefType) m.getReturnType();
+		for (UpdatableWrapper<SootMethod> m : selectMethodByName) {
+			if (m.getContents().getReturnType() instanceof RefType) {
+				RefType refType = (RefType) m.getContents().getReturnType();
 				SootClass classs = refType.getSootClass();
 				if (classs.equals(Scene.v().getSootClass("java.util.Iterator")) || Scene.v().getActiveHierarchy()
 						.getImplementersOf(Scene.v().getSootClass("java.util.Iterator")).contains(classs)) {
-					res.add(m);
+					res.add(m.getContents());
 				}
 			}
 		}
 		return icfg.wrap(res);
 	}
 
-	private List<SootClass> getImplementersOfIterator(String className) {
+	private Collection<UpdatableWrapper<SootClass>> getImplementersOfIterator(String className, IExtendedICFG<Unit, SootMethod> icfg) {
 		SootClass sootClass = Scene.v().getSootClass(className);
 		List<SootClass> list = Scene.v().getActiveHierarchy().getImplementersOf(sootClass);
 		List<SootClass> res = new LinkedList<>();
 		for (SootClass c : list) {
 			res.add(c);
 		}
-		return res;
+		return icfg.wrap(res);
 	}
 
 	@Override

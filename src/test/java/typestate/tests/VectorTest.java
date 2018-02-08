@@ -4,6 +4,9 @@ import java.util.Vector;
 
 import org.junit.Test;
 
+import boomerang.cfg.IExtendedICFG;
+import soot.SootMethod;
+import soot.Unit;
 import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
@@ -82,7 +85,7 @@ public class VectorTest extends IDEALTestingFramework {
 	}
 	
 	@Override
-	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-		return new VectorStateMachine();
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg) {
+		return new VectorStateMachine(icfg);
 	}
 }

@@ -3,12 +3,12 @@ package typestate.impl.statemachines;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.Utils;
 import soot.Local;
 import soot.SootClass;
 import soot.SootMethod;
@@ -34,43 +34,43 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 
 	}
 
-	public KeyStoreStateMachine() {
+	public KeyStoreStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
 		// addTransition(new MatcherTransition(States.NONE,
 		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.INIT, loadMethods(), Parameter.This, States.LOADED, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, loadMethods(icfg), Parameter.This, States.LOADED, Type.OnReturn, icfg));
 
-		addTransition(new MatcherTransition<ConcreteState>(States.INIT, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, anyMethodOtherThanLoad(), Parameter.This, States.ERROR,
-				Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, anyMethodOtherThanLoad(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, anyMethodOtherThanLoad(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
 
 	}
 
-	private Set<SootMethod> anyMethodOtherThanLoad() {
-		List<SootClass> subclasses = getSubclassesOf("java.security.KeyStore");
-		Set<SootMethod> loadMethods = loadMethods();
+	private Set<UpdatableWrapper<SootMethod>> anyMethodOtherThanLoad(IExtendedICFG<Unit, SootMethod> icfg) {
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.security.KeyStore", icfg);
+		Set<UpdatableWrapper<SootMethod>> loadMethods = loadMethods(icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
-				if (m.isPublic() && !loadMethods.contains(m) && !m.isStatic())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
+				if (m.isPublic() && !Utils.getSootMethods(loadMethods).contains(m) && !m.isStatic())
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
-	private Set<SootMethod> loadMethods() {
-		return selectMethodByName(getSubclassesOf("java.security.KeyStore"), "load");
+	private Set<UpdatableWrapper<SootMethod>> loadMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getSubclassesOf("java.security.KeyStore", icfg), "load", icfg);
 	}
 
-	private Set<SootMethod> keyStoreConstructor() {
-		List<SootClass> subclasses = getSubclassesOf("java.security.KeyStore");
+	private Set<UpdatableWrapper<SootMethod>> keyStoreConstructor(IExtendedICFG<Unit, SootMethod> icfg) {
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.security.KeyStore", icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
 				if (m.getName().equals("getInstance") && m.isStatic())
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 		if (unit.getContents() instanceof AssignStmt) {
 			AssignStmt stmt = (AssignStmt) unit;
 			if(stmt.containsInvokeExpr()){
-				if(keyStoreConstructor().contains(stmt.getInvokeExpr().getMethod())){
+				if(Utils.getSootMethods(keyStoreConstructor(icfg)).contains(stmt.getInvokeExpr().getMethod())){
 					Set<UpdatableAccessGraph> out = new HashSet<>();
 					out.add(new UpdatableAccessGraph(icfg.wrap((Local) stmt.getLeftOp())));
 					return out;

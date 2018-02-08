@@ -6,8 +6,11 @@ import java.io.InputStream;
 
 import org.junit.Test;
 
+import boomerang.cfg.IExtendedICFG;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
+import soot.SootMethod;
+import soot.Unit;
 import test.ConcreteState;
 import test.slowmethod.SlowMethodDetector;
 import typestate.TypestateChangeFunction;
@@ -42,8 +45,8 @@ public class InputStreamTest extends SlowMethodDetector {
 	}
 
 	@Override
-	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-		return new InputStreamStateMachine();
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg) {
+		return new InputStreamStateMachine(icfg);
 	}
 	
 	@Override

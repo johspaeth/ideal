@@ -5,6 +5,9 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import boomerang.cfg.IExtendedICFG;
+import soot.SootMethod;
+import soot.Unit;
 import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
@@ -21,7 +24,7 @@ public class PrintStreamTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-		return new PrintStreamStateMachine();
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg) {
+		return new PrintStreamStateMachine(icfg);
 	}
 }

@@ -3,12 +3,12 @@ package typestate.impl.statemachines;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.Utils;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
@@ -39,10 +39,10 @@ public class SocketStateMachine extends MatcherStateMachine<ConcreteState> imple
 	}
 
 	private Set<UpdatableWrapper<SootMethod>> socketConstructor(IExtendedICFG<Unit, SootMethod> icfg) {
-		List<SootClass> subclasses = getSubclassesOf("java.net.Socket");
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.net.Socket", icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
 				if (m.isConstructor())
 					out.add(m);
 		}
@@ -50,16 +50,16 @@ public class SocketStateMachine extends MatcherStateMachine<ConcreteState> imple
 	}
 
 	private Set<UpdatableWrapper<SootMethod>> connect(IExtendedICFG<Unit, SootMethod> icfg) {
-		return icfg.wrap(selectMethodByName(getSubclassesOf("java.net.Socket"), "connect"));
+		return selectMethodByName(getSubclassesOf("java.net.Socket", icfg), "connect", icfg);
 	}
 
 	private Set<UpdatableWrapper<SootMethod>> useMethods(IExtendedICFG<Unit, SootMethod> icfg) {
-		List<SootClass> subclasses = getSubclassesOf("java.net.Socket");
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.net.Socket", icfg);
 		Set<UpdatableWrapper<SootMethod>> connectMethod = connect(icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
-				if (m.isPublic() && !connectMethod.contains(m) && !m.isStatic())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
+				if (m.isPublic() && !Utils.getSootMethods(connectMethod).contains(m) && !m.isStatic())
 					out.add(m);
 		}
 		return icfg.wrap(out);

@@ -33,39 +33,39 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 
 	}
 
-	public InputStreamStateMachine() {
-		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+	public InputStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>")), Parameter.This, States.ERROR, Type.OnCallToReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, icfg.wrap(Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>"))), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, icfg.wrap(Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>"))), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
 	}
-	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getImplementersOf("java.io.InputStream"), "close");
-	}
-
-	private Set<SootMethod> readMethods() {
-		return selectMethodByName(getImplementersOf("java.io.InputStream"), "read");
+	private Set<UpdatableWrapper<SootMethod>> closeMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getImplementersOf("java.io.InputStream", icfg), "close", icfg);
 	}
 
+	private Set<UpdatableWrapper<SootMethod>> readMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getImplementersOf("java.io.InputStream", icfg), "read", icfg);
+	}
 
-	private List<SootClass> getImplementersOf(String className) {
+
+	private Collection<UpdatableWrapper<SootClass>> getImplementersOf(String className, IExtendedICFG<Unit, SootMethod> icfg) {
 		SootClass sootClass = Scene.v().getSootClass(className);
 		List<SootClass> list = Scene.v().getActiveHierarchy().getSubclassesOfIncluding(sootClass);
 		List<SootClass> res = new LinkedList<>();
 		for (SootClass c : list) {
 			res.add(c);
 		}
-		return res;
+		return icfg.wrap(res);
 	}
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit,
 			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), icfg);
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(icfg), icfg);
 	}
 	@Override
 	public TypestateDomainValue getBottomElement() {
