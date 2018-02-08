@@ -2,6 +2,9 @@ package typestate.tests;
 
 import org.junit.Test;
 
+import boomerang.cfg.IExtendedICFG;
+import soot.SootMethod;
+import soot.Unit;
 import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
@@ -89,7 +92,7 @@ public class FileMustBeClosedNullPOATest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-		return new FileMustBeClosedStateMachine();
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg) {
+		return new FileMustBeClosedStateMachine(icfg);
 	}
 }

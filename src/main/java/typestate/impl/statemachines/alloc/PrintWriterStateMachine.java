@@ -2,12 +2,12 @@ package typestate.impl.statemachines.alloc;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.Utils;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
@@ -31,36 +31,36 @@ public class PrintWriterStateMachine extends MatcherStateMachine<ConcreteState>
 		}
 	}
 
-	PrintWriterStateMachine() {
-		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(), Parameter.This, States.CLOSED,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(), Parameter.This, States.ERROR,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(), Parameter.This, States.ERROR,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, closeMethods(), Parameter.This, States.ERROR,
-				Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, readMethods(), Parameter.This, States.OPEN,
-				Type.OnReturn));
+	PrintWriterStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(icfg), Parameter.This, States.CLOSED,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, closeMethods(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, readMethods(icfg), Parameter.This, States.OPEN,
+				Type.OnReturn, icfg));
 
 	}
 
-	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getSubclassesOf("java.io.PrintWriter"), "close");
+	private Set<UpdatableWrapper<SootMethod>> closeMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getSubclassesOf("java.io.PrintWriter", icfg), "close", icfg);
 	}
 
-	private Set<SootMethod> readMethods() {
-		List<SootClass> subclasses = getSubclassesOf("java.io.PrintWriter");
-		Set<SootMethod> closeMethods = closeMethods();
+	private Set<UpdatableWrapper<SootMethod>> readMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.io.PrintWriter", icfg);
+		Set<UpdatableWrapper<SootMethod>> closeMethods = closeMethods(icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
-				if (m.isPublic() && !closeMethods.contains(m) && !m.isStatic())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
+				if (m.isPublic() && !Utils.getSootMethods(closeMethods).contains(m) && !m.isStatic())
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
 	@Override

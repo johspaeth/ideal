@@ -12,6 +12,7 @@ import boomerang.BoomerangContext;
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.Utils;
 import soot.Local;
 import soot.Scene;
 import soot.SootClass;
@@ -84,25 +85,25 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 		return res;
 	}
 
-	protected Set<SootMethod> selectMethodByName(Collection<SootClass> classes, String pattern) {
+	protected Set<UpdatableWrapper<SootMethod>> selectMethodByName(Collection<UpdatableWrapper<SootClass>> collection, String pattern, IExtendedICFG<Unit, SootMethod> icfg) {
 		Set<SootMethod> res = new HashSet<>();
-		for (SootClass c : classes) {
-			for (SootMethod m : c.getMethods()) {
+		for (UpdatableWrapper<SootClass> c : collection) {
+			for (SootMethod m : c.getContents().getMethods()) {
 				if (Pattern.matches(pattern, m.getName()))
 					res.add(m);
 			}
 		}
-		return res;
+		return icfg.wrap(res);
 	}
 
-	protected List<SootClass> getSubclassesOf(String className) {
+	protected Collection<UpdatableWrapper<SootClass>> getSubclassesOf(String className, IExtendedICFG<Unit, SootMethod> icfg) {
 		SootClass sootClass = Scene.v().getSootClass(className);
 		List<SootClass> list = Scene.v().getActiveHierarchy().getSubclassesOfIncluding(sootClass);
 		List<SootClass> res = new LinkedList<>();
 		for (SootClass c : list) {
 			res.add(c);
 		}
-		return res;
+		return icfg.wrap(res);
 	}
 
 	protected Collection<UpdatableAccessGraph> generateAtConstructor(UpdatableWrapper<Unit> unit,
@@ -143,9 +144,9 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	}
 	
 	protected Collection<UpdatableAccessGraph> generateThisAtAnyCallSitesOf(UpdatableWrapper<Unit> unit,
-			Collection<UpdatableWrapper<SootMethod>> calledMethod, Set<SootMethod> set, IExtendedICFG<Unit, SootMethod> icfg) {
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, Set<UpdatableWrapper<SootMethod>> set, IExtendedICFG<Unit, SootMethod> icfg) {
 		for (UpdatableWrapper<SootMethod> callee : calledMethod) {
-			if (set.contains(callee.getContents())) {
+			if (Utils.getSootMethods(set).contains(callee.getContents())) {
 				if (unit.getContents() instanceof Stmt) {
 					if (((Stmt) unit.getContents()).getInvokeExpr() instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iie = (InstanceInvokeExpr) ((Stmt) unit.getContents()).getInvokeExpr();

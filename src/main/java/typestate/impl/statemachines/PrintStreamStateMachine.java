@@ -2,12 +2,12 @@ package typestate.impl.statemachines;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.Utils;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
@@ -32,32 +32,32 @@ public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 
 	}
 
-	public PrintStreamStateMachine() {
+	public PrintStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 
-	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getSubclassesOf("java.io.PrintStream"), "close");
+	private Set<UpdatableWrapper<SootMethod>> closeMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getSubclassesOf("java.io.PrintStream", icfg), "close", icfg);
 	}
 
-	private Set<SootMethod> readMethods() {
-		List<SootClass> subclasses = getSubclassesOf("java.io.PrintStream");
-		Set<SootMethod> closeMethods = closeMethods();
+	private Set<UpdatableWrapper<SootMethod>> readMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.io.PrintStream", icfg);
+		Set<UpdatableWrapper<SootMethod>> closeMethods = closeMethods(icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
-				if (m.isPublic() && !closeMethods.contains(m) && !m.isStatic())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
+				if (m.isPublic() && !Utils.getSootMethods(closeMethods).contains(m) && !m.isStatic())
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
 			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(), icfg);
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, closeMethods(icfg), icfg);
 	}
 
 	@Override

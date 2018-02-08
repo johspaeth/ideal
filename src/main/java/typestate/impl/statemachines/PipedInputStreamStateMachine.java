@@ -27,21 +27,21 @@ public class PipedInputStreamStateMachine extends MatcherStateMachine<ConcreteSt
 		}
 	}
 
-	PipedInputStreamStateMachine() {
+	PipedInputStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.INIT, connect(), Parameter.This, States.CONNECTED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.INIT, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CONNECTED, readMethods(), Parameter.This, States.CONNECTED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CONNECTED, readMethods(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 
-	private Set<SootMethod> connect() {
-		return selectMethodByName(getSubclassesOf("java.io.PipedInputStream"), "connect");
+	private Set<UpdatableWrapper<SootMethod>> connect(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getSubclassesOf("java.io.PipedInputStream", icfg), "connect", icfg);
 	}
 
 
-	private Set<SootMethod> readMethods() {
-		return selectMethodByName(getSubclassesOf("java.io.PipedInputStream"), "read");
+	private Set<UpdatableWrapper<SootMethod>> readMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getSubclassesOf("java.io.PipedInputStream", icfg), "read", icfg);
 	}
 
 

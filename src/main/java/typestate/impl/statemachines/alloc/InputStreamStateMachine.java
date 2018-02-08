@@ -49,10 +49,10 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 
 
 	private Set<UpdatableWrapper<SootMethod>> nativeReadMethods(IExtendedICFG<Unit, SootMethod> icfg) {
-		List<SootClass> subclasses = getSubclassesOf("java.io.InputStream");
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.io.InputStream", icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
 				if (m.isNative() && m.toString().contains("read()"))
 					out.add(m);
 		}
@@ -60,41 +60,41 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	}
 
 
-	private Set<SootMethod> constructors() {
-		List<SootClass> subclasses = getSubclassesOf("java.io.InputStream");
+	private Set<UpdatableWrapper<SootMethod>> constructors(IExtendedICFG<Unit, SootMethod> icfg) {
+		Collection<UpdatableWrapper<SootClass>> subclasses = getSubclassesOf("java.io.InputStream", icfg);
 		Set<SootMethod> out = new HashSet<>();
-		for (SootClass c : subclasses) {
-			for (SootMethod m : c.getMethods())
+		for (UpdatableWrapper<SootClass> c : subclasses) {
+			for (SootMethod m : c.getContents().getMethods())
 				if (m.isConstructor())
 					out.add(m);
 		}
-		return out;
+		return icfg.wrap(out);
 	}
 
 	private Set<UpdatableWrapper<SootMethod>> closeMethods(IExtendedICFG<Unit, SootMethod> icfg) {
-		return icfg.wrap(selectMethodByName(getImplementersOf("java.io.InputStream"), "close"));
+		return selectMethodByName(getImplementersOf("java.io.InputStream", icfg), "close", icfg);
 	}
 
 	private Set<UpdatableWrapper<SootMethod>> readMethods(IExtendedICFG<Unit, SootMethod> icfg) {
-		return icfg.wrap(selectMethodByName(getImplementersOf("java.io.InputStream"), "read"));
+		return selectMethodByName(getImplementersOf("java.io.InputStream", icfg), "read", icfg);
 	}
 
 
-	private List<SootClass> getImplementersOf(String className) {
+	private Collection<UpdatableWrapper<SootClass>> getImplementersOf(String className, IExtendedICFG<Unit, SootMethod> icfg) {
 		SootClass sootClass = Scene.v().getSootClass(className);
 		List<SootClass> list = Scene.v().getActiveHierarchy().getSubclassesOfIncluding(sootClass);
 		List<SootClass> res = new LinkedList<>();
 		for (SootClass c : list) {
 			res.add(c);
 		}
-		return res;
+		return icfg.wrap(res);
 	}
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> m, UpdatableWrapper<Unit> unit,
 			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
 		
-		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(), icfg);
+		return this.generateThisAtAnyCallSitesOf(unit, calledMethod, constructors(icfg), icfg);
 	}
 
 

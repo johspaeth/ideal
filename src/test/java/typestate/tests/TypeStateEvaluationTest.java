@@ -38,8 +38,8 @@ public class TypeStateEvaluationTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-		return new FileMustBeClosedStateMachine();
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg) {
+		return new FileMustBeClosedStateMachine(icfg);
 	}
 
 }

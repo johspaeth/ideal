@@ -33,38 +33,38 @@ public class OutputStreamStateMachine extends MatcherStateMachine<ConcreteState>
 
 	}
 
-	OutputStreamStateMachine() {
-		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
+	OutputStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(
-				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(), Parameter.This, States.CLOSED, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
-		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, writeMethods(), Parameter.This, States.ERROR, Type.OnReturn));
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, writeMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, writeMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 
 
-	private Set<SootMethod> closeMethods() {
-		return selectMethodByName(getImplementersOf("java.io.OutputStream"), "close");
+	private Set<UpdatableWrapper<SootMethod>> closeMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getImplementersOf("java.io.OutputStream", icfg), "close", icfg);
 	}
 
-	private Set<SootMethod> writeMethods() {
-		return selectMethodByName(getImplementersOf("java.io.OutputStream"), "write");
+	private Set<UpdatableWrapper<SootMethod>> writeMethods(IExtendedICFG<Unit, SootMethod> icfg) {
+		return selectMethodByName(getImplementersOf("java.io.OutputStream", icfg), "write", icfg);
 	}
 
 
-	private List<SootClass> getImplementersOf(String className) {
+	private Collection<UpdatableWrapper<SootClass>> getImplementersOf(String className, IExtendedICFG<Unit, SootMethod> icfg) {
 		SootClass sootClass = Scene.v().getSootClass(className);
 		List<SootClass> list = Scene.v().getActiveHierarchy().getSubclassesOfIncluding(sootClass);
 		List<SootClass> res = new LinkedList<>();
 		for (SootClass c : list) {
 			res.add(c);
 		}
-		return res;
+		return icfg.wrap(res);
 	}
 
 	@Override
 	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> unit,
 			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
-		return generateThisAtAnyCallSitesOf(unit,calledMethod,closeMethods(), icfg);
+		return generateThisAtAnyCallSitesOf(unit,calledMethod,closeMethods(icfg), icfg);
 	}
 
 

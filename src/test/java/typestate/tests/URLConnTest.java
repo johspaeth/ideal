@@ -5,6 +5,9 @@ import java.net.HttpURLConnection;
 
 import org.junit.Test;
 
+import boomerang.cfg.IExtendedICFG;
+import soot.SootMethod;
+import soot.Unit;
 import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
@@ -71,7 +74,7 @@ public class URLConnTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-		return new URLConnStateMachine();
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg) {
+		return new URLConnStateMachine(icfg);
 	}
 }

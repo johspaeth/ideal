@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import boomerang.cfg.IExtendedICFG;
+import soot.SootMethod;
+import soot.Unit;
 import test.ConcreteState;
 import test.IDEALTestingFramework;
 import typestate.TypestateChangeFunction;
@@ -14,6 +17,7 @@ import typestate.impl.statemachines.HasNextStateMachine;
 
 public class IteratorTest extends IDEALTestingFramework {
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void test1() {
 		List<Object> list = new LinkedList<>();
@@ -25,6 +29,7 @@ public class IteratorTest extends IDEALTestingFramework {
 		mustBeInErrorState(iterator);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void test2() {
 		List<Object> list = new LinkedList<>();
@@ -36,6 +41,7 @@ public class IteratorTest extends IDEALTestingFramework {
 		mustBeInAcceptingState(list.iterator());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void test3() {
 		MyLinkedList<Object> list = new MyLinkedList<>();
@@ -47,11 +53,12 @@ public class IteratorTest extends IDEALTestingFramework {
 		mustBeInErrorState(iterator);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void test4() {
 		LinkedList<Object> list = new LinkedList<>();
 		list.add(new Object());
-		Iterator it1 = list.iterator();
+		Iterator<Object> it1 = list.iterator();
 		Object each = null;
 		for (; it1.hasNext(); each = it1.next()) {
 			try {
@@ -63,6 +70,7 @@ public class IteratorTest extends IDEALTestingFramework {
 		mustBeInAcceptingState(it1);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void test9() {
 		List l1 = new ArrayList();
@@ -117,7 +125,7 @@ public class IteratorTest extends IDEALTestingFramework {
 	}
 
 	@Override
-	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction() {
-		return new HasNextStateMachine();
+	protected TypestateChangeFunction<ConcreteState> createTypestateChangeFunction(IExtendedICFG<Unit, SootMethod> icfg) {
+		return new HasNextStateMachine(icfg);
 	}
 }
