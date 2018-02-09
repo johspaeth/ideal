@@ -17,35 +17,49 @@ import typestate.test.helper.File;
 
 public class FileMustBeClosedStateMachine extends MatcherStateMachine<ConcreteState>{
 
-  public static enum States implements ConcreteState {
-    NONE, INIT, OPENED, CLOSED;
+	public static enum States implements ConcreteState {
+		NONE, INIT, OPENED, CLOSED;
 
-    @Override
-    public boolean isErrorState() {
-      return this == OPENED;
-    }
+		@Override
+		public boolean isErrorState() {
+			return this == OPENED;
+		}
 
-  }
-
-  public FileMustBeClosedStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
-    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn, icfg));
-    addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
-    addTransition(new MatcherTransition<ConcreteState>(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
-  }
+	}
 
 
 
-  @Override
-  public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method,UpdatableWrapper<Unit> unit,
-      Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
-    return generateAtAllocationSiteOf(unit, File.class, icfg);
-  }
+	private IExtendedICFG<Unit, SootMethod> icfg;
+
+	public FileMustBeClosedStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+	}
 
 
 
-public TypestateDomainValue<ConcreteState> getBottomElement() {
-	return new TypestateDomainValue<ConcreteState>(States.INIT);
-}
+	@Override
+	public Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method,UpdatableWrapper<Unit> unit,
+			Collection<UpdatableWrapper<SootMethod>> calledMethod, IExtendedICFG<Unit, SootMethod> icfg) {
+		return generateAtAllocationSiteOf(unit, File.class, icfg);
+	}
+
+
+
+	public TypestateDomainValue<ConcreteState> getBottomElement() {
+		return new TypestateDomainValue<ConcreteState>(States.INIT);
+	}
+
+
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+	}
 
 
 
