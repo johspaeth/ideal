@@ -23,6 +23,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+	
 	public static enum States implements ConcreteState {
 		 OPEN, CLOSED, ERROR;
 
@@ -33,6 +35,7 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	}
 
 	InputStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(
@@ -101,5 +104,22 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.OPEN);
+	}
+
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.OPEN, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, readMethods(icfg), Parameter.This, States.OPEN, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, closeMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, nativeReadMethods(icfg), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, nativeReadMethods(icfg), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.OPEN, nativeReadMethods(icfg), Parameter.This, States.OPEN, Type.OnCallToReturn, icfg));
 	}
 }

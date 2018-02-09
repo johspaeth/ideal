@@ -19,6 +19,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class URLConnStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+	
 	public static enum States implements ConcreteState {
 		NONE, INIT, CONNECTED, ERROR;
 
@@ -30,6 +32,7 @@ public class URLConnStateMachine extends MatcherStateMachine<ConcreteState> impl
 	}
 
 	public URLConnStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(new MatcherTransition<ConcreteState>(States.CONNECTED, illegalOpertaion(icfg), Parameter.This, States.ERROR,
 				Type.OnReturn, icfg));
 		addTransition(
@@ -55,5 +58,13 @@ public class URLConnStateMachine extends MatcherStateMachine<ConcreteState> impl
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.CONNECTED);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(new MatcherTransition<ConcreteState>(States.CONNECTED, illegalOpertaion(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.ERROR, illegalOpertaion(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 }

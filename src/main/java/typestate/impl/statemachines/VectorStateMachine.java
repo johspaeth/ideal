@@ -21,6 +21,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class VectorStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+	
 	public static enum States implements ConcreteState {
 		INIT, NOT_EMPTY, ACCESSED_EMPTY;
 
@@ -32,6 +34,7 @@ public class VectorStateMachine extends MatcherStateMachine<ConcreteState> imple
 	}
 
 	public VectorStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.INIT, addElement(icfg), Parameter.This, States.NOT_EMPTY, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, accessElement(icfg), Parameter.This, States.ACCESSED_EMPTY,
@@ -78,6 +81,23 @@ public class VectorStateMachine extends MatcherStateMachine<ConcreteState> imple
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.INIT);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.INIT, addElement(icfg), Parameter.This, States.NOT_EMPTY, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, accessElement(icfg), Parameter.This, States.ACCESSED_EMPTY,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.NOT_EMPTY, accessElement(icfg), Parameter.This, States.NOT_EMPTY,
+				Type.OnReturn, icfg));
+
+		addTransition(new MatcherTransition<ConcreteState>(States.NOT_EMPTY, removeAllElements(icfg), Parameter.This, States.INIT,
+				Type.OnReturn, icfg));
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.INIT, removeAllElements(icfg), Parameter.This, States.INIT, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ACCESSED_EMPTY, accessElement(icfg), Parameter.This,
+				States.ACCESSED_EMPTY, Type.OnReturn, icfg));
 	}
 
 }

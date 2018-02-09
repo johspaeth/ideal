@@ -18,6 +18,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class PipedInputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+	
 	public static enum States implements ConcreteState {
 		INIT, CONNECTED, ERROR;
 
@@ -28,6 +30,7 @@ public class PipedInputStreamStateMachine extends MatcherStateMachine<ConcreteSt
 	}
 
 	PipedInputStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
@@ -54,5 +57,14 @@ public class PipedInputStreamStateMachine extends MatcherStateMachine<ConcreteSt
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.INIT);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CONNECTED, readMethods(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 }

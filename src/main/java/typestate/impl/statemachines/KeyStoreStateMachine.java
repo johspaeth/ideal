@@ -24,6 +24,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+
 	public static enum States implements ConcreteState {
 		NONE, INIT, LOADED, ERROR;
 
@@ -35,6 +37,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 	}
 
 	public KeyStoreStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		// addTransition(new MatcherTransition(States.NONE,
 		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, loadMethods(icfg), Parameter.This, States.LOADED, Type.OnReturn, icfg));
@@ -91,6 +94,18 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.INIT);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		// addTransition(new MatcherTransition(States.NONE,
+		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, loadMethods(icfg), Parameter.This, States.LOADED, Type.OnReturn, icfg));
+
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, anyMethodOtherThanLoad(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, anyMethodOtherThanLoad(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));		
 	}
 
 }

@@ -24,6 +24,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 		implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+	
 	public static enum States implements ConcreteState {
 		NONE, UNITIALIZED, SIGN_CHECK, VERIFY_CHECK, ERROR;
 
@@ -34,6 +36,7 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 	}
 
 	SignatureStateMachine(ExtendedICFG icfg) {
+		this.icfg = icfg;
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, constructor(icfg), Parameter.This,
 				States.UNITIALIZED, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initSign(icfg), Parameter.This,
@@ -127,5 +130,54 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.NONE);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, constructor(icfg), Parameter.This,
+				States.UNITIALIZED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initSign(icfg), Parameter.This,
+				States.SIGN_CHECK, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initVerify(icfg), Parameter.This,
+				States.VERIFY_CHECK, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, sign(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, verify(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, update(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+
+		addTransition(new MatcherTransition<ConcreteState>(States.SIGN_CHECK, initSign(icfg), Parameter.This,
+				States.SIGN_CHECK, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.SIGN_CHECK, initVerify(icfg), Parameter.This,
+				States.VERIFY_CHECK, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.SIGN_CHECK, sign(icfg), Parameter.This, States.SIGN_CHECK,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.SIGN_CHECK, verify(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.SIGN_CHECK, update(icfg), Parameter.This,
+				States.SIGN_CHECK, Type.OnReturn, icfg));
+
+		addTransition(new MatcherTransition<ConcreteState>(States.VERIFY_CHECK, initSign(icfg), Parameter.This,
+				States.SIGN_CHECK, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.VERIFY_CHECK, initVerify(icfg), Parameter.This,
+				States.VERIFY_CHECK, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.VERIFY_CHECK, sign(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.VERIFY_CHECK, verify(icfg), Parameter.This,
+				States.VERIFY_CHECK, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.VERIFY_CHECK, update(icfg), Parameter.This,
+				States.VERIFY_CHECK, Type.OnReturn, icfg));
+
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, initSign(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, initVerify(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, sign(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, verify(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, update(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
 	}
 }

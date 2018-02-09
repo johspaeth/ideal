@@ -22,6 +22,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class SocketStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+	
 	public static enum States implements ConcreteState {
 		NONE, INIT, CONNECTED, ERROR;
 
@@ -31,6 +33,7 @@ public class SocketStateMachine extends MatcherStateMachine<ConcreteState> imple
 		}
 	}
 	public SocketStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.NONE, socketConstructor(icfg), Parameter.This, States.INIT, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
@@ -74,6 +77,15 @@ public class SocketStateMachine extends MatcherStateMachine<ConcreteState> imple
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.NONE);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.NONE, socketConstructor(icfg), Parameter.This, States.INIT, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, useMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, useMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 
 }

@@ -29,6 +29,7 @@ import typestate.finiteautomata.Transition;
 public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  implements TypestateChangeFunction<ConcreteState> {
 
 	private Set<UpdatableWrapper<SootMethod>> hasNextMethods;
+	IExtendedICFG<Unit, SootMethod> icfg;
 
 	public static enum States implements ConcreteState {
 		NONE, INIT, HASNEXT, ERROR;
@@ -41,6 +42,7 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	}
 
 	public HasNextStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, retrieveIteratorConstructors(icfg), Parameter.This, States.INIT,
 				Type.None, icfg));
 		addTransition(
@@ -123,5 +125,23 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.INIT);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, retrieveIteratorConstructors(icfg), Parameter.This, States.INIT,
+				Type.None, icfg));
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.INIT, retrieveNextMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveNextMethods(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveNextMethods(icfg), Parameter.This, States.INIT,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.INIT, retrieveHasNextMethods(icfg), Parameter.This, States.HASNEXT,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.HASNEXT, retrieveHasNextMethods(icfg), Parameter.This, States.HASNEXT,
+				Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, retrieveHasNextMethods(icfg), Parameter.This, States.ERROR,
+				Type.OnReturn, icfg));
 	}
 }

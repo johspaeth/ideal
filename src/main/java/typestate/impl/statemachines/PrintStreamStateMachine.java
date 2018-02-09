@@ -21,6 +21,7 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
 
 	public static enum States implements ConcreteState {
 		NONE, CLOSED, ERROR;
@@ -33,6 +34,7 @@ public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	}
 
 	public PrintStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
@@ -63,5 +65,12 @@ public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	@Override
 	public TypestateDomainValue<ConcreteState> getBottomElement() {
 		return new TypestateDomainValue<ConcreteState>(States.CLOSED);
+	}
+
+	@Override
+	public void getNewTansitions() {
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
 	}
 }
