@@ -269,8 +269,14 @@ public class IncrementalIDEALTest {
 		computeResults();
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
-		return compareResults();
+		boolean result = compareResults();
+		return result;
 //		return false;
 	}
 	

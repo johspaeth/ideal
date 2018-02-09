@@ -23,6 +23,8 @@ import typestate.finiteautomata.MatcherTransition.Type;
 
 public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> implements TypestateChangeFunction<ConcreteState> {
 
+	IExtendedICFG<Unit, SootMethod> icfg;
+	
 	public static enum States implements ConcreteState {
 		NONE, CLOSED, ERROR;
 
@@ -34,6 +36,7 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	}
 
 	public InputStreamStateMachine(IExtendedICFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
@@ -70,5 +73,16 @@ public class InputStreamStateMachine extends MatcherStateMachine<ConcreteState> 
 	@Override
 	public TypestateDomainValue getBottomElement() {
 		return new TypestateDomainValue<States>(States.NONE);
+	}
+	@Override
+	public void getNewTansitions() {
+		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(
+				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));
+
+		addTransition(new MatcherTransition<ConcreteState>(States.CLOSED, icfg.wrap(Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>"))), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
+		addTransition(new MatcherTransition<ConcreteState>(States.ERROR, icfg.wrap(Collections.singleton(Scene.v().getMethod("<java.io.InputStream: int read()>"))), Parameter.This, States.ERROR, Type.OnCallToReturn, icfg));
 	}
 }
