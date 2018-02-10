@@ -221,7 +221,7 @@ public class IncrementalIDEALTest {
 		} else {
 			Options.v().set_no_bodies_for_excluded(true);
 			Options.v().set_allow_phantom_refs(true);
-			 Options.v().setPhaseOption("cg", "all-reachable:true");
+			Options.v().setPhaseOption("cg", "all-reachable:true");
 		}
 
 //		Options.v().set_src_prec(Options.src_prec_java);
@@ -269,11 +269,6 @@ public class IncrementalIDEALTest {
 		computeResults();
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
 		boolean result = compareResults();
 		return result;
@@ -503,7 +498,15 @@ public class IncrementalIDEALTest {
 			}
 		
 		// Fix cached main class - this will automatically fix the main method
-		SootClass oldMainClass = Scene.v().getMainClass();
+		SootClass oldMainClass = null;
+		
+		try {
+			oldMainClass = Scene.v().getMainClass();
+		}
+		catch(Exception e) {
+			oldMainClass = Scene.v().getSootClass(testClassName);
+		}
+		
 		SootClass mainClass = Scene.v().getSootClass(oldMainClass.getName());
 		Scene.v().setMainClass(mainClass);
 		System.out.println("Old main class: " + oldMainClass + " - new: " + mainClass);
