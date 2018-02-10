@@ -81,7 +81,7 @@ public class AnalysisSolver<V>
 
 		public ContextRequester(UpdatableAccessGraph d1, UpdatableWrapper<Unit> stmt) {
 			this.d1 = d1;
-			methodToStartFact.put(icfg().getMethodOf(stmt).getContents(), d1);
+			methodToStartFact.put(context.icfg().getMethodOf(stmt).getContents(), d1);
 		}
 
 		@Override

@@ -382,10 +382,33 @@ public class PerSeedAnalysisContext<V> {
 
 	@SuppressWarnings("unchecked")
 	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg, @SuppressWarnings("rawtypes") CFGChangeSet cfgChangeSet) {
+		
+		boomerang = null;
+		seenPOA.clear();
+		pathEdgeToEdgeFunc.clear();
+		
 		disableIDEPhase();
-		phaseOneSolver.update(newCfg, cfgChangeSet);
+		phaseOneSolver.update(newCfg, cfgChangeSet, isInIDEPhase());
+		
+		Set<PointOfAlias<V>> pointsOfAlias = getAndClearPOA();
+//		debugger().startAliasPhase(pointsOfAlias);
+		for (PointOfAlias<V> p : pointsOfAlias) {
+			if (seenPOA.contains(p))
+				continue;
+			seenPOA.add(p);
+//			debugger().solvePOA(p);
+			Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> edges = p.getPathEdges(this);
+			if (p instanceof ReturnEvent) {
+				ReturnEvent<V> returnEvent = (ReturnEvent<V>) p;
+				System.out.println("poas " + p);
+				for (PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph> edge : edges) {
+					pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
+				}
+			}
+		}
+		
 		enableIDEPhase();
-		phaseTwoSolver.update(newCfg, cfgChangeSet);
+		phaseTwoSolver.update(newCfg, cfgChangeSet, isInIDEPhase());
 	}
 
 	public Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V> phaseOneResults() {
