@@ -386,6 +386,11 @@ public class PerSeedAnalysisContext<V> {
 		boomerang = null;
 		seenPOA.clear();
 		pathEdgeToEdgeFunc.clear();
+		callSiteToFlows.clear();
+		callSiteToStrongUpdates.clear();
+		nullnessBranches.clear();
+		pathEdgeToEdgeFunc.clear();
+		queryToResult.clear();
 		
 		disableIDEPhase();
 		phaseOneSolver.update(newCfg, cfgChangeSet, isInIDEPhase());
