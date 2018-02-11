@@ -453,17 +453,14 @@ public class UpdatableAccessGraph {
 //		if (hashCode != 0)
 //			return hashCode;
 
-		/*final int prime = 31;
+		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.getFieldGraph().hashCode());
-		result = prime * result + ((value == null) ? 0 : value.getContents().hashCode());
-		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.getContents().hashCode());
+		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.hashCode());
 		this.hashCode = result;
 
-		return this.hashCode;*/
-//		return this.getAccessGraph().hashCode();
-		
-		return 1;
+		return this.hashCode;
 	}
 
 	@Override

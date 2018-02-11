@@ -3,10 +3,11 @@ package typestate.incremental.tests;
 import org.junit.Before;
 import org.junit.Test;
 
+import incremental.IncrementalIdealTestRuner;
 import test.IncrementalIDEALTest;
 import typestate.test.helper.File;
 
-public class FileMustBeClosedTest {
+public class FileMustBeClosedTest extends IncrementalIdealTestRuner {
 	
 	@Test
 	public void simple0() {
