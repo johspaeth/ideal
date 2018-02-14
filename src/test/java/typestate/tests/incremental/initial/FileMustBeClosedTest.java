@@ -1,10 +1,8 @@
-package typestate.incremental.tests;
+package typestate.tests.incremental.initial;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import incremental.IncrementalIdealTestRuner;
-import test.IncrementalIDEALTest;
+import test.IncrementalIdealTestRuner;
 import typestate.test.helper.File;
 
 public class FileMustBeClosedTest extends IncrementalIdealTestRuner {
@@ -17,7 +15,7 @@ public class FileMustBeClosedTest extends IncrementalIdealTestRuner {
 		alias.close();
 	}
 	
-	@Before
+	/*@Before
 	void runTest(String args[]) {
 		if(args.length < 3) {
 			System.out.println("Invoke the program with the arguments path_of_initial_jar, path_of_updated_jar, class_name");
@@ -28,5 +26,6 @@ public class FileMustBeClosedTest extends IncrementalIdealTestRuner {
 		String testClassName = args[2];
 		IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
 		test.runTestAndCompareResults();
-	}
+	}*/
+	
 }
