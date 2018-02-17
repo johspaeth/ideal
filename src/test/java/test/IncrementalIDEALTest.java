@@ -75,7 +75,7 @@ public class IncrementalIDEALTest {
 		this.testClassName = testClassName;
 	}
 	
-	public static void main(String args[]) {
+	/*public static void main(String args[]) {
 		if(args.length < 3) {
 			System.out.println("Invoke the program with the arguments path_of_initial_jar, path_of_updated_jar, class_name");
 			System.exit(1);
@@ -83,6 +83,15 @@ public class IncrementalIDEALTest {
 		String initialVersion = args[0];
 		String updatedVersion = args[1];
 		String testClassName = args[2];
+		IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
+		test.runTestAndCompareResults();
+	}*/
+	
+	public static void main(String args[]) {
+		String basePath = "C:\\Users\\Shashank B S\\Documents\\Masters\\classes\\SoSe2017\\Thesis\\Implementaion\\IncrementalIdealTestProjects\\";
+		String initialVersion = basePath + "InitialProject\\target\\InitialProject-0.0.1.jar";
+		String updatedVersion = basePath + "UpdatedProject\\target\\UpdatedProject-0.0.1.jar";
+		String testClassName = "ideal.tests.FileMustBeClosedTest";
 		IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
 		test.runTestAndCompareResults();
 	}

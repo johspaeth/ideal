@@ -1,0 +1,3 @@
+[submodule "IncrementalIdealTests"]
+	path = IncrementalIdealTests
+	url = https://github.com/bsshashank/IncrementalIdealTests.git
