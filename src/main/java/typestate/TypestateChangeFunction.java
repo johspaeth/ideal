@@ -23,5 +23,7 @@ public interface TypestateChangeFunction<State> {
 			UpdatableWrapper<Unit> returnSite, UpdatableAccessGraph d3);
 
 	TypestateDomainValue<State> getBottomElement();
+	
+	void updateTypeStateFunctions();
 
 }

@@ -58,7 +58,7 @@ public class PipedOutputStreamStateMachine extends MatcherStateMachine<ConcreteS
 		return new TypestateDomainValue<ConcreteState>(States.INIT);
 	}
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, readMethods(icfg), Parameter.This, States.ERROR, Type.OnReturn, icfg));

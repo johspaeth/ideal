@@ -80,4 +80,10 @@ public class TypestateEdgeFunctions<State> implements AnalysisEdgeFunctions<Type
 	public String toString() {
 		return func.toString();
 	}
+
+	@Override
+	public void updateEdgeFunction() {
+		func.updateTypeStateFunctions();
+	}
+
 }

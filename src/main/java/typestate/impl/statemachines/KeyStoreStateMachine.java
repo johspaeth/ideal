@@ -97,7 +97,7 @@ public class KeyStoreStateMachine extends MatcherStateMachine<ConcreteState> imp
 	}
 
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		// addTransition(new MatcherTransition(States.NONE,
 		// keyStoreConstructor(),Parameter.This, States.INIT, Type.OnReturn));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, loadMethods(icfg), Parameter.This, States.LOADED, Type.OnReturn, icfg));

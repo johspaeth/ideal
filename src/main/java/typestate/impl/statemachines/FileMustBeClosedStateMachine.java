@@ -52,10 +52,8 @@ public class FileMustBeClosedStateMachine extends MatcherStateMachine<ConcreteSt
 		return new TypestateDomainValue<ConcreteState>(States.INIT);
 	}
 
-
-
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*open.*",Parameter.This, States.OPENED, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.OPENED, ".*close.*",Parameter.This, States.CLOSED, Type.OnReturn, icfg));

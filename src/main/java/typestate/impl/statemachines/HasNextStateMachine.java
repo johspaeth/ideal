@@ -128,7 +128,7 @@ public class HasNextStateMachine extends MatcherStateMachine<ConcreteState>  imp
 	}
 
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, retrieveIteratorConstructors(icfg), Parameter.This, States.INIT,
 				Type.None, icfg));
 		addTransition(

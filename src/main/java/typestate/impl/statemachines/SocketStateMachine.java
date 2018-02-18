@@ -80,7 +80,7 @@ public class SocketStateMachine extends MatcherStateMachine<ConcreteState> imple
 	}
 
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.NONE, socketConstructor(icfg), Parameter.This, States.INIT, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, connect(icfg), Parameter.This, States.CONNECTED, Type.OnReturn, icfg));

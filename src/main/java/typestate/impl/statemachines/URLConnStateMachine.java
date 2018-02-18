@@ -61,7 +61,7 @@ public class URLConnStateMachine extends MatcherStateMachine<ConcreteState> impl
 	}
 
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(new MatcherTransition<ConcreteState>(States.CONNECTED, illegalOpertaion(icfg), Parameter.This, States.ERROR,
 				Type.OnReturn, icfg));
 		addTransition(

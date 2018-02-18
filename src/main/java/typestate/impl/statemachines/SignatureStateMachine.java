@@ -133,7 +133,7 @@ public class SignatureStateMachine extends MatcherStateMachine<ConcreteState>
 	}
 
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, constructor(icfg), Parameter.This,
 				States.UNITIALIZED, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.UNITIALIZED, initSign(icfg), Parameter.This,

@@ -65,7 +65,6 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	}
 
 	private Set<Transition<State>> getMatchingTransitions(UpdatableWrapper<SootMethod> method, UpdatableAccessGraph node, Type type) {
-		this.updateTransition();
 		Set<Transition<State>> res = new HashSet<>();
 		if (node.getFieldCount() == 0) {
 			for (MatcherTransition<State> trans : transition) {
@@ -188,11 +187,11 @@ public abstract class MatcherStateMachine<State> implements TypestateChangeFunct
 	public abstract Collection<UpdatableAccessGraph> generateSeed(UpdatableWrapper<SootMethod> method, UpdatableWrapper<Unit> stmt,
 			Collection<UpdatableWrapper<SootMethod>> calledMethods, IExtendedICFG<Unit, SootMethod> icfg);
 	
-	public abstract void getNewTansitions();
+	public abstract void updateTypeStateFunctions();
 	
-	public void updateTransition() {
+	/*public void updateTypeStateFunctions() {
 		this.transition = new HashSet<>();
-		this.getNewTansitions();
-	}
+		this.updateTransitionFunctions();
+	}*/
 }
 	

@@ -84,7 +84,7 @@ public class VectorStateMachine extends MatcherStateMachine<ConcreteState> imple
 	}
 
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.INIT, addElement(icfg), Parameter.This, States.NOT_EMPTY, Type.OnReturn, icfg));
 		addTransition(new MatcherTransition<ConcreteState>(States.INIT, accessElement(icfg), Parameter.This, States.ACCESSED_EMPTY,

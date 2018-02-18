@@ -71,7 +71,7 @@ public class PrintWriterStateMachine extends MatcherStateMachine<ConcreteState> 
 	}
 
 	@Override
-	public void getNewTansitions() {
+	public void updateTypeStateFunctions() {
 		addTransition(new MatcherTransition<ConcreteState>(States.NONE, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
 		addTransition(
 				new MatcherTransition<ConcreteState>(States.CLOSED, closeMethods(icfg), Parameter.This, States.CLOSED, Type.OnReturn, icfg));
