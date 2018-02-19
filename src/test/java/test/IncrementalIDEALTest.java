@@ -88,9 +88,10 @@ public class IncrementalIDEALTest {
 	}*/
 	
 	public static void main(String args[]) {
-		String basePath = "C:\\Users\\Shashank B S\\Documents\\Masters\\classes\\SoSe2017\\Thesis\\Implementaion\\IncrementalIdealTestProjects\\";
-		String initialVersion = basePath + "InitialProject\\target\\InitialProject-0.0.1.jar";
-		String updatedVersion = basePath + "UpdatedProject\\target\\UpdatedProject-0.0.1.jar";
+		String userdir = System.getProperty("user.dir");
+		String basePath = userdir + "/IncrementalIdealTests/";
+		String initialVersion = basePath + "InitialProject/target/InitialProject-0.0.1.jar";
+		String updatedVersion = basePath + "UpdatedProject/target/UpdatedProject-0.0.1.jar";
 		String testClassName = "ideal.tests.FileMustBeClosedTest";
 		IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
 		test.runTestAndCompareResults();
