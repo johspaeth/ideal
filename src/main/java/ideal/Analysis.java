@@ -1,6 +1,7 @@
 package ideal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,8 @@ import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.Jimple;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 
@@ -66,8 +69,9 @@ public class Analysis<V> {
 
 	public void analysisForSeed(IFactAtStatement seed){
 //		System.out.println("\nseed in analysisForSeed " + seed.getStmt());
-		perSeedContexts.add(new PerSeedAnalysisContext<>(analysisDefinition, seed));
-		perSeedContexts.getLast().run();
+		PerSeedAnalysisContext<V> currContext = new PerSeedAnalysisContext<>(analysisDefinition, seed);
+		perSeedContexts.add(currContext);
+		currContext.run();
 	}
 	
 	public void update(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
@@ -77,6 +81,13 @@ public class Analysis<V> {
 		for(PerSeedAnalysisContext<V> contextSolver: perSeedContexts) {
 			contextSolver.updateSolverResults(newCfg, cfgChangeSet);
 //			contextSolver.destroy();
+		}
+		
+		Set<IFactAtStatement> seedsAfterUpdate = computeSeeds();
+		seedsAfterUpdate.removeAll(initialSeeds);
+		System.out.println("new seeds are " + seedsAfterUpdate);
+		for (IFactAtStatement newSeed : seedsAfterUpdate) {
+			analysisForSeed(newSeed);
 		}
 	}
 	
@@ -112,18 +123,18 @@ public class Analysis<V> {
 		return seeds;
 	}
 	
-	public List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults() {
-		List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults = new LinkedList<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>>();
+	public HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults() {
+		HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults = new HashMap<>();
 		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
-			phaseOneResults.add(context.phaseOneResults());
+			phaseOneResults.put(context.getSeed().getStmt().getContents(), context.phaseOneResults());
 		}
 		return phaseOneResults;
 	}
 	
-	public List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults() {
-		List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults = new LinkedList<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>>();
+	public HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults() {
+		HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults = new HashMap<>();
 		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
-			phaseTwoResults.add(context.phaseTwoResults());
+			phaseTwoResults.put(context.getSeed().getStmt().getContents(), context.phaseTwoResults());
 		}
 		return phaseTwoResults;
 	}

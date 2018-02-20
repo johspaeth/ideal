@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -62,11 +63,11 @@ public class IncrementalIDEALTest {
 	private Analysis<TypestateDomainValue<ConcreteState>> analysis;
 	private Path codePath;
 	
-	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseTwo;
-	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseTwo;
+	HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseTwo;
+	HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseTwo;
 	
-	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne;
-	List<Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseOne;
+	HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResultsPhaseOne;
+	HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResultsPhaseOne;
 
 	public IncrementalIDEALTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -286,7 +287,46 @@ public class IncrementalIDEALTest {
 	}
 	
 	private <V> boolean compareResults() {
-		boolean compareFlag = false; 
+		boolean compareFlag = false;
+		Set<Unit> updateSeeds = updateResultsPhaseTwo.keySet();
+		Set<Unit> computeSeeds = computeResultsPhaseTwo.keySet();
+		
+		for (Unit computeSeed : computeSeeds) {
+			for (Unit updateSeed : updateSeeds) {
+				if(updateSeed.toString().contentEquals(computeSeed.toString())) {
+					Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeTable = computeResultsPhaseTwo.get(computeSeed);
+					Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateTable = updateResultsPhaseTwo.get(updateSeed);
+					
+					if(updateTable.size() != computeTable.size())
+						continue;
+					
+					System.out.println("seed " + updateSeed);
+					System.out.println(computeTable);
+					System.out.println(updateTable);
+					System.out.println();
+					
+					compareFlag = true;
+					Set<Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeTableCellSet = computeTable.cellSet();
+					Set<Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateTableCellSet = updateTable.cellSet();
+					
+					for (Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeCell : computeTableCellSet) {
+						boolean present = false;
+						for (Cell<UpdatableWrapper<Unit>, UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateCell : updateTableCellSet) {
+							if(computeCell.toString().contentEquals(updateCell.toString())) {
+								present = true;
+								break;
+							}
+						}
+						if(!present) {
+							compareFlag = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		/*boolean compareFlag = false; 
 		System.out.println("computeResults " + computeResultsPhaseTwo);
 		System.out.println("updateResults  " + updateResultsPhaseTwo);
 		System.out.println();
@@ -323,6 +363,8 @@ public class IncrementalIDEALTest {
 				}
 			}
 		}
+		System.out.println("completed comparing the compute and update results and the results are " + (compareFlag ? "equal" : "not equal"));
+		return compareFlag;*/
 		System.out.println("completed comparing the compute and update results and the results are " + (compareFlag ? "equal" : "not equal"));
 		return compareFlag;
 	}
