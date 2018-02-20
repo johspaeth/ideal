@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Table;
@@ -20,8 +20,6 @@ import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.Jimple;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 
@@ -83,12 +81,32 @@ public class Analysis<V> {
 //			contextSolver.destroy();
 		}
 		
-		Set<IFactAtStatement> seedsAfterUpdate = computeSeeds();
+		/*Set<IFactAtStatement> seedsAfterUpdate = computeSeeds();
 		seedsAfterUpdate.removeAll(initialSeeds);
 		System.out.println("new seeds are " + seedsAfterUpdate);
 		for (IFactAtStatement newSeed : seedsAfterUpdate) {
 			analysisForSeed(newSeed);
+		}*/
+		
+		Set<IFactAtStatement> newSeeds = getNewSeeds(computeSeeds());
+		for (IFactAtStatement newSeed : newSeeds) {
+			System.out.println("analysing new seed " + newSeed);
+			analysisForSeed(newSeed);
 		}
+	}
+	
+	private Set<IFactAtStatement> getNewSeeds(Set<IFactAtStatement> newSeeds) {
+		Set<IFactAtStatement> newSeedsInScene = new HashSet<>();
+		int newSeedCount = newSeeds.size();
+		int oldSeedCount = initialSeeds.size();
+		for (IFactAtStatement newSeed : newSeeds) {
+			for (IFactAtStatement initialSeed : initialSeeds) {
+				if(newSeed.getStmt().getContents() != initialSeed.getStmt().getContents() && newSeedCount > oldSeedCount) {
+					newSeedsInScene.add(newSeed);
+				}
+			}
+		}
+		return newSeedsInScene;
 	}
 	
 	private void printOptions() {
@@ -123,20 +141,12 @@ public class Analysis<V> {
 		return seeds;
 	}
 	
-	public HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults() {
-		HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseOneResults = new HashMap<>();
+	public Map<Unit, Map<String, Map<UpdatableAccessGraph, V>>> getSummaryResults() {
+		Map<Unit, Map<String, Map<UpdatableAccessGraph, V>>> results = new HashMap<>();
 		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
-			phaseOneResults.put(context.getSeed().getStmt().getContents(), context.phaseOneResults());
+			results.put(context.getSeed().getStmt().getContents(), context.getSummaryResults());
 		}
-		return phaseOneResults;
-	}
-	
-	public HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults() {
-		HashMap<Unit, Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V>> phaseTwoResults = new HashMap<>();
-		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
-			phaseTwoResults.put(context.getSeed().getStmt().getContents(), context.phaseTwoResults());
-		}
-		return phaseTwoResults;
+		return results;
 	}
 
 }

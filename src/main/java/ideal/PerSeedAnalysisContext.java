@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.base.Stopwatch;
@@ -424,4 +425,17 @@ public class PerSeedAnalysisContext<V> {
 		return phaseTwoSolver.allResults();
 	}
 
+	public Map<String, Map<UpdatableAccessGraph, V>> getSummaryResults() {
+		Map<String, Map<UpdatableAccessGraph, V>> results = new HashMap<>();
+		List<SootMethod> allMethods = Scene.v().getMainClass().getMethods();
+		for (SootMethod sootMethod : allMethods) {
+			if(sootMethod.hasActiveBody()) {
+				UpdatableWrapper<Unit> returnStmt = icfg().wrap(sootMethod.getActiveBody().getUnits().getPredOf(sootMethod.getActiveBody().getUnits().getLast()));
+				Map<UpdatableAccessGraph, V> resultsAtReturn = phaseTwoSolver.resultsAt(returnStmt);
+				if(!resultsAtReturn.isEmpty())
+					results.put(returnStmt.toString(), resultsAtReturn);
+			}
+		}
+		return results;
+	}
 }
