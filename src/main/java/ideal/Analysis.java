@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Table;
-
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.AbstractUpdatableExtendedICFG;
 import boomerang.cfg.IExtendedICFG;

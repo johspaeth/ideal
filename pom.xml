@@ -3,6 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ideal</groupId>
 	<artifactId>ideal</artifactId>
+	<packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>IDEal Framework</name>
 	<description>Framework for Inter-procedural dataflow analysis with Aliasing</description>
@@ -74,4 +75,7 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
+	<modules>
+		<module>IncrementalIdealTests</module>
+	</modules>
 </project>
