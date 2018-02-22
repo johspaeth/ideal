@@ -38,14 +38,14 @@ public UpdatableWrapper<SootField> getField() {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((field == null) ? 0 : field.getContents().hashCode());
-    result = prime * result + ((stmt == null) ? 0 : stmt.getContents().hashCode());
+    result = prime * result + ((field == null) ? 0 : field.hashCode());
+    result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
     return result;
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    /*if (this == obj)
       return true;
     if (obj == null)
       return false;
@@ -62,7 +62,8 @@ public UpdatableWrapper<SootField> getField() {
         return false;
     } else if (!stmt.equals(other.stmt))
       return false;
-    return true;
+    return true;*/
+	return ((UpdatableWrappedSootField) obj).getWrappedSootField().equals(this.getWrappedSootField());
   }
 
   public String toString() {

@@ -132,7 +132,7 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 		} else if (fields.size() != other.fields.size() || !fields.equals(other.fields))
 			return false;
 		return true;*/
-		return ((UpdatableSetBasedFieldGraph) obj).getFieldGraph().equals(this.getFieldGraph());
+		return ((UpdatableSetBasedFieldGraph) obj).getFields().equals(this.getFields());
 	}
 
 	@Override
