@@ -27,7 +27,10 @@ public UpdatableWrapper<SootField> getField() {
   }
   
   public WrappedSootField getWrappedSootField() {
-	  return new WrappedSootField(this.field.getContents(), this.stmt.getContents());
+	  if(stmt != null)
+		  return new WrappedSootField(this.field.getContents(), this.stmt.getContents());
+	  else
+		  return new WrappedSootField(this.field.getContents(), null);
   }
 
 

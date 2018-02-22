@@ -159,19 +159,19 @@ public class UpdatableAccessGraph {
 	 *            The field to check against
 	 * @return {@link Boolean} whether the field matches or not.
 	 */
-	public boolean firstFieldMustMatch(SootField field) {
+	public boolean firstFieldMustMatch(UpdatableWrapper<SootField> field) {
 		if (fieldGraph == null)
 			return false;
 		if(fieldGraph instanceof UpdatableSetBasedFieldGraph)
 			return false;
 		for(UpdatableWrappedSootField f: getFirstField())
-			return f.getField().equals(field);
+			return f.getField().getContents().equals(field.getContents());
 		throw new RuntimeException("Unreachable Code");
 	}
 	
-	public boolean firstFirstFieldMayMatch(SootField field) {
+	public boolean firstFirstFieldMayMatch(UpdatableWrapper<SootField> field) {
 		for(UpdatableWrappedSootField f: getFirstField())
-			if(f.getField().equals(field))
+			if(f.getField().getContents().equals(field.getContents()))
 				return true;
 		return false;
 	}
@@ -286,9 +286,9 @@ public class UpdatableAccessGraph {
 	 *            The value to check against.
 	 * @return {@link Boolean} depending if the base matches the argument.
 	 */
-	public boolean baseMatches(Value local) {
+	public boolean baseMatches(UpdatableWrapper<Value> local) {
 		assert local != null;
-		return value != null ? value.getContents() == local : false;
+		return value != null ? value.getContents() == local.getContents() : false;
 //		return value.getContents() == local;
 	}
 
@@ -302,7 +302,7 @@ public class UpdatableAccessGraph {
 	 *            The first field to check.
 	 * @return {@link Boolean} depending if it matches.
 	 */
-	public boolean baseAndFirstFieldMatches(Value local, SootField field) {
+	public boolean baseAndFirstFieldMatches(UpdatableWrapper<Value> local, UpdatableWrapper<SootField> field) {
 		if (!baseMatches(local)) {
 			return false;
 		}
@@ -508,8 +508,8 @@ public class UpdatableAccessGraph {
 	public Type getAllocationType() {
 		if(!hasAllocationSite())
 			throw new RuntimeException("Wrong state");
-		if(allocationSite instanceof AssignStmt){
-			AssignStmt as = (AssignStmt) allocationSite;
+		if(allocationSite.getContents() instanceof AssignStmt){
+			AssignStmt as = (AssignStmt) allocationSite.getContents();
 			Value rightOp = as.getRightOp();
 			if(rightOp instanceof NewExpr){
 				NewExpr newExpr = (NewExpr) rightOp;

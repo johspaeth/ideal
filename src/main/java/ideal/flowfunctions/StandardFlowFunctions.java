@@ -127,7 +127,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 
 				if (rightOp instanceof Constant || rightOp instanceof NewExpr) {
 					// a = new || a = 2
-					if (leftOp instanceof Local && source.baseMatches(leftOp))
+					if (leftOp instanceof Local && source.baseMatches(icfg.wrap(leftOp)))
 						// source == a.*
 						return Collections.emptySet();
 					// a.f = new || a.f = 2;
@@ -136,20 +136,20 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 						Value base = fr.getBase();
 						SootField field = fr.getField();
 						// source == a.f.*
-						if (source.baseAndFirstFieldMatches(base, field))
+						if (source.baseAndFirstFieldMatches(icfg.wrap(base), icfg.wrap(field)))
 							return Collections.emptySet();
 					}
 
 				}
 
 				if (leftOp instanceof Local) {
-					if (source.baseMatches(leftOp)) {
+					if (source.baseMatches(icfg.wrap(leftOp))) {
 						if (rightOp instanceof InstanceFieldRef) {
 							InstanceFieldRef fr = (InstanceFieldRef) rightOp;
 							Value base = fr.getBase();
 							SootField field = fr.getField();
 
-							if (source.baseAndFirstFieldMatches(base, field)) {
+							if (source.baseAndFirstFieldMatches(icfg.wrap(base), icfg.wrap(field))) {
 								Set<UpdatableAccessGraph> popFirstField = source.popFirstField();
 								out.addAll(popFirstField);
 							} else {
@@ -163,7 +163,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					InstanceFieldRef fr = (InstanceFieldRef) leftOp;
 					Value base = fr.getBase();
 					SootField field = fr.getField();
-					if (source.baseAndFirstFieldMatches(base, field)) {
+					if (source.baseAndFirstFieldMatches(icfg.wrap(base), icfg.wrap(field))) {
 						return Collections.emptySet();
 					}
 				}
@@ -171,13 +171,13 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					CastExpr castExpr = (CastExpr) rightOp;
 					Value op = castExpr.getOp();
 					if (op instanceof Local) {
-						if (!source.isStatic() && source.baseMatches(op)) {
+						if (!source.isStatic() && source.baseMatches(icfg.wrap(op))) {
 							out.add(source.deriveWithNewLocal(icfg.wrap((Local) leftOp)));
 						}
 					}
 				}
 
-				if (rightOp instanceof Local && source.baseMatches(rightOp)) {
+				if (rightOp instanceof Local && source.baseMatches(icfg.wrap(rightOp))) {
 
 					if (leftOp instanceof Local) {
 						// e = d;
@@ -244,10 +244,10 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					Value base = fr.getBase();
 					SootField field = fr.getField();
 
-					if (source.baseMatches(base) && source.firstFirstFieldMayMatch(field)) {
+					if (source.baseMatches(icfg.wrap((Value) base)) && source.firstFirstFieldMayMatch(icfg.wrap(field))) {
 						// e = a.f && source == a.f.*
 						// replace in source
-						if (leftOp instanceof Local && !source.baseMatches(leftOp)) {
+						if (leftOp instanceof Local && !source.baseMatches(icfg.wrap(leftOp))) {
 							for(UpdatableWrappedSootField firstField : source.getFirstField()){
 								UpdatableAccessGraph deriveWithNewLocal = source.deriveWithNewLocal(icfg.wrap((Local) leftOp));
 								out.addAll(deriveWithNewLocal.popFirstField());
@@ -256,7 +256,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					}
 				} else if (rightOp instanceof ArrayRef) {
 					ArrayRef arrayRef = (ArrayRef) rightOp;
-					if (source.baseAndFirstFieldMatches(arrayRef.getBase(), AliasFinder.ARRAY_FIELD)) {
+					if (source.baseAndFirstFieldMatches(icfg.wrap(arrayRef.getBase()), icfg.wrap(AliasFinder.ARRAY_FIELD))) {
 
 						Set<UpdatableAccessGraph> withoutFirstField = source.popFirstField();
 						for (UpdatableAccessGraph a : withoutFirstField) {
@@ -267,7 +267,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					}
 				} else if (rightOp instanceof StaticFieldRef && Analysis.ENABLE_STATIC_FIELDS) {
 					StaticFieldRef sfr = (StaticFieldRef) rightOp;
-					if (source.isStatic() && source.firstFieldMustMatch(sfr.getField())) {
+					if (source.isStatic() && source.firstFieldMustMatch(icfg.wrap(sfr.getField()))) {
 						if (leftOp instanceof Local) {
 							Set<UpdatableAccessGraph> withoutFirstField = source.popFirstField();
 							for (UpdatableAccessGraph a : withoutFirstField) {
@@ -321,7 +321,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					final InvokeExpr ie = is.getInvokeExpr();
 					for (int i = 0; i < paramLocals.length; i++) {
 						Value arg = ie.getArg(i);
-						if (arg instanceof Local && source.baseMatches(arg)) {
+						if (arg instanceof Local && source.baseMatches(icfg.wrap(arg))) {
 							if (!pointsToSetEmpty(paramLocals[i])) {
 								out.add(source.deriveWithNewLocal(icfg.wrap(paramLocals[i])));
 							}
@@ -334,7 +334,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 					if (!callee.getContents().isStatic() && ie instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iIExpr = (InstanceInvokeExpr) is.getInvokeExpr();
 
-						if (source.baseMatches(iIExpr.getBase())) {
+						if (source.baseMatches(icfg.wrap(iIExpr.getBase()))) {
 							if (d1 != null && d1.hasAllocationSite() && source.getFieldCount() < 1) {
 								Unit sourceStmt = d1.getSourceStmt().getContents();
 								if (sourceStmt instanceof AssignStmt) {
@@ -421,7 +421,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 							}
 						}
 						if (!callee.getContents().isStatic() && ie instanceof InstanceInvokeExpr) {
-							if (source.baseMatches(thisLocal)) {
+							if (source.baseMatches(icfg.wrap((Value) thisLocal))) {
 
 								InstanceInvokeExpr iIExpr = (InstanceInvokeExpr) is.getInvokeExpr();
 								Local newBase = (Local) iIExpr.getBase();
@@ -479,6 +479,9 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 	@Override
 	public FlowFunction<UpdatableAccessGraph> getCallToReturnFlowFunction(final UpdatableAccessGraph sourceFact, final UpdatableWrapper<Unit> callStmt,
 			final UpdatableWrapper<Unit> returnSite, final boolean hasCallees) {
+		
+		IExtendedICFG<Unit, SootMethod> icfg = context.icfg();
+		
 //		if (!hasCallees) {
 //			return Identity.v();
 //		}
@@ -499,14 +502,14 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 				}
 				if(hasCallees){
 					for (int i = 0; i < invokeExpr.getArgCount(); i++) {
-						if (source.baseMatches(invokeExpr.getArg(i))) {
+						if (source.baseMatches(context.icfg().wrap(invokeExpr.getArg(i)))) {
 							return  Sets.newHashSet();
 						}
 					}
 					if (invokeExpr instanceof InstanceInvokeExpr) {
 						InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 						Value base = iie.getBase();
-						if (source.baseMatches(base)) {
+						if (source.baseMatches(context.icfg().wrap(base))) {
 							return  Sets.newHashSet();
 						}
 					}
