@@ -1,11 +1,13 @@
 package ideal.incremental.accessgraph;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import com.google.common.base.Joiner;
 
 import boomerang.accessgraph.IFieldGraph;
+import boomerang.accessgraph.SetBasedFieldGraph;
 import soot.Scene;
 import soot.Type;
 
@@ -117,7 +119,7 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 	}
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		/*if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
@@ -129,13 +131,13 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 				return false;
 		} else if (fields.size() != other.fields.size() || !fields.equals(other.fields))
 			return false;
-		return true;
+		return true;*/
+		return ((UpdatableSetBasedFieldGraph) obj).getFieldGraph().equals(this.getFieldGraph());
 	}
 
 	@Override
 	public IFieldGraph getFieldGraph() {
-		// TODO Auto-generated method stub
-		return null;
+		return new SetBasedFieldGraph(new HashSet<>(Arrays.asList(Utils.getWrappedSootField(this.getFields()))));
 	}
 
 }

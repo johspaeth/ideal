@@ -60,4 +60,13 @@ public class Utils {
 		return sootMethods;
 	}
 	
+	public static WrappedSootField[] getWrappedSootField(UpdatableWrappedSootField[] updatableFields) {
+		WrappedSootField[] fields = new WrappedSootField[updatableFields.length];
+		int i = 0;
+		for (UpdatableWrappedSootField updatableWrappedSootField : updatableFields) {
+			fields[i++] = updatableWrappedSootField.getWrappedSootField();
+		}
+		return fields;
+	}
+	
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import boomerang.accessgraph.FieldGraph;
 import boomerang.accessgraph.WrappedSootField;
+import heros.incremental.UpdatableWrapper;
 import soot.SootField;
 
 /**
@@ -138,11 +139,11 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	}
 
 	boolean hasLoops() {
-		Set<SootField> sootFields = new HashSet<>();
+		Set<UpdatableWrapper<SootField>> sootFields = new HashSet<>();
 		for (UpdatableWrappedSootField f : this.fields) {
 			if (sootFields.contains(f.getField().getContents()))
 				return true;
-			sootFields.add(f.getField().getContents());
+			sootFields.add(f.getField());
 		}
 		return false;
 	}
@@ -173,13 +174,13 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fields == null) ? 0 : this.getFieldGraph().hashCode());
+		result = prime * result + ((fields == null) ? 0 : this.fields.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		/*if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
@@ -191,7 +192,8 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 				return false;
 		} else if (!this.getFieldGraph().getFields().equals(other.getFieldGraph().getFields()))
 			return false;
-		return true;
+		return true;*/
+		return ((UpdatableFieldGraph) obj).getFieldGraph().equals(this.getFieldGraph());
 	}
 
 
