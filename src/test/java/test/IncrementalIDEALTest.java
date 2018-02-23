@@ -10,11 +10,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import boomerang.cfg.ExtendedICFG;
@@ -58,8 +61,8 @@ public class IncrementalIDEALTest {
 	private Analysis<TypestateDomainValue<ConcreteState>> analysis;
 	private Path codePath;
 	
-	private Map<Unit, Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>>> computeResults;
-	private Map<Unit, Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>>> updateResults;
+	private Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResults;
+	private Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResults;
 
 	public IncrementalIDEALTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -271,45 +274,42 @@ public class IncrementalIDEALTest {
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
 		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
-		boolean result = compareResults();
+		boolean result = false;
+		try {
+			result = compareResults();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		System.out.println("The compute and update results are " + (result ? "EQUAL" : "NOTEQUAL"));
 	}
 	
-	private <V> boolean compareResults() {
-		Set<Unit> computeKeys = computeResults.keySet();
-		Set<Unit> updateKeys = updateResults.keySet();
+	private <V> boolean compareResults() throws Exception {
+		Set<String> computeResultsKeySet = computeResults.keySet();
 		
-		for (Unit computeUnit : computeKeys) {
-			for (Unit updateUnit : updateKeys) {
-				if(computeUnit.toString().contentEquals(updateUnit.toString())) {
-					Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeSeedResult = computeResults.get(computeUnit);
-					Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateSeedResult = updateResults.get(updateUnit);
-					
-					Set<String> computeSeedResults = computeResults.get(computeUnit).keySet();
-					Set<String> updateSeedResults = updateResults.get(updateUnit).keySet();
-					
-					for (String computeReturnSite : computeSeedResults) {
-						for (String updateReturnSite : updateSeedResults) {
-							if(computeReturnSite.contentEquals(updateReturnSite)) {
-								Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeResultAtReturn = computeSeedResult.get(computeReturnSite);
-								Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateResultAtReturn = updateSeedResult.get(updateReturnSite);
-								System.out.println("Results at return site " + computeReturnSite + " --> " + computeResultAtReturn + " : " + updateResultAtReturn);
-								
-								Set<UpdatableAccessGraph> computeKeySet = computeResultAtReturn.keySet();
-								Set<UpdatableAccessGraph> updateKeySet = updateResultAtReturn.keySet();
-								
-								for (UpdatableAccessGraph computeKey : computeKeySet) {
-									for (UpdatableAccessGraph updateKey : updateKeySet) {
-										if(!(computeResultAtReturn.get(computeKey).toString().contentEquals(updateResultAtReturn.get(updateKey).toString())))
-											return false;
-									}
-								}
-							}
+		for (String computeResultKey : computeResultsKeySet) {
+			if(!updateResults.containsKey(computeResultKey))
+				return false;
+			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeResultsAtReturn = computeResults.get(computeResultKey);
+			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateResultsAtReturn = updateResults.get(computeResultKey);
+			
+			boolean resultFound = false;
+			for (UpdatableAccessGraph computeKey : computeResultsAtReturn.keySet()) {
+				resultFound = false;
+				for (UpdatableAccessGraph updateKey : updateResultsAtReturn.keySet()) {
+					if(computeKey.toString().contentEquals(updateKey.toString())) {
+						resultFound = true;
+						System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
+						if(!(computeResultsAtReturn.get(computeKey).toString().contentEquals(updateResultsAtReturn.get(updateKey).toString()))) {
+							throw new Exception("result for " + computeKey + " is not same in update results " + updateResultsAtReturn.get(updateKey).toString());
 						}
 					}
 				}
+				if(!resultFound) {
+					throw new Exception("result for " + computeKey + " not found in update results");
+				}
 			}
 		}
+		
 		return true;
 	}
 

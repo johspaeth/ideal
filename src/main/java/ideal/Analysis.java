@@ -139,11 +139,29 @@ public class Analysis<V> {
 		return seeds;
 	}
 	
-	public Map<Unit, Map<String, Map<UpdatableAccessGraph, V>>> getSummaryResults() {
-		Map<Unit, Map<String, Map<UpdatableAccessGraph, V>>> results = new HashMap<>();
-		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
-			results.put(context.getSeed().getStmt().getContents(), context.getSummaryResults());
+	public Map<String, Map<UpdatableAccessGraph, V>> getSummaryResults() {
+		Map<String, Map<UpdatableAccessGraph, V>> results = new HashMap<>();
+		QueueReader<MethodOrMethodContext> reachableMethods = Scene.v().getReachableMethods().listener();
+		while(reachableMethods.hasNext()) {
+			UpdatableWrapper<SootMethod> currMethod = icfg.wrap(reachableMethods.next().method());
+			Collection<UpdatableWrapper<Unit>> endPoints = icfg.getEndPointsOf(currMethod);
+			for (UpdatableWrapper<Unit> endpoint : endPoints) {
+				for(PerSeedAnalysisContext<V> context: perSeedContexts) {
+					Map<UpdatableAccessGraph, V> resultAtEndPoint = context.getResultAt(endpoint);
+					if(!resultAtEndPoint.isEmpty())
+						results.put(context.getSeed().getStmt().getContents().toString() + " : " + currMethod.getContents().getSignature() + endpoint, resultAtEndPoint);
+				}
+			}
 		}
+		/*Map<String, Map<String, Map<String, Map<UpdatableAccessGraph, V>>>> results = new HashMap<>();
+		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
+			results.put(context.getSeed().getStmt().getContents().toString(), context.getSummaryResults());
+			Map<String, Map<String, Map<UpdatableAccessGraph, V>>> perSeedResult = context.getSummaryResults();
+			for (IFactAtStatement iFactAtStatement : ) {
+				
+			}
+		}
+		return results;*/
 		return results;
 	}
 

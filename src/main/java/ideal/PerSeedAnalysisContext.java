@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.base.Stopwatch;
@@ -33,9 +32,11 @@ import ideal.incremental.accessgraph.Utils;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
+import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
+import soot.util.queue.QueueReader;
 
 public class PerSeedAnalysisContext<V> {
 
@@ -424,8 +425,30 @@ public class PerSeedAnalysisContext<V> {
 	public Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V> phaseTwoResults() {
 		return phaseTwoSolver.allResults();
 	}
+	
+	public Map<String, Map<String, Map<UpdatableAccessGraph, V>>> getSummaryResults() {
+		Map<String, Map<String, Map<UpdatableAccessGraph, V>>> results = new HashMap<>();
+		
+		QueueReader<MethodOrMethodContext> reachableMethods = Scene.v().getReachableMethods().listener();
+		while(reachableMethods.hasNext()) {
+			UpdatableWrapper<SootMethod> currMethod = icfg().wrap(reachableMethods.next().method());
+			Collection<UpdatableWrapper<Unit>> endPoints = icfg().getEndPointsOf(currMethod);
+			Map<String, Map<UpdatableAccessGraph, V>> resultAtEndPoints = new HashMap<>();
+			for (UpdatableWrapper<Unit> endPoint : endPoints) {
+				resultAtEndPoints.put(endPoint.getContents().toString(), phaseTwoSolver.resultsAt(endPoint));
+				System.out.println("result at end point " + endPoint.toString() + " of method " + currMethod + " is " + phaseTwoSolver.resultsAt(endPoint));
+			}
+			results.put(currMethod.getContents().getSignature().toString(), resultAtEndPoints);
+		}
+		
+		return results;
+	}
+	
+	public Map<UpdatableAccessGraph, V> getResultAt(UpdatableWrapper<Unit> stmt) {
+		return phaseTwoSolver.resultsAt(stmt);
+	}
 
-	public Map<String, Map<UpdatableAccessGraph, V>> getSummaryResults() {
+	/*public Map<String, Map<UpdatableAccessGraph, V>> getSummaryResults() {
 		Map<String, Map<UpdatableAccessGraph, V>> results = new HashMap<>();
 		List<SootMethod> allMethods = Scene.v().getMainClass().getMethods();
 		for (SootMethod sootMethod : allMethods) {
@@ -437,5 +460,5 @@ public class PerSeedAnalysisContext<V> {
 			}
 		}
 		return results;
-	}
+	}*/
 }
