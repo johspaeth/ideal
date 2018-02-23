@@ -292,20 +292,29 @@ public class IncrementalIDEALTest {
 			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeResultsAtReturn = computeResults.get(computeResultKey);
 			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateResultsAtReturn = updateResults.get(computeResultKey);
 			
+			System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
+			
 			boolean resultFound = false;
 			for (UpdatableAccessGraph computeKey : computeResultsAtReturn.keySet()) {
 				resultFound = false;
+				int i = 0;
 				for (UpdatableAccessGraph updateKey : updateResultsAtReturn.keySet()) {
 					if(computeKey.toString().contentEquals(updateKey.toString())) {
 						resultFound = true;
-						System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
 						if(!(computeResultsAtReturn.get(computeKey).toString().contentEquals(updateResultsAtReturn.get(updateKey).toString()))) {
+							if(i < updateResultsAtReturn.keySet().size()) {
+								i++;
+								resultFound = false;
+								continue;
+							}
 							throw new Exception("result for " + computeKey + " is not same in update results " + updateResultsAtReturn.get(updateKey).toString());
 						}
+						i++;
 					}
 				}
 				if(!resultFound) {
-					throw new Exception("result for " + computeKey + " not found in update results");
+					System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
+					throw new Exception("result for " + computeKey + " with value " + computeResultsAtReturn.get(computeKey).toString() + " not found in update results");
 				}
 			}
 		}
