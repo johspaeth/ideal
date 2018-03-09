@@ -10,14 +10,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import boomerang.cfg.ExtendedICFG;
@@ -63,6 +60,9 @@ public class IncrementalIDEALTest {
 	
 	private Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResults;
 	private Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResults;
+	
+	private long computeEdgeCount = 0;
+	private long updateEdgeCount = 0;
 
 	public IncrementalIDEALTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -171,6 +171,7 @@ public class IncrementalIDEALTest {
 				analysis = createAnalysis();
 				analysis.run();
 				computeResults = analysis.getSummaryResults();
+				computeEdgeCount = analysis.getEdgeCount();
 			}
 		};
 	}
@@ -190,6 +191,7 @@ public class IncrementalIDEALTest {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis.update(icfg);
 				updateResults = analysis.getSummaryResults();
+				updateEdgeCount = analysis.getEdgeCount();
 			}
 		};
 	}
@@ -281,6 +283,9 @@ public class IncrementalIDEALTest {
 			e.printStackTrace();
 		}
 		System.out.println("The compute and update results are " + (result ? "EQUAL" : "NOTEQUAL"));
+		System.out.println("Number of edges propagated in the Step 1 " + computeEdgeCount);
+		System.out.println("Number of edges propagated in the Step 2 " + updateEdgeCount);
+		System.out.println("Incremental build was able to save " + (computeEdgeCount - updateEdgeCount) + " edge propagations in total");
 	}
 	
 	private <V> boolean compareResults() throws Exception {

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -135,21 +137,10 @@ public class PerSeedAnalysisContext<V> {
 	public boolean isStrongUpdate(UpdatableWrapper<Unit> callSite, UpdatableAccessGraph returnSideNode) {
 		boolean isStrongUpdate = analysisDefinition.enableStrongUpdates()
 				&& callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
-		/*if(callSite.toString().contains("open")) {
-			System.out.println("-----------------------------------------------------------isStrongUpdate()-------------------------------------------");
-			System.out.println("callSite " + callSite);
-			System.out.println("Access Graph " + returnSideNode);
-			System.out.println("isStrongUpdate " + isStrongUpdate);
-			System.out.println("-----------------------------------------------------------isStrongUpdate()-------------------------------------------");
-		}*/
 		return isStrongUpdate;
 	}
 
 	public void storeStrongUpdateAtCallSite(UpdatableWrapper<Unit> callSite, Collection<UpdatableAccessGraph> mayAliasSet) {
-		System.out.println("-----------------------------------------------------------storeStrongUpdateAtCallSite()-------------------------------------------");
-		System.out.println("callSite " + callSite);
-		System.out.println("mayAliasSet " + mayAliasSet);
-		System.out.println("-----------------------------------------------------------storeStrongUpdateAtCallSite()-------------------------------------------");
 		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
 	}
 
@@ -201,13 +192,13 @@ public class PerSeedAnalysisContext<V> {
 									),
 								res
 								);*/
-						if (res.queryTimedout()) {
-//							analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
-						}
-						return res;
+				if (res.queryTimedout()) {
+					//							analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+				}
+				return res;
 			} catch (Exception e) {
 				e.printStackTrace();
-//				analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
+				//				analysisDefinition.debugger().onAliasTimeout(key.getAp(), key.getStmt(), key.d1);
 				checkTimeout();
 				return new AliasResults();
 			}
@@ -351,7 +342,6 @@ public class PerSeedAnalysisContext<V> {
 			return new AliasResults();
 
 		//analysisDefinition.debugger().beforeAlias(boomerangAccessGraph.getAccessGraph(), curr.getContents(), d1.getAccessGraph());
-		System.out.println("d1 " + d1.toString());
 		return queryToResult.getOrCreate(new BoomerangQuery(boomerangAccessGraph.getAccessGraph(), curr.getContents(), d1.getAccessGraph()));
 	}
 
@@ -370,8 +360,8 @@ public class PerSeedAnalysisContext<V> {
 	}
 
 	public void checkTimeout() {
-		//		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
-		//			throw new IDEALTimeoutException();
+		if (startTime.elapsed(TimeUnit.SECONDS) > analysisDefinition.analysisBudgetInSeconds())
+			throw new IDEALTimeoutException();
 	}
 
 	public IDebugger<V> debugger() {
@@ -384,7 +374,7 @@ public class PerSeedAnalysisContext<V> {
 
 	@SuppressWarnings("unchecked")
 	public void updateSolverResults(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg, @SuppressWarnings("rawtypes") CFGChangeSet cfgChangeSet) {
-		
+
 		boomerang = null;
 		seenPOA.clear();
 		pathEdgeToEdgeFunc.clear();
@@ -393,27 +383,26 @@ public class PerSeedAnalysisContext<V> {
 		nullnessBranches.clear();
 		pathEdgeToEdgeFunc.clear();
 		queryToResult.clear();
-		
+
 		disableIDEPhase();
 		phaseOneSolver.update(newCfg, cfgChangeSet, isInIDEPhase());
-		
+
 		Set<PointOfAlias<V>> pointsOfAlias = getAndClearPOA();
-//		debugger().startAliasPhase(pointsOfAlias);
+		//		debugger().startAliasPhase(pointsOfAlias);
 		for (PointOfAlias<V> p : pointsOfAlias) {
 			if (seenPOA.contains(p))
 				continue;
 			seenPOA.add(p);
-//			debugger().solvePOA(p);
+			//			debugger().solvePOA(p);
 			Collection<PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph>> edges = p.getPathEdges(this);
 			if (p instanceof ReturnEvent) {
 				ReturnEvent<V> returnEvent = (ReturnEvent<V>) p;
-				System.out.println("poas " + p);
 				for (PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph> edge : edges) {
 					pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
 				}
 			}
 		}
-		
+
 		enableIDEPhase();
 		phaseTwoSolver.update(newCfg, cfgChangeSet, isInIDEPhase());
 	}
@@ -425,10 +414,10 @@ public class PerSeedAnalysisContext<V> {
 	public Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V> phaseTwoResults() {
 		return phaseTwoSolver.allResults();
 	}
-	
+
 	public Map<String, Map<String, Map<UpdatableAccessGraph, V>>> getSummaryResults() {
 		Map<String, Map<String, Map<UpdatableAccessGraph, V>>> results = new HashMap<>();
-		
+
 		QueueReader<MethodOrMethodContext> reachableMethods = Scene.v().getReachableMethods().listener();
 		while(reachableMethods.hasNext()) {
 			UpdatableWrapper<SootMethod> currMethod = icfg().wrap(reachableMethods.next().method());
@@ -436,29 +425,18 @@ public class PerSeedAnalysisContext<V> {
 			Map<String, Map<UpdatableAccessGraph, V>> resultAtEndPoints = new HashMap<>();
 			for (UpdatableWrapper<Unit> endPoint : endPoints) {
 				resultAtEndPoints.put(endPoint.getContents().toString(), phaseTwoSolver.resultsAt(endPoint));
-				System.out.println("result at end point " + endPoint.toString() + " of method " + currMethod + " is " + phaseTwoSolver.resultsAt(endPoint));
 			}
 			results.put(currMethod.getContents().getSignature().toString(), resultAtEndPoints);
 		}
-		
+
 		return results;
 	}
-	
+
 	public Map<UpdatableAccessGraph, V> getResultAt(UpdatableWrapper<Unit> stmt) {
 		return phaseTwoSolver.resultsAt(stmt);
 	}
 
-	/*public Map<String, Map<UpdatableAccessGraph, V>> getSummaryResults() {
-		Map<String, Map<UpdatableAccessGraph, V>> results = new HashMap<>();
-		List<SootMethod> allMethods = Scene.v().getMainClass().getMethods();
-		for (SootMethod sootMethod : allMethods) {
-			if(sootMethod.hasActiveBody()) {
-				UpdatableWrapper<Unit> returnStmt = icfg().wrap(sootMethod.getActiveBody().getUnits().getPredOf(sootMethod.getActiveBody().getUnits().getLast()));
-				Map<UpdatableAccessGraph, V> resultsAtReturn = phaseTwoSolver.resultsAt(returnStmt);
-				if(!resultsAtReturn.isEmpty())
-					results.put(returnStmt.toString(), resultsAtReturn);
-			}
-		}
-		return results;
-	}*/
+	public long getEdgeCount() {
+		return /*phaseOneSolver.getEdgeCount()*/phaseTwoSolver.getEdgeCount();
+	}
 }

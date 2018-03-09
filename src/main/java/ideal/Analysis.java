@@ -34,6 +34,10 @@ public class Analysis<V> {
 	protected final IDEALAnalysisDefinition<V> analysisDefinition;
 	private LinkedList<PerSeedAnalysisContext<V>> perSeedContexts;
 	protected Set<IFactAtStatement> initialSeeds;
+	private boolean updatedResults = false;
+	
+	@SuppressWarnings("rawtypes")
+	CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
 		this.analysisDefinition = analysisDefinition;
@@ -71,8 +75,7 @@ public class Analysis<V> {
 	}
 	
 	public void update(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
-		@SuppressWarnings("rawtypes")
-		CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
+//		CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
 		System.out.println("updating " + perSeedContexts.size() + " perSeedContexts");
 		for(PerSeedAnalysisContext<V> contextSolver: perSeedContexts) {
 			contextSolver.updateSolverResults(newCfg, cfgChangeSet);
@@ -91,6 +94,7 @@ public class Analysis<V> {
 			System.out.println("analysing new seed " + newSeed);
 			analysisForSeed(newSeed);
 		}
+		updatedResults = true;
 	}
 	
 	private Set<IFactAtStatement> getNewSeeds(Set<IFactAtStatement> newSeeds) {
@@ -163,6 +167,18 @@ public class Analysis<V> {
 		}
 		return results;*/
 		return results;
+	}
+	
+	public long getEdgeCount() {
+		long edgeCount = 0;
+//		if(!updatedResults)
+			for (PerSeedAnalysisContext<V> perSeedAnalysisContext : perSeedContexts) {
+//				System.out.println("edge count " + perSeedAnalysisContext.getEdgeCount() + " edge count " + edgeCount);
+				edgeCount += perSeedAnalysisContext.getEdgeCount();
+			}
+//		else
+//			edgeCount = (cfgChangeSet.getExpiredEdges().size() + cfgChangeSet.getNewEdges().size()) * (perSeedContexts.size() * 2);
+		return edgeCount;
 	}
 
 }
