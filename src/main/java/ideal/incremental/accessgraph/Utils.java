@@ -1,7 +1,9 @@
 package ideal.incremental.accessgraph;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
@@ -67,6 +69,14 @@ public class Utils {
 			fields[i++] = updatableWrappedSootField.getWrappedSootField();
 		}
 		return fields;
+	}
+	
+	public static List<Unit> getUnits(List<UpdatableWrapper<Unit>> wrappedUnits) {
+		List<Unit> units = new ArrayList<>();
+		for (UpdatableWrapper<Unit> wrappedUnit : wrappedUnits) {
+			units.add(wrappedUnit.getContents());
+		}
+		return units;
 	}
 	
 }

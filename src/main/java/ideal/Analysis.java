@@ -1,10 +1,13 @@
 package ideal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import boomerang.accessgraph.WrappedSootField;
@@ -14,6 +17,7 @@ import heros.incremental.CFGChangeSet;
 import heros.incremental.UpdatableWrapper;
 import ideal.debug.IDebugger;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.Utils;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
@@ -34,8 +38,11 @@ public class Analysis<V> {
 	protected final IDEALAnalysisDefinition<V> analysisDefinition;
 	private LinkedList<PerSeedAnalysisContext<V>> perSeedContexts;
 	protected Set<IFactAtStatement> initialSeeds;
-	private boolean updatedResults = false;
-	
+	private Map<UpdatableWrapper<Unit>, PerSeedAnalysisContext<V>> seedToContextMapping;
+	private List<UpdatableWrapper<Unit>> initialSeedStmts;
+
+	private boolean resultsUpdated = false;
+
 	@SuppressWarnings("rawtypes")
 	CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
 
@@ -44,18 +51,15 @@ public class Analysis<V> {
 		this.icfg = analysisDefinition.eIcfg();
 		this.debugger = analysisDefinition.debugger();
 		this.perSeedContexts = new LinkedList<PerSeedAnalysisContext<V>>();
+		this.seedToContextMapping = new HashMap<>();
+		this.initialSeedStmts = new ArrayList<>();
 	}
 
 	public void run() {
 		printOptions();
 		WrappedSootField.TRACK_STMT = false;
 		initialSeeds = computeSeeds();
-		
-		/*System.out.println("Initial seeds " + initialSeeds);
-		for (IFactAtStatement iFactAtStatement : initialSeeds) {
-			System.out.println("stmt " + iFactAtStatement.getStmt() + " AccessGraph " + iFactAtStatement.getFact());
-		}*/
-		
+
 		if (initialSeeds.isEmpty())
 			System.err.println("No seeds found!");
 		else
@@ -68,49 +72,63 @@ public class Analysis<V> {
 	}
 
 	public void analysisForSeed(IFactAtStatement seed){
-//		System.out.println("\nseed in analysisForSeed " + seed.getStmt());
 		PerSeedAnalysisContext<V> currContext = new PerSeedAnalysisContext<>(analysisDefinition, seed);
 		perSeedContexts.add(currContext);
+		seedToContextMapping.put(seed.getStmt(), currContext);
+		initialSeedStmts.add(seed.getStmt());
 		currContext.run();
 	}
-	
+
 	public void update(AbstractUpdatableExtendedICFG<Unit, SootMethod> newCfg) {
-//		CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
-		System.out.println("updating " + perSeedContexts.size() + " perSeedContexts");
+
+		List<Unit> newSeedStmts = new ArrayList<>();
+		Set<IFactAtStatement> newSeedsInScene = new HashSet<>();
+		List<Unit> retainedSeedStmts = new ArrayList<>();
 		for(PerSeedAnalysisContext<V> contextSolver: perSeedContexts) {
 			contextSolver.updateSolverResults(newCfg, cfgChangeSet);
-//			contextSolver.destroy();
+
+			if(cfgChangeSet.isChangeSetComputed() && !resultsUpdated) {
+				newSeedsInScene = computeSeeds();
+				
+				List<Unit> updatedSeedStmts = getSeedStmts(newSeedsInScene);
+				retainedSeedStmts = new ArrayList<>(updatedSeedStmts);
+				newSeedStmts = new ArrayList<>(updatedSeedStmts);
+				
+				retainedSeedStmts.retainAll(Utils.getUnits(initialSeedStmts));
+				newSeedStmts.removeAll(retainedSeedStmts);
+				
+				removeOldContexts(seedToContextMapping, retainedSeedStmts);
+				resultsUpdated = true;
+			}
+
+			//			contextSolver.destroy();
+			System.err.println("updated " + retainedSeedStmts.size() + " seeds!");
 		}
-		
-		/*Set<IFactAtStatement> seedsAfterUpdate = computeSeeds();
-		seedsAfterUpdate.removeAll(initialSeeds);
-		System.out.println("new seeds are " + seedsAfterUpdate);
-		for (IFactAtStatement newSeed : seedsAfterUpdate) {
-			analysisForSeed(newSeed);
-		}*/
-		
-		Set<IFactAtStatement> newSeeds = getNewSeeds(computeSeeds());
-		for (IFactAtStatement newSeed : newSeeds) {
-			System.out.println("analysing new seed " + newSeed);
-			analysisForSeed(newSeed);
+
+		for (IFactAtStatement seed : newSeedsInScene) {
+			if(newSeedStmts.contains(seed.getStmt().getContents()))
+				analysisForSeed(seed);
 		}
-		updatedResults = true;
+		System.err.println("analysed " + newSeedStmts.size() + " new seeds!");
 	}
-	
-	private Set<IFactAtStatement> getNewSeeds(Set<IFactAtStatement> newSeeds) {
-		Set<IFactAtStatement> newSeedsInScene = new HashSet<>();
-		int newSeedCount = newSeeds.size();
-		int oldSeedCount = initialSeeds.size();
-		for (IFactAtStatement newSeed : newSeeds) {
-			for (IFactAtStatement initialSeed : initialSeeds) {
-				if(newSeed.getStmt().getContents() != initialSeed.getStmt().getContents() && newSeedCount > oldSeedCount) {
-					newSeedsInScene.add(newSeed);
-				}
+
+	private void removeOldContexts(Map<UpdatableWrapper<Unit>, PerSeedAnalysisContext<V>> seedToContextMapping, List<Unit> oldSeeds) {
+		Map<UpdatableWrapper<Unit>, PerSeedAnalysisContext<V>> updatedSeedToContextMapping = new HashMap<>();
+		for (Entry<UpdatableWrapper<Unit>, PerSeedAnalysisContext<V>> seedContext : updatedSeedToContextMapping.entrySet()) {
+			if(oldSeeds.contains(seedContext.getKey().getContents())) {
+				updatedSeedToContextMapping.put(seedContext.getKey(), seedContext.getValue());
 			}
 		}
-		return newSeedsInScene;
 	}
-	
+
+	private List<Unit> getSeedStmts(Set<IFactAtStatement> seeds) {
+		List<Unit> seedStmts = new ArrayList<>();
+		for (IFactAtStatement seed : seeds) {
+			seedStmts.add(seed.getStmt().getContents());
+		}
+		return seedStmts;
+	}
+
 	private void printOptions() {
 		if(PRINT_OPTIONS)
 			System.out.println(analysisDefinition);
@@ -142,42 +160,31 @@ public class Analysis<V> {
 		}
 		return seeds;
 	}
-	
+
 	public Map<String, Map<UpdatableAccessGraph, V>> getSummaryResults() {
 		Map<String, Map<UpdatableAccessGraph, V>> results = new HashMap<>();
 		QueueReader<MethodOrMethodContext> reachableMethods = Scene.v().getReachableMethods().listener();
 		while(reachableMethods.hasNext()) {
 			UpdatableWrapper<SootMethod> currMethod = icfg.wrap(reachableMethods.next().method());
+			if(currMethod.getContents().toString().contains("open") || currMethod.getContents().toString().contains("close"))
+				continue;
 			Collection<UpdatableWrapper<Unit>> endPoints = icfg.getEndPointsOf(currMethod);
 			for (UpdatableWrapper<Unit> endpoint : endPoints) {
-				for(PerSeedAnalysisContext<V> context: perSeedContexts) {
+				for(PerSeedAnalysisContext<V> context: seedToContextMapping.values()) {
 					Map<UpdatableAccessGraph, V> resultAtEndPoint = context.getResultAt(endpoint);
 					if(!resultAtEndPoint.isEmpty())
 						results.put(context.getSeed().getStmt().getContents().toString() + " : " + currMethod.getContents().getSignature() + endpoint, resultAtEndPoint);
 				}
 			}
 		}
-		/*Map<String, Map<String, Map<String, Map<UpdatableAccessGraph, V>>>> results = new HashMap<>();
-		for(PerSeedAnalysisContext<V> context: perSeedContexts) {
-			results.put(context.getSeed().getStmt().getContents().toString(), context.getSummaryResults());
-			Map<String, Map<String, Map<UpdatableAccessGraph, V>>> perSeedResult = context.getSummaryResults();
-			for (IFactAtStatement iFactAtStatement : ) {
-				
-			}
-		}
-		return results;*/
 		return results;
 	}
-	
+
 	public long getEdgeCount() {
 		long edgeCount = 0;
-//		if(!updatedResults)
-			for (PerSeedAnalysisContext<V> perSeedAnalysisContext : perSeedContexts) {
-//				System.out.println("edge count " + perSeedAnalysisContext.getEdgeCount() + " edge count " + edgeCount);
-				edgeCount += perSeedAnalysisContext.getEdgeCount();
-			}
-//		else
-//			edgeCount = (cfgChangeSet.getExpiredEdges().size() + cfgChangeSet.getNewEdges().size()) * (perSeedContexts.size() * 2);
+		for (Entry<UpdatableWrapper<Unit>, PerSeedAnalysisContext<V>> seed : seedToContextMapping.entrySet()) {
+			edgeCount += seed.getValue().getEdgeCount();
+		}
 		return edgeCount;
 	}
 

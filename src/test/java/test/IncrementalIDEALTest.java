@@ -89,8 +89,11 @@ public class IncrementalIDEALTest {
 		String initialVersion = basePath + "InitialProject/target/InitialProject-0.0.1.jar";
 		String updatedVersion = basePath + "UpdatedProject/target/UpdatedProject-0.0.1.jar";
 		String testClassName = "ideal.tests.FileMustBeClosedTest";
-		IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
-		test.runTestAndCompareResults();
+		
+		//for(int i=0; i<100; i++) {
+			IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
+			test.runTestAndCompareResults();
+		//}
 	}
 	
 	private void computeResults() {
@@ -282,18 +285,20 @@ public class IncrementalIDEALTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("The compute and update results are " + (result ? "EQUAL" : "NOTEQUAL"));
-		System.out.println("Number of edges propagated in the Step 1 " + computeEdgeCount);
-		System.out.println("Number of edges propagated in the Step 2 " + updateEdgeCount);
-		System.out.println("Incremental build was able to save " + (computeEdgeCount - updateEdgeCount) + " edge propagations in total");
+		System.err.println("The compute and update results are " + (result ? "EQUAL" : "NOTEQUAL"));
+		System.err.println("Number of edges propagated in the Step 1 " + computeEdgeCount);
+		System.err.println("Number of edges propagated in the Step 2 " + updateEdgeCount);
+		System.err.println("Incremental build was able to save " + (computeEdgeCount - updateEdgeCount) + " edge propagations in total");
 	}
 	
 	private <V> boolean compareResults() throws Exception {
 		Set<String> computeResultsKeySet = computeResults.keySet();
 		
 		for (String computeResultKey : computeResultsKeySet) {
-			if(!updateResults.containsKey(computeResultKey))
-				return false;
+			if(!updateResults.containsKey(computeResultKey)) {
+				throw new Exception("key " + computeResultKey + " not found in " + updateResults);
+//				return false;
+			}
 			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeResultsAtReturn = computeResults.get(computeResultKey);
 			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateResultsAtReturn = updateResults.get(computeResultKey);
 			
@@ -325,6 +330,9 @@ public class IncrementalIDEALTest {
 		}
 		
 		return true;
+		//System.out.println("computeResults " + computeResults);
+		//System.out.println("updateResults  " + updateResults);
+		//return computeResults.equals(updateResults);
 	}
 
 	private void patchGraph() {

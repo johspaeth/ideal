@@ -301,7 +301,6 @@ public class PerSeedAnalysisContext<V> {
 				worklist.addAll(edges);
 				if (p instanceof ReturnEvent) {
 					ReturnEvent<V> returnEvent = (ReturnEvent<V>) p;
-					System.out.println("poas " + p);
 					for (PathEdge<UpdatableWrapper<Unit>, UpdatableAccessGraph> edge : edges) {
 						pathEdgeToEdgeFunc.put(edge, returnEvent.getEdgeFunction());
 					}
@@ -415,12 +414,16 @@ public class PerSeedAnalysisContext<V> {
 		return phaseTwoSolver.allResults();
 	}
 
-	public Map<String, Map<String, Map<UpdatableAccessGraph, V>>> getSummaryResults() {
+	/*public Map<String, Map<String, Map<UpdatableAccessGraph, V>>> getSummaryResults() {
 		Map<String, Map<String, Map<UpdatableAccessGraph, V>>> results = new HashMap<>();
 
 		QueueReader<MethodOrMethodContext> reachableMethods = Scene.v().getReachableMethods().listener();
 		while(reachableMethods.hasNext()) {
 			UpdatableWrapper<SootMethod> currMethod = icfg().wrap(reachableMethods.next().method());
+			
+			if(currMethod.getContents().getSignature().toString().contains("open") || currMethod.getContents().getSignature().toString().contains("close"))
+				continue;
+			
 			Collection<UpdatableWrapper<Unit>> endPoints = icfg().getEndPointsOf(currMethod);
 			Map<String, Map<UpdatableAccessGraph, V>> resultAtEndPoints = new HashMap<>();
 			for (UpdatableWrapper<Unit> endPoint : endPoints) {
@@ -430,7 +433,7 @@ public class PerSeedAnalysisContext<V> {
 		}
 
 		return results;
-	}
+	}*/
 
 	public Map<UpdatableAccessGraph, V> getResultAt(UpdatableWrapper<Unit> stmt) {
 		return phaseTwoSolver.resultsAt(stmt);
