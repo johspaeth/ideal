@@ -76,12 +76,12 @@ public class AnalysisSolver<V>
 	}
 
 	private class ContextRequester implements IContextRequester {
-		Multimap<SootMethod, UpdatableAccessGraph> methodToStartFact = HashMultimap.create();
+		Multimap<UpdatableWrapper<SootMethod>, UpdatableAccessGraph> methodToStartFact = HashMultimap.create();
 		private UpdatableAccessGraph d1;
 
 		public ContextRequester(UpdatableAccessGraph d1, UpdatableWrapper<Unit> stmt) {
 			this.d1 = d1;
-			methodToStartFact.put(context.icfg().getMethodOf(stmt).getContents(), d1);
+			methodToStartFact.put(context.icfg().getMethodOf(stmt), d1);
 		}
 
 		@Override
@@ -92,11 +92,11 @@ public class AnalysisSolver<V>
 			Collection<UpdatableWrapper<Unit>> startPoints = icfg().getStartPointsOf(context.icfg().wrap(callee));
 
 			for (UpdatableWrapper<Unit> sp : startPoints) {
-				for (UpdatableAccessGraph g : new HashSet<>(methodToStartFact.get(callee))) {
+				for (UpdatableAccessGraph g : new HashSet<>(methodToStartFact.get(context.icfg().wrap(callee)))) {
 					Map<UpdatableWrapper<Unit>, Set<Pair<UpdatableAccessGraph, UpdatableAccessGraph>>> inc = incoming(g, sp);
 					for (Set<Pair<UpdatableAccessGraph, UpdatableAccessGraph>> in : inc.values()) {
 						for (Pair<UpdatableAccessGraph, UpdatableAccessGraph> e : in) {
-							methodToStartFact.put(icfg().getMethodOf(context.icfg().wrap(callSite)).getContents(), e.getO2());
+							methodToStartFact.put(context.icfg().getMethodOf(context.icfg().wrap(callSite)), e.getO2());
 						}
 					}
 					if (inc.containsKey(context.icfg().wrap(callSite)))

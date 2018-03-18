@@ -141,7 +141,7 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	boolean hasLoops() {
 		Set<UpdatableWrapper<SootField>> sootFields = new HashSet<>();
 		for (UpdatableWrappedSootField f : this.fields) {
-			if (sootFields.contains(f.getField().getContents()))
+			if (sootFields.contains(f.getField()))
 				return true;
 			sootFields.add(f.getField());
 		}

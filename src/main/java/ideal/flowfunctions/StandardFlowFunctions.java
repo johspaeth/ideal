@@ -197,7 +197,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 								UpdatableAccessGraph newAp = withNewLocal.prependField(newFirstField);
 								out.add(newAp);
 								InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as),
-										lBase, newAp, succ);
+										context.icfg().wrap(lBase), newAp, succ);
 								if (context.isInIDEPhase()) {
 									out.addAll(context.getFlowAtPointOfAlias(instanceFieldWrite));
 								} else {
@@ -216,7 +216,7 @@ public class StandardFlowFunctions<V> extends AbstractFlowFunctions
 							UpdatableAccessGraph newAp = withNewLocal.prependField(
 									new UpdatableWrappedSootField(icfg.wrap(AliasFinder.ARRAY_FIELD), curr));
 							out.add(newAp);
-							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as), lBase,
+							InstanceFieldWrite<V> instanceFieldWrite = new InstanceFieldWrite(sourceFact, context.icfg().wrap(as), context.icfg().wrap(lBase),
 									newAp, succ);
 							if (context.isInIDEPhase()) {
 								out.addAll(context.getFlowAtPointOfAlias(instanceFieldWrite));

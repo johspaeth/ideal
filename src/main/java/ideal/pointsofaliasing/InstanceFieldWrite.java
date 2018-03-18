@@ -14,9 +14,9 @@ import soot.Unit;
 
 public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 
-	private Local base;
+	private UpdatableWrapper<Local> base;
 
-	public InstanceFieldWrite(UpdatableAccessGraph d1, UpdatableWrapper<Unit> stmt, Local base, UpdatableAccessGraph d2, UpdatableWrapper<Unit> succ) {
+	public InstanceFieldWrite(UpdatableAccessGraph d1, UpdatableWrapper<Unit> stmt, UpdatableWrapper<Local> base, UpdatableAccessGraph d2, UpdatableWrapper<Unit> succ) {
 		super(d1, stmt, d2, succ);
 		this.base = base;
 	}
@@ -37,7 +37,7 @@ public class InstanceFieldWrite<V> extends AbstractPointOfAlias<V> {
 	}
 
 	public Collection<UpdatableAccessGraph> getIndirectFlowTargets(PerSeedAnalysisContext<V> tsanalysis) {
-		UpdatableAccessGraph accessGraph = new UpdatableAccessGraph(tsanalysis.icfg().wrap(base));
+		UpdatableAccessGraph accessGraph = new UpdatableAccessGraph(base);
 		Collection<UpdatableAccessGraph> results = Utils.getUpdatableAccessGraph(tsanalysis.aliasesFor(accessGraph, curr, d1).mayAliasSet(), tsanalysis.icfg());
 		return results;
 	}

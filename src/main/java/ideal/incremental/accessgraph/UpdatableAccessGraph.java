@@ -53,11 +53,11 @@ public class UpdatableAccessGraph {
 		if(null == fieldGraph && null == getSourceStmt())
 			return new AccessGraph(value.getContents());
 		else if(null == fieldGraph && null != getSourceStmt())
-			return new AccessGraph(value.getContents(), getSourceStmt().getContents(), hasAllocationSite());
+			return new AccessGraph(value.getContents(), getSourceStmt().getContents(), isNullAllocsite);
 		else if(getSourceStmt() == null)
-			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), null, hasAllocationSite());
+			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), null, isNullAllocsite);
 		else
-			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), getSourceStmt().getContents(), hasAllocationSite());
+			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), getSourceStmt().getContents(), isNullAllocsite);
 	}
 	
 	/*public UpdatableAccessGraph(UpdatableWrapper<Unit> base, UpdatableIFieldGraph IFieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean hasNullAllocationSite) {
