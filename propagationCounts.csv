@@ -1,0 +1,17 @@
+Test,Step 1,Step 2,Saved Propagation Count
+noSeedTest, 40, 37, 3
+newSeedTest, 64, 62, 2
+simple0, 30, 21, 9
+simple1, 40, 28, 12
+branching, 34, 29, 5
+aliasing, 48, 43, 5
+summaryTest, 138, 101, 37
+interprocedural, 50, 16, 34
+noStrongUpdate, 46, 30, 16
+noStrongUpdatePossible, 142, 107, 35
+test, 46, 17, 29
+unbalancedReturn1, 36, 27, 9
+wrappedClose, 30, 14, 16
+multipleStates, 46, 18, 28
+doubleBranching, 82, 61, 21
+, 22, 13, 9

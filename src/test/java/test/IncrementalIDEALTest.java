@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -289,6 +290,8 @@ public class IncrementalIDEALTest {
 		System.err.println("Number of edges propagated in the Step 1 " + computeEdgeCount);
 		System.err.println("Number of edges propagated in the Step 2 " + updateEdgeCount);
 		System.err.println("Incremental build was able to save " + (computeEdgeCount - updateEdgeCount) + " edge propagations in total");
+		if(result)
+			logResultToFile();
 	}
 	
 	private <V> boolean compareResults() throws Exception {
@@ -302,7 +305,7 @@ public class IncrementalIDEALTest {
 			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeResultsAtReturn = computeResults.get(computeResultKey);
 			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateResultsAtReturn = updateResults.get(computeResultKey);
 			
-			System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
+//			System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
 			
 			boolean resultFound = false;
 			for (UpdatableAccessGraph computeKey : computeResultsAtReturn.keySet()) {
@@ -323,7 +326,9 @@ public class IncrementalIDEALTest {
 					}
 				}
 				if(!resultFound) {
-					System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
+//					System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
+					System.out.println("computeResults " + computeResults);
+					System.out.println("updateResults  " + updateResults);
 					throw new Exception("result for " + computeKey + " with value " + computeResultsAtReturn.get(computeKey).toString() + " not found in update results");
 				}
 			}
@@ -335,6 +340,16 @@ public class IncrementalIDEALTest {
 		//return computeResults.equals(updateResults);
 	}
 
+	private void logResultToFile() {
+		try {
+			String propagationCounts = "\n, " + computeEdgeCount + ", " + updateEdgeCount + ", " + (computeEdgeCount - updateEdgeCount);
+		    Files.write(Paths.get("propagationCounts.csv"), propagationCounts.getBytes(), StandardOpenOption.APPEND);
+		    System.err.println("Logged result to file");
+		}catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
 	private void patchGraph() {
 		final boolean AGGRESSIVE_CHECKS = true;
 		

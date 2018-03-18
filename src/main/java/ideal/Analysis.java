@@ -166,7 +166,7 @@ public class Analysis<V> {
 		QueueReader<MethodOrMethodContext> reachableMethods = Scene.v().getReachableMethods().listener();
 		while(reachableMethods.hasNext()) {
 			UpdatableWrapper<SootMethod> currMethod = icfg.wrap(reachableMethods.next().method());
-			if(currMethod.getContents().toString().contains("open") || currMethod.getContents().toString().contains("close"))
+			if(currMethod.getContents().toString().contains("open") || currMethod.getContents().toString().contains("close") || currMethod.getContents().toString().contains("clse"))
 				continue;
 			Collection<UpdatableWrapper<Unit>> endPoints = icfg.getEndPointsOf(currMethod);
 			for (UpdatableWrapper<Unit> endpoint : endPoints) {
