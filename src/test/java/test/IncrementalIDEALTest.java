@@ -59,8 +59,8 @@ public class IncrementalIDEALTest {
 	private Analysis<TypestateDomainValue<ConcreteState>> analysis;
 	private Path codePath;
 	
-	private Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> computeResults;
-	private Map<String, Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>>> updateResults;
+	private Map<String, TypestateDomainValue<ConcreteState>> computeResults;
+	private Map<String, TypestateDomainValue<ConcreteState>> updateResults;
 	
 	private long computeEdgeCount = 0;
 	private long updateEdgeCount = 0;
@@ -290,54 +290,23 @@ public class IncrementalIDEALTest {
 		System.err.println("Number of edges propagated in the Step 1 " + computeEdgeCount);
 		System.err.println("Number of edges propagated in the Step 2 " + updateEdgeCount);
 		System.err.println("Incremental build was able to save " + (computeEdgeCount - updateEdgeCount) + " edge propagations in total");
+		result = false;
 		if(result)
 			logResultToFile();
 	}
 	
 	private <V> boolean compareResults() throws Exception {
-		Set<String> computeResultsKeySet = computeResults.keySet();
 		
-		for (String computeResultKey : computeResultsKeySet) {
-			if(!updateResults.containsKey(computeResultKey)) {
-				throw new Exception("key " + computeResultKey + " not found in " + updateResults);
-//				return false;
-			}
-			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> computeResultsAtReturn = computeResults.get(computeResultKey);
-			Map<UpdatableAccessGraph, TypestateDomainValue<ConcreteState>> updateResultsAtReturn = updateResults.get(computeResultKey);
-			
-//			System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
-			
-			boolean resultFound = false;
-			for (UpdatableAccessGraph computeKey : computeResultsAtReturn.keySet()) {
-				resultFound = false;
-				int i = 0;
-				for (UpdatableAccessGraph updateKey : updateResultsAtReturn.keySet()) {
-					if(computeKey.toString().contentEquals(updateKey.toString())) {
-						resultFound = true;
-						if(!(computeResultsAtReturn.get(computeKey).toString().contentEquals(updateResultsAtReturn.get(updateKey).toString()))) {
-							if(i < updateResultsAtReturn.keySet().size()) {
-								i++;
-								resultFound = false;
-								continue;
-							}
-							throw new Exception("result for " + computeKey + " is not same in update results " + updateResultsAtReturn.get(updateKey).toString());
-						}
-						i++;
-					}
-				}
-				if(!resultFound) {
-//					System.out.println("result at " + computeResultKey + " --> " + computeResultsAtReturn + " : " + updateResultsAtReturn);
-					System.out.println("computeResults " + computeResults);
-					System.out.println("updateResults  " + updateResults);
-					throw new Exception("result for " + computeKey + " with value " + computeResultsAtReturn.get(computeKey).toString() + " not found in update results");
-				}
-			}
+		for (String key : computeResults.keySet()) {
+			TypestateDomainValue<ConcreteState> computeResult = computeResults.get(key);
+			TypestateDomainValue<ConcreteState> updateResult = updateResults.get(key);
+			System.out.println(key + " --> " + computeResult + " : " + updateResult);
+			if(!computeResult.toString().contentEquals(updateResult.toString()))
+				throw new Exception("The compute(" + computeResult + ") and update(" + updateResult + ") results do not match for the result at " + key);
 		}
+		System.out.println();
 		
 		return true;
-		//System.out.println("computeResults " + computeResults);
-		//System.out.println("updateResults  " + updateResults);
-		//return computeResults.equals(updateResults);
 	}
 
 	private void logResultToFile() {

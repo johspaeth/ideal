@@ -161,8 +161,8 @@ public class Analysis<V> {
 		return seeds;
 	}
 
-	public Map<String, Map<UpdatableAccessGraph, V>> getSummaryResults() {
-		Map<String, Map<UpdatableAccessGraph, V>> results = new HashMap<>();
+	public Map<String, V> getSummaryResults() {
+		Map<String, V> results = new HashMap<>();
 		QueueReader<MethodOrMethodContext> reachableMethods = Scene.v().getReachableMethods().listener();
 		while(reachableMethods.hasNext()) {
 			UpdatableWrapper<SootMethod> currMethod = icfg.wrap(reachableMethods.next().method());
@@ -172,8 +172,13 @@ public class Analysis<V> {
 			for (UpdatableWrapper<Unit> endpoint : endPoints) {
 				for(PerSeedAnalysisContext<V> context: seedToContextMapping.values()) {
 					Map<UpdatableAccessGraph, V> resultAtEndPoint = context.getResultAt(endpoint);
-					if(!resultAtEndPoint.isEmpty())
-						results.put(context.getSeed().getStmt().getContents().toString() + " : " + currMethod.getContents().getSignature() + endpoint, resultAtEndPoint);
+					if(!resultAtEndPoint.isEmpty()) {
+						
+						for (UpdatableAccessGraph accessGraph : resultAtEndPoint.keySet()) {
+//							System.out.println(context.getSeed().getStmt().getContents().toString() + " : " + currMethod.getContents().getSignature() + " at " + endpoint + " with access graph " + accessGraph + " --> " + resultAtEndPoint.get(accessGraph));
+							results.put(context.getSeed().getStmt().getContents().toString() + " : " + currMethod.getContents().getSignature() + " : " + endpoint + " : " + accessGraph, resultAtEndPoint.get(accessGraph));
+						}
+					}
 				}
 			}
 		}
