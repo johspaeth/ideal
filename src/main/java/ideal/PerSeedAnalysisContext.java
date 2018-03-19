@@ -34,11 +34,9 @@ import ideal.incremental.accessgraph.Utils;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
-import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
-import soot.util.queue.QueueReader;
 
 public class PerSeedAnalysisContext<V> {
 
@@ -169,12 +167,12 @@ public class PerSeedAnalysisContext<V> {
 		@Override
 		protected AliasResults createItem(PerSeedAnalysisContext<V>.BoomerangQuery key) {
 			try {
-				IExtendedICFG<Unit, SootMethod> icfg = analysisDefinition.eIcfg();
+				IExtendedICFG<Unit, SootMethod> icfg = icfg();
 				UpdatableAccessGraph updatableAccessGraph = Utils.getUpdatableAccessGraph(key.getAp(), icfg);
 				boomerang.startQuery();
 				AliasResults res = boomerang
 						//						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(key.d1, analysisDefinition.eIcfg().wrap(key.getStmt())))
-						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(updatableAccessGraph, analysisDefinition.eIcfg().wrap(key.getStmt())))
+						.findAliasAtStmt(key.getAp(), key.getStmt(), getContextRequestorFor(updatableAccessGraph, icfg.wrap(key.getStmt())))
 						.withoutNullAllocationSites();
 				/*analysisDefinition.debugger().onAliasesComputed(
 						key.getAp(), 
@@ -404,6 +402,7 @@ public class PerSeedAnalysisContext<V> {
 
 		enableIDEPhase();
 		phaseTwoSolver.update(newCfg, cfgChangeSet, isInIDEPhase());
+		disableIDEPhase();
 	}
 
 	public Table<UpdatableWrapper<Unit>, UpdatableAccessGraph, V> phaseOneResults() {

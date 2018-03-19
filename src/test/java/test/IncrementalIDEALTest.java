@@ -301,7 +301,7 @@ public class IncrementalIDEALTest {
 			TypestateDomainValue<ConcreteState> computeResult = computeResults.get(key);
 			TypestateDomainValue<ConcreteState> updateResult = updateResults.get(key);
 			System.out.println(key + " --> " + computeResult + " : " + updateResult);
-			if(!computeResult.toString().contentEquals(updateResult.toString()))
+			if(computeResult != null && (updateResult == null || !computeResult.toString().contentEquals(updateResult.toString())))
 				throw new Exception("The compute(" + computeResult + ") and update(" + updateResult + ") results do not match for the result at " + key);
 		}
 		System.out.println();

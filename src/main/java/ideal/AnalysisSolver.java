@@ -89,7 +89,7 @@ public class AnalysisSolver<V>
 			if (d1.equals(zeroValue)) {
 				return true;
 			}
-			Collection<UpdatableWrapper<Unit>> startPoints = icfg().getStartPointsOf(context.icfg().wrap(callee));
+			Collection<UpdatableWrapper<Unit>> startPoints = context.icfg().getStartPointsOf(context.icfg().wrap(callee));
 
 			for (UpdatableWrapper<Unit> sp : startPoints) {
 				for (UpdatableAccessGraph g : new HashSet<>(methodToStartFact.get(context.icfg().wrap(callee)))) {
