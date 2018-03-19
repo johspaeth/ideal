@@ -46,7 +46,7 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 	
 	@Override
 	public long analysisBudgetInSeconds() {
-		return 30;
+		return 30000;
 	}
 	
 	@Override
