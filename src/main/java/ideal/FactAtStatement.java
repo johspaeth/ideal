@@ -26,9 +26,10 @@ public class FactAtStatement implements IFactAtStatement {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fact == null) ? 0 : fact.getAccessGraph().hashCode());
-		result = prime * result + ((u == null) ? 0 : u.getContents().hashCode());
+		result = prime * result + ((fact == null) ? 0 : fact.hashCode());
+		result = prime * result + ((u == null) ? 0 : u.hashCode());
 		return result;
+//		return 1;
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class FactAtStatement implements IFactAtStatement {
 		if (u == null) {
 			if (other.u != null)
 				return false;
-		} else if (!u.equals(other.u))
+		} else if (!u.getContents().equals(other.u.getContents()))
 			return false;
 		return true;
 	}

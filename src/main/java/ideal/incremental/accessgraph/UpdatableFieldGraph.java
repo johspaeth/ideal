@@ -174,8 +174,10 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fields == null) ? 0 : this.fields.hashCode());
+		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
 		return result;
+//		return getFieldGraph().hashCode();
+//		return 1;
 	}
 
 	@Override

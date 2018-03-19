@@ -8,6 +8,7 @@ import com.google.common.base.Joiner;
 
 import boomerang.accessgraph.IFieldGraph;
 import boomerang.accessgraph.SetBasedFieldGraph;
+import boomerang.accessgraph.WrappedSootField;
 import soot.Scene;
 import soot.Type;
 
@@ -33,6 +34,15 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 				this.fields =new HashSet<>(fields);// minimize(fields);
 		}
 		// assert fields.size() > 1;
+	}
+	
+	public SetBasedFieldGraph getSetBasedFieldGraph() {
+		Set<WrappedSootField> wrappedSootFields = new HashSet<>();
+		for (UpdatableWrappedSootField updatableWrappedSootField : allFields) {
+			wrappedSootFields.add(updatableWrappedSootField.getWrappedSootField());
+		}
+		
+		return new SetBasedFieldGraph(wrappedSootFields);
 	}
 
 
@@ -116,6 +126,8 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 		int result = 1;
 		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
 		return result;
+//		return this.getSetBasedFieldGraph().hashCode();
+//		return 1;
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -132,7 +144,7 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 		} else if (fields.size() != other.fields.size() || !fields.equals(other.fields))
 			return false;
 		return true;*/
-		return ((UpdatableSetBasedFieldGraph) obj).getFields().equals(this.getFields());
+		return ((UpdatableSetBasedFieldGraph) obj).getSetBasedFieldGraph().equals(this.getSetBasedFieldGraph());
 	}
 
 	@Override

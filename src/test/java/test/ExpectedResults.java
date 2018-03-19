@@ -61,7 +61,7 @@ public abstract class ExpectedResults<State> implements Assertion, ComparableRes
 		if (unit == null) {
 			if (other.unit != null)
 				return false;
-		} else if (!unit.equals(other.unit))
+		} else if (!unit.getContents().equals(other.unit.getContents()))
 			return false;
 		return true;
 	}
