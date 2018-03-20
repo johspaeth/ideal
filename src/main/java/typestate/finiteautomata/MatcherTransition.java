@@ -64,7 +64,7 @@ public class MatcherTransition<State> extends Transition<State> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((matchingMethods == null) ? 0 : matchingMethods.hashCode());
+		result = prime * result + ((matchingMethods == null) ? 0 : Utils.getSootMethods(matchingMethods).hashCode());
 		result = prime * result + ((param == null) ? 0 : param.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
@@ -82,7 +82,7 @@ public class MatcherTransition<State> extends Transition<State> {
 		if (matchingMethods == null) {
 			if (other.matchingMethods != null)
 				return false;
-		} else if (!matchingMethods.equals(other.matchingMethods))
+		} else if (!Utils.getSootMethods(matchingMethods).equals(Utils.getSootMethods(other.matchingMethods)))
 			return false;
 		if (param != other.param)
 			return false;

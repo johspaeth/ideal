@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 import com.google.common.base.Joiner;
 
-import boomerang.accessgraph.IFieldGraph;
 import boomerang.accessgraph.SetBasedFieldGraph;
 import boomerang.accessgraph.WrappedSootField;
 import soot.Scene;
@@ -38,7 +37,7 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 	
 	public SetBasedFieldGraph getSetBasedFieldGraph() {
 		Set<WrappedSootField> wrappedSootFields = new HashSet<>();
-		for (UpdatableWrappedSootField updatableWrappedSootField : allFields) {
+		for (UpdatableWrappedSootField updatableWrappedSootField : fields) {
 			wrappedSootFields.add(updatableWrappedSootField.getWrappedSootField());
 		}
 		
@@ -124,31 +123,35 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		
+		/*final int prime = 31;
+		int result = 1;
 		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
-		return result;
-//		return this.getSetBasedFieldGraph().hashCode();
+		return result;*/
+		return ((fields == null) ? (prime * result) : getSetBasedFieldGraph().hashCode());
 //		return 1;
 	}
 	@Override
 	public boolean equals(Object obj) {
-		/*if (this == obj)
+		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UpdatableSetBasedFieldGraph other = (UpdatableSetBasedFieldGraph) obj;
+		/*UpdatableSetBasedFieldGraph other = (UpdatableSetBasedFieldGraph) obj;
 		if (fields == null) {
 			if (other.fields != null)
 				return false;
-		} else if (fields.size() != other.fields.size() || !fields.equals(other.fields))
+		}*/
+		if(!((UpdatableSetBasedFieldGraph) obj).getSetBasedFieldGraph().equals(this.getSetBasedFieldGraph()))
 			return false;
-		return true;*/
-		return ((UpdatableSetBasedFieldGraph) obj).getSetBasedFieldGraph().equals(this.getSetBasedFieldGraph());
+		return true;
+//		return ((UpdatableSetBasedFieldGraph) obj).getSetBasedFieldGraph().equals(this.getSetBasedFieldGraph());
 	}
 
 	@Override
-	public IFieldGraph getFieldGraph() {
+	public SetBasedFieldGraph getFieldGraph() {
 		return new SetBasedFieldGraph(new HashSet<>(Arrays.asList(Utils.getWrappedSootField(this.getFields()))));
 	}
 

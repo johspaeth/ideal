@@ -72,10 +72,12 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
+		int result = 1;
+		/*final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((callerCallSiteFact == null) ? 0 : callerCallSiteFact.hashCode());
-		return result;
-//		return callerCallSiteFact.hashCode();
+		return result;*/
+		return ((callerCallSiteFact == null) ? (prime * result) : callerCallSiteFact.getAccessGraph().hashCode());
 //		return 1;
 	}
 
@@ -91,7 +93,7 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		if (callerCallSiteFact == null) {
 			if (other.callerCallSiteFact != null)
 				return false;
-		} else if (!callerCallSiteFact.equals(other.callerCallSiteFact))
+		} else if (!callerCallSiteFact.getAccessGraph().equals(other.callerCallSiteFact.getAccessGraph()))
 			return false;
 		return true;
 	}

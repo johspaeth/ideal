@@ -455,17 +455,23 @@ public class UpdatableAccessGraph {
 
 		final int prime = 31;
 		int result = 1;
+		
+		/*final int prime = 31;
+		int result = 1;
 		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.hashCode());
 		this.hashCode = result;
 
-		return this.hashCode;
+		return this.hashCode;*/
+//		if(fieldGraph == null && value == null && allocationSite == null)
+//			return prime * result;
+		return ((fieldGraph == null) ? (prime * result) : getAccessGraph().hashCode());
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		/*if (obj == this || super.equals(obj))
+		if (obj == this || super.equals(obj))
 			return true;
 		if (obj == null || getClass() != obj.getClass())
 			return false;
@@ -486,9 +492,11 @@ public class UpdatableAccessGraph {
 				return false;
 		} else if (!fieldGraph.getFieldGraph().equals(other.fieldGraph.getFieldGraph()))
 			return false;
+		if(!((UpdatableAccessGraph) obj).getAccessGraph().equals(this.getAccessGraph()))
+			return false;
 		assert this.hashCode() == obj.hashCode();
-		return true;*/
-		return ((UpdatableAccessGraph) obj).getAccessGraph().equals(this.getAccessGraph());
+		return true;
+//		return ((UpdatableAccessGraph) obj).getAccessGraph().equals(this.getAccessGraph());
 	}
 
 	public boolean hasSetBasedFieldGraph() {

@@ -174,15 +174,18 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		
+		/*final int prime = 31;
+		int result = 1;
 		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
-		return result;
-//		return getFieldGraph().hashCode();
+		return result;*/
+		return ((fields == null) ? (prime * result) : getFieldGraph().hashCode());
 //		return 1;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		/*if (this == obj)
+		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
@@ -190,12 +193,12 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 			return false;
 		UpdatableFieldGraph other = (UpdatableFieldGraph) obj;
 		if (fields == null) {
-			if (other.getFieldGraph().getFields() != null)
+			if (other.fields != null)
 				return false;
-		} else if (!this.getFieldGraph().getFields().equals(other.getFieldGraph().getFields()))
+		} else if (!this.getFieldGraph().equals(other.getFieldGraph()))
 			return false;
-		return true;*/
-		return ((UpdatableFieldGraph) obj).getFieldGraph().equals(this.getFieldGraph());
+		return true;
+//		return ((UpdatableFieldGraph) obj).getFieldGraph().equals(this.getFieldGraph());
 	}
 
 
