@@ -68,6 +68,7 @@ public class IncrementalIDEALTest {
 
 	private long computeEdgeCount = 0;
 	private long updateEdgeCount = 0;
+	private long computeStartTime;
 
 	public IncrementalIDEALTest(String initialCodePath, String updatedCodePath, String testClassName)
 	{
@@ -227,7 +228,7 @@ public class IncrementalIDEALTest {
 	private <V> Transformer createAnalysisComputationTransformer() {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				long computeStartTime = System.nanoTime();
+//				long computeStartTime = System.nanoTime();
 
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis = createAnalysis();
@@ -343,7 +344,9 @@ public class IncrementalIDEALTest {
 
 	public boolean runTestAndCompareResults() {
 		System.out.println("-------------------------------------------------STEP 1-------------------------------------------------");
+		this.computeStartTime = System.nanoTime();
 		computeResults();
+		computeRunTime = System.nanoTime() - computeStartTime;
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
 		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
