@@ -17,6 +17,7 @@ import heros.incremental.CFGChangeSet;
 import heros.incremental.UpdatableWrapper;
 import ideal.debug.IDebugger;
 import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.UpdatableWrappedSootField;
 import ideal.incremental.accessgraph.Utils;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -45,6 +46,7 @@ public class Analysis<V> {
 
 	@SuppressWarnings("rawtypes")
 	CFGChangeSet cfgChangeSet = new CFGChangeSet<>();
+	private long totalComputationRunTime;
 
 	public Analysis(IDEALAnalysisDefinition<V> analysisDefinition) {
 		this.analysisDefinition = analysisDefinition;
@@ -56,8 +58,10 @@ public class Analysis<V> {
 	}
 
 	public void run() {
+		long computationStartTime = System.nanoTime();
 		printOptions();
 		WrappedSootField.TRACK_STMT = false;
+		UpdatableWrappedSootField.TRACK_STMT = false;
 		initialSeeds = computeSeeds();
 
 		if (initialSeeds.isEmpty())
@@ -69,6 +73,7 @@ public class Analysis<V> {
 			analysisForSeed(seed);
 		}
 		debugger.afterAnalysis();
+		totalComputationRunTime = System.nanoTime() - computationStartTime;
 	}
 
 	public void analysisForSeed(IFactAtStatement seed){
@@ -193,4 +198,11 @@ public class Analysis<V> {
 		return edgeCount;
 	}
 
+	public long getTotalComputeRunTime() {
+		return totalComputationRunTime;
+	}
+
+	public long getChangeSetComputationTime() {
+		return cfgChangeSet.getComputationTime();
+	}
 }

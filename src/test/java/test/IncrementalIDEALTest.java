@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
@@ -25,7 +26,7 @@ import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEDebugger;
 import ideal.debug.IDebugger;
-import ideal.incremental.accessgraph.UpdatableAccessGraph;
+import ideal.incremental.accessgraph.AnalysisStats;
 import soot.G;
 import soot.MethodOrMethodContext;
 import soot.PackManager;
@@ -50,7 +51,7 @@ import typestate.TypestateDomainValue;
 import typestate.impl.statemachines.FileMustBeClosedStateMachine;
 
 public class IncrementalIDEALTest {
-	
+
 	private String initialCodePath;
 	private String updatedCodePath;
 	private String testClassName;
@@ -58,10 +59,13 @@ public class IncrementalIDEALTest {
 	protected SootMethod sootTestMethod;
 	private Analysis<TypestateDomainValue<ConcreteState>> analysis;
 	private Path codePath;
-	
+
 	private Map<String, TypestateDomainValue<ConcreteState>> computeResults;
 	private Map<String, TypestateDomainValue<ConcreteState>> updateResults;
-	
+
+	private long updateRunTime;
+	private long computeRunTime;
+
 	private long computeEdgeCount = 0;
 	private long updateEdgeCount = 0;
 
@@ -71,7 +75,7 @@ public class IncrementalIDEALTest {
 		this.updatedCodePath = updatedCodePath;
 		this.testClassName = testClassName;
 	}
-	
+
 	/*public static void main(String args[]) {
 		if(args.length < 3) {
 			System.out.println("Invoke the program with the arguments path_of_initial_jar, path_of_updated_jar, class_name");
@@ -83,22 +87,74 @@ public class IncrementalIDEALTest {
 		IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
 		test.runTestAndCompareResults();
 	}*/
-	
+
 	public static void main(String args[]) {
 		String userdir = System.getProperty("user.dir");
 		String basePath = userdir + "/IncrementalIdealTests/";
 		String initialVersion = basePath + "InitialProject/target/InitialProject-0.0.1.jar";
 		String updatedVersion = basePath + "UpdatedProject/target/UpdatedProject-0.0.1.jar";
 		String testClassName = "ideal.tests.FileMustBeClosedTest";
+
+		List<AnalysisStats> statsList = new ArrayList<>();
+		IncrementalIDEALTest test;
 		
-		//for(int i=0; i<100; i++) {
-			IncrementalIDEALTest test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
-			test.runTestAndCompareResults();
-		//}
+		for(int i=0; i<100; i++) {
+			test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
+			if(!test.runTestAndCompareResults())
+				System.exit(1);
+			statsList.add(test.getAnalysisStats());
+//			IncrementalIDEALTest.logResultToFile(test.getAnalysisStats());
+		}
+
+		/*BigInteger computationTotalRunTime = BigInteger.ZERO;
+		BigInteger changeSetComputationTime = BigInteger.ZERO;
+		BigInteger updateTotalRunTime = BigInteger.ZERO;
+		
+		int size = statsList.size();
+		
+		for (AnalysisStats analysisStats : statsList) {
+			computationTotalRunTime.add(BigInteger.valueOf(analysisStats.getComputeRunTime())); // = BigInteger.valueOf(analysisStats.getComputeRunTime()).add(computationTotalRunTime);
+			changeSetComputationTime.add(BigInteger.valueOf(analysisStats.getChangeSetComputationTime())); //= BigInteger.valueOf(analysisStats.getChangeSetComputationTime()).add(changeSetComputationTime);
+			updateTotalRunTime.add(BigInteger.valueOf(analysisStats.getUpdateRunTime())); //= BigInteger.valueOf(analysisStats.getUpdateRunTime()).add(updateTotalRunTime);
+		}*/
+		
+		long computationTotalRunTime = 0;
+		long changeSetComputationTime = 0;
+		long updateTotalRunTime = 0;
+		
+		int size = statsList.size();
+		
+		for (AnalysisStats analysisStats : statsList) {
+			computationTotalRunTime += TimeUnit.MILLISECONDS.convert(analysisStats.getComputeRunTime(), TimeUnit.NANOSECONDS);
+			changeSetComputationTime += TimeUnit.MILLISECONDS.convert(analysisStats.getChangeSetComputationTime(), TimeUnit.NANOSECONDS);
+			updateTotalRunTime += TimeUnit.MILLISECONDS.convert(analysisStats.getUpdateRunTime(), TimeUnit.NANOSECONDS);
+		}
+
+		/*System.out.println(computationTotalRunTime/size);
+		System.out.println(changeSetComputationTime/size);
+		System.out.println(updateTotalRunTime/size);*/
+		
+//		AnalysisStats result = new AnalysisStats(updateTotalRunTime.divide(BigInteger.valueOf(size)).longValueExact(), changeSetComputationTime.divide(BigInteger.valueOf(size)).longValueExact(), computationTotalRunTime.divide(BigInteger.valueOf(size)).longValueExact(), statsList.get(0).getComputePropagationCount(), statsList.get(0).getUpdatePropagationCount());
+		
+		AnalysisStats result = new AnalysisStats(updateTotalRunTime/size, changeSetComputationTime/size, computationTotalRunTime/size, statsList.get(0).getComputePropagationCount(), statsList.get(0).getUpdatePropagationCount());
+		IncrementalIDEALTest.logResultToFile(result);
+
+		System.out.println("computeRunTime, computePropagationCount, changeSetComputationTime, updateRunTime, updatePropagationCount, avoidedPropagationCount");
+		System.out.println(result);
 	}
-	
+
+	private AnalysisStats getAnalysisStats() {
+		AnalysisStats stats = new AnalysisStats();
+		stats.setComputeRunTime(computeRunTime);
+		stats.setUpdateRunTime(updateRunTime);
+		stats.setComputePropagationCount(computeEdgeCount);
+		stats.setUpdatePropagationCount(updateEdgeCount);
+		stats.setChangeSetComputationTime(analysis.getChangeSetComputationTime());
+		return stats;
+	}
+
 	private void computeResults() {
-		System.out.println("Analysing the updated code from path " + updatedCodePath);
+		System.out.println("Analyzing the updated code from path " + updatedCodePath);
 		try {
 			codePath = Files.createTempFile("updated", "code.jar");
 			Files.copy(Paths.get(updatedCodePath), codePath, StandardCopyOption.REPLACE_EXISTING);
@@ -109,7 +165,7 @@ public class IncrementalIDEALTest {
 		initializeSoot();
 		compute();
 	}
-	
+
 	private void updateResults() {
 		System.out.println("Analysing the initial code from path " + initialCodePath);
 		try {
@@ -122,23 +178,23 @@ public class IncrementalIDEALTest {
 		initializeSoot();
 		update();
 	}
-	
+
 	private void compute(){
-//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+		//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transformer = new Transform("wjtp.ifds", createAnalysisComputationTransformer());
 		PackManager.v().getPack("wjtp").add(transformer);
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
 	}
-	
+
 	private void update() {
-//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+		//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transformer = new Transform("wjtp.ifds", createAnalysisUpdateTransformer());
 		PackManager.v().getPack("wjtp").add(transformer);
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
 	}
-	
+
 	protected Analysis<TypestateDomainValue<ConcreteState>> createAnalysis() {
 		return new Analysis<TypestateDomainValue<ConcreteState>>(new TypestateAnalysisProblem<ConcreteState>() {
 			@Override
@@ -167,19 +223,24 @@ public class IncrementalIDEALTest {
 			}
 		});
 	}
-	
+
 	private <V> Transformer createAnalysisComputationTransformer() {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+				long computeStartTime = System.nanoTime();
+
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis = createAnalysis();
 				analysis.run();
+
+				computeRunTime = System.nanoTime() - computeStartTime;
+
 				computeResults = analysis.getSummaryResults();
 				computeEdgeCount = analysis.getEdgeCount();
 			}
 		};
 	}
-	
+
 	private Transformer createAnalysisUpdateTransformer() {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
@@ -191,15 +252,21 @@ public class IncrementalIDEALTest {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+
+				long updateStartTime = System.nanoTime();
+
 				patchGraph();
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis.update(icfg);
+
+				updateRunTime = System.nanoTime() - updateStartTime;
+
 				updateResults = analysis.getSummaryResults();
 				updateEdgeCount = analysis.getEdgeCount();
 			}
 		};
 	}
-	
+
 	private void initializeSoot() {
 		Options.v().set_whole_program(true);
 		Options.v().setPhaseOption("jb", "use-original-names:true");
@@ -216,7 +283,7 @@ public class IncrementalIDEALTest {
 			Options.v().setPhaseOption("cg", "trim-clinit:false");
 			Options.v().set_no_bodies_for_excluded(true);
 			Options.v().set_allow_phantom_refs(true);
-			
+
 			List<String> includeList = new LinkedList<String>();
 			includeList.add("java.lang.*");
 			includeList.add("java.util.*");
@@ -234,29 +301,29 @@ public class IncrementalIDEALTest {
 			Options.v().setPhaseOption("cg", "all-reachable:true");
 		}
 
-//		Options.v().set_src_prec(Options.src_prec_java);
+		//		Options.v().set_src_prec(Options.src_prec_java);
 		Options.v().set_exclude(excludedPackages());
 		Options.v().set_soot_classpath(sootCp);
-		
+
 		System.out.println("soot CP " + sootCp);
-		
+
 		SootClass c = Scene.v().forceResolve(testClassName, SootClass.BODIES);
 		Scene.v().loadNecessaryClasses();
 		if (c != null) {
 			c.setApplicationClass();
 		}
-		
+
 		if(c.getMethods().get(0).equals(c.getMethodByName("main")))
 			sootTestMethod = c.getMethods().get(1);
 		else
 			sootTestMethod = c.getMethods().get(0);
-		
+
 		SootMethod methodByName = c.getMethodByName("main");
 		List<SootMethod> ePoints = new LinkedList<>();
 		ePoints.add(methodByName);
 		Scene.v().setEntryPoints(ePoints);
 	}
-	
+
 	protected boolean includeJDK() {
 		return false;
 	}
@@ -274,7 +341,7 @@ public class IncrementalIDEALTest {
 		return excludedPackages;
 	}
 
-	public void runTestAndCompareResults() {
+	public boolean runTestAndCompareResults() {
 		System.out.println("-------------------------------------------------STEP 1-------------------------------------------------");
 		computeResults();
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
@@ -291,49 +358,52 @@ public class IncrementalIDEALTest {
 		System.err.println("Number of edges propagated in the Step 2 " + updateEdgeCount);
 		System.err.println("Incremental build was able to save " + (computeEdgeCount - updateEdgeCount) + " edge propagations in total");
 		result = false;
-		if(result)
-			logResultToFile();
+		//		if(result)
+		//			logResultToFile();
+		return result;
 	}
-	
+
 	private <V> boolean compareResults() throws Exception {
-		
+
 		for (String key : computeResults.keySet()) {
 			TypestateDomainValue<ConcreteState> computeResult = computeResults.get(key);
 			TypestateDomainValue<ConcreteState> updateResult = updateResults.get(key);
 			System.out.println(key + " --> " + computeResult + " : " + updateResult);
 		}
 		System.out.println();
-		
+
 		for (String key : computeResults.keySet()) {
 			TypestateDomainValue<ConcreteState> computeResult = computeResults.get(key);
 			TypestateDomainValue<ConcreteState> updateResult = updateResults.get(key);
-//			System.out.println("comparing states " + computeResult.getStates().equals(updateResult.getStates()));
+			//			System.out.println("comparing states " + computeResult.getStates().equals(updateResult.getStates()));
 			if(updateResult == null && computeResult.getStates().isEmpty())
 				continue;
 			if(computeResult != null && (updateResult == null || !computeResult.getStates().equals(updateResult.getStates())/*!computeResult.toString().contentEquals(updateResult.toString())*/))
 				throw new Exception("The compute(" + computeResult + ") and update(" + updateResult + ") results do not match for the result at " + key);
 		}
 		System.out.println();
-		
+
 		return true;
 	}
 
-	private void logResultToFile() {
+	public static void logResultToFile(AnalysisStats stats) {
 		try {
-			String propagationCounts = "\n, " + computeEdgeCount + ", " + updateEdgeCount + ", " + (computeEdgeCount - updateEdgeCount);
-		    Files.write(Paths.get("propagationCounts.csv"), propagationCounts.getBytes(), StandardOpenOption.APPEND);
-		    System.err.println("Logged result to file");
+			//			String propagationCounts = "\n, " + computeEdgeCount + ", " + updateEdgeCount + ", " + (computeEdgeCount - updateEdgeCount);
+			//		    Files.write(Paths.get("propagationCounts.csv"), propagationCounts.getBytes(), StandardOpenOption.APPEND);
+
+			Files.write(Paths.get("propagationCounts.csv"), ("\n" + stats.toString()).getBytes(), StandardOpenOption.APPEND);
+			System.err.println("Logged result to file");
 		}catch (IOException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
-	
+
 	private void patchGraph() {
 		final boolean AGGRESSIVE_CHECKS = true;
-		
+
 		// Get the original call graph size before we change anything
 		System.out.println("Original call graph has " + Scene.v().getCallGraph().size() +  " edges");
-			
+
 		// Mark all existing compilation units as unresolved
 		Program program = SootResolver.v().getProgram();
 		for (CompilationUnit cu : program.getCompilationUnits())
@@ -346,15 +416,15 @@ public class IncrementalIDEALTest {
 			Field vcField = Singletons.class.getDeclaredField("instance_soot_jimple_toolkits_callgraph_VirtualCalls");
 			vcField.setAccessible(true);
 			vcField.set(G.v(), null);
-			
+
 			vcField = Singletons.class.getDeclaredField("instance_soot_jimple_toolkits_pointer_DumbPointerAnalysis");
 			vcField.setAccessible(true);
 			vcField.set(G.v(), null);
-			
+
 			vcField = Singletons.class.getDeclaredField("instance_soot_jimple_toolkits_pointer_FullObjectSet");
 			vcField.setAccessible(true);
 			vcField.set(G.v(), null);
-			
+
 			vcField = Singletons.class.getDeclaredField("instance_soot_EntryPoints");
 			vcField.setAccessible(true);
 			vcField.set(G.v(), null);
@@ -362,7 +432,7 @@ public class IncrementalIDEALTest {
 			vcField = Scene.class.getDeclaredField("doneResolving");
 			vcField.setAccessible(true);
 			vcField.set(Scene.v(), false);
-			
+
 			// Spark data
 			Method methClear = HashMap.class.getMethod("clear");
 			vcField = G.class.getDeclaredField("Parm_pairToElement");
@@ -372,7 +442,7 @@ public class IncrementalIDEALTest {
 			vcField = G.class.getDeclaredField("MethodPAG_methodToPag");
 			vcField.setAccessible(true);
 			methClear.invoke(vcField.get(G.v()), (Object[]) null);
-			
+
 			vcField = Singletons.class.getDeclaredField("instance_soot_jimple_spark_sets_AllSharedListNodes");
 			vcField.setAccessible(true);
 			vcField.set(G.v(), null);
@@ -400,7 +470,7 @@ public class IncrementalIDEALTest {
 			vcField = Singletons.class.getDeclaredField("instance_soot_jimple_spark_SparkTransformer");
 			vcField.setAccessible(true);
 			vcField.set(G.v(), null);
-			
+
 			vcField = Singletons.class.getDeclaredField("instance_soot_jimple_toolkits_pointer_FullObjectSet");
 			vcField.setAccessible(true);
 			vcField.set(G.v(), null);
@@ -487,7 +557,7 @@ public class IncrementalIDEALTest {
 				System.err.println("Could not load class " + sc + ", skipping...");
 				continue;
 			}
-//				SootClass scNew = Scene.v().forceResolve(sc.getName(), SootClass.BODIES);
+			//				SootClass scNew = Scene.v().forceResolve(sc.getName(), SootClass.BODIES);
 			assert scNew != null;
 			if (ac.contains(sc))
 				scNew.setApplicationClass();
@@ -507,17 +577,17 @@ public class IncrementalIDEALTest {
 				Scene.v().forceResolve(sc.getName(), SootClass.SIGNATURES);
 				System.out.println("Reloaded class " + sc.getName());
 			}
-		
+
 		// Fix cached main class - this will automatically fix the main method
 		SootClass oldMainClass = null;
-		
+
 		try {
 			oldMainClass = Scene.v().getMainClass();
 		}
 		catch(Exception e) {
 			oldMainClass = Scene.v().getSootClass(testClassName);
 		}
-		
+
 		SootClass mainClass = Scene.v().getSootClass(oldMainClass.getName());
 		Scene.v().setMainClass(mainClass);
 		System.out.println("Old main class: " + oldMainClass + " - new: " + mainClass);
@@ -531,7 +601,7 @@ public class IncrementalIDEALTest {
 
 		// Recreate the exception throw analysis
 		Scene.v().getDefaultThrowAnalysis();
-		
+
 		// Update the call graph
 		long timeBeforeCG = System.nanoTime();
 		PackManager.v().getPack("cg").apply();
@@ -546,15 +616,15 @@ public class IncrementalIDEALTest {
 		Scene.v().getReachableMethods();
 		System.out.println("Updating reachable methods took "
 				+ ((System.nanoTime() - timeBeforeRM) / 1E9) + " seconds");
-		
+
 		// Update the class hierarchy
 		Scene.v().getActiveHierarchy();
-		
+
 		List<MethodOrMethodContext> eps = new ArrayList<MethodOrMethodContext>();
 		eps.addAll(Scene.v().getEntryPoints());
 		ReachableMethods reachableMethods = new ReachableMethods(Scene.v().getCallGraph(), eps.iterator());
 		reachableMethods.update();
-		
+
 		// Fix the resolving state for the old classes. Otherwise, access to the
 		// fields and methods will be blocked and no diff can be performed.
 		for (SootClass sc : allClasses)
