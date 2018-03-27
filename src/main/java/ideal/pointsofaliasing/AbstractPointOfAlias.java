@@ -27,11 +27,11 @@ public abstract class AbstractPointOfAlias<V> implements PointOfAlias<V>{
     final int prime = 31;
     int result = 1;
     result = prime * result + ((curr == null) ? 0 : curr.getContents().hashCode());
-    result = prime * result + ((d1 == null) ? 0 : d1.getAccessGraph().hashCode());
-    result = prime * result + ((d2 == null) ? 0 : d2.getAccessGraph().hashCode());
+    result = prime * result + ((d1 == null) ? 0 : d1.hashCode());
+    result = prime * result + ((d2 == null) ? 0 : d2.hashCode());
     result = prime * result + ((succ == null) ? 0 : succ.getContents().hashCode());
-    return result;
-//	  return 1;
+//    return result;
+    return 1;
   }
 
   @Override
@@ -52,12 +52,12 @@ public abstract class AbstractPointOfAlias<V> implements PointOfAlias<V>{
     if (d1 == null) {
       if (other.d1 != null)
         return false;
-    } else if (!d1.getAccessGraph().equals(other.d1.getAccessGraph()))
+    } else if (!d1.equals(other.d1))
       return false;
     if (d2 == null) {
       if (other.d2 != null)
         return false;
-    } else if (!d2.getAccessGraph().equals(other.d2.getAccessGraph()))
+    } else if (!d2.equals(other.d2))
       return false;
     if (succ == null) {
       if (other.succ != null)

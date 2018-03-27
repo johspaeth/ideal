@@ -135,11 +135,16 @@ public class PerSeedAnalysisContext<V> {
 	public boolean isStrongUpdate(UpdatableWrapper<Unit> callSite, UpdatableAccessGraph returnSideNode) {
 		boolean isStrongUpdate = analysisDefinition.enableStrongUpdates()
 				&& callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
+		
+		System.out.println("returning is strong update at " + callSite + " : " + returnSideNode + " : " + isStrongUpdate);
+		
 		return isStrongUpdate;
 	}
 
 	public void storeStrongUpdateAtCallSite(UpdatableWrapper<Unit> callSite, Collection<UpdatableAccessGraph> mayAliasSet) {
 		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
+		
+		System.out.println("storing strong updates at site " + callSite + " : " + mayAliasSet);
 	}
 
 	public boolean isNullnessBranch(UpdatableWrapper<Unit> curr, UpdatableWrapper<Unit> succ, UpdatableAccessGraph returnSideNode) {

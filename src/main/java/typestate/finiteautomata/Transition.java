@@ -23,7 +23,8 @@ public class Transition<State> implements ITransition<State> {
     int result = 1;
     result = prime * result + ((from == null) ? 0 : from.hashCode());
     result = prime * result + ((to == null) ? 0 : to.hashCode());
-    return result;
+//    return result;
+    return 1;
   }
 
   @Override

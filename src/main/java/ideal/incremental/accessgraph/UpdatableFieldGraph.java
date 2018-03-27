@@ -70,7 +70,8 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 		for (UpdatableWrappedSootField updatableWrappedSootField : this.fields) {
 			fields[i++] = updatableWrappedSootField.getWrappedSootField();
 		}
-		return fields.length > 0 ? new FieldGraph(fields) :  FieldGraph.EMPTY_GRAPH;
+//		return fields.length > 0 ? new FieldGraph(fields) :  FieldGraph.EMPTY_GRAPH;
+		return new FieldGraph(fields);
 //		return new FieldGraph(fields);
 	}
 
@@ -174,13 +175,9 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		
-		/*final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
-		return result;*/
-		return ((fields == null) ? (prime * result) : getFieldGraph().hashCode());
-//		return 1;
+		result = prime * result + ((fields == null) ? 0 : Utils.getWrappedSootField(fields).hashCode());
+//		return result;
+		return 1;
 	}
 
 	@Override
@@ -195,10 +192,9 @@ public class UpdatableFieldGraph implements UpdatableIFieldGraph {
 		if (fields == null) {
 			if (other.fields != null)
 				return false;
-		} else if (!this.getFieldGraph().equals(other.getFieldGraph()))
+		} else if (!Utils.getWrappedSootField(fields).equals(Utils.getWrappedSootField(other.fields)))
 			return false;
 		return true;
-//		return ((UpdatableFieldGraph) obj).getFieldGraph().equals(this.getFieldGraph());
 	}
 
 

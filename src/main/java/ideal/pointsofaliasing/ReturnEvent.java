@@ -38,13 +38,13 @@ public class ReturnEvent<V> extends Event<V> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((callSite.getContents() == null) ? 0 : callSite.getContents().hashCode());
-		result = prime * result + ((d2 == null) ? 0 : d2.getAccessGraph().hashCode());
-		result = prime * result + ((d3 == null) ? 0 : d3.getAccessGraph().hashCode());
-		result = prime * result + ((exitStmt.getContents() == null) ? 0 : exitStmt.getContents().hashCode());
-		result = prime * result + ((returnSite.getContents() == null) ? 0 : returnSite.getContents().hashCode());
-		return result;
-//		return 1;
+		result = prime * result + ((callSite == null) ? 0 : callSite.getContents().hashCode());
+		result = prime * result + ((d2 == null) ? 0 : d2.hashCode());
+		result = prime * result + ((d3 == null) ? 0 : d3.hashCode());
+		result = prime * result + ((exitStmt == null) ? 0 : exitStmt.getContents().hashCode());
+		result = prime * result + ((returnSite == null) ? 0 : returnSite.getContents().hashCode());
+//		return result;
+		return 1;
 	}
 
 	@Override
@@ -64,12 +64,12 @@ public class ReturnEvent<V> extends Event<V> {
 		if (d2 == null) {
 			if (other.d2 != null)
 				return false;
-		} else if (!d2.getAccessGraph().equals(other.d2.getAccessGraph()))
+		} else if (!d2.equals(other.d2))
 			return false;
 		if (d3 == null) {
 			if (other.d3 != null)
 				return false;
-		} else if (!d3.getAccessGraph().equals(other.d3.getAccessGraph()))
+		} else if (!d3.equals(other.d3))
 			return false;
 		if (exitStmt == null) {
 			if (other.exitStmt != null)

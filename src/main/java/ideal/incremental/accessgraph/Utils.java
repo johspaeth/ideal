@@ -11,6 +11,7 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.accessgraph.WrappedSootField;
 import boomerang.cfg.IExtendedICFG;
 import heros.incremental.UpdatableWrapper;
+import ideal.InternalAnalysisProblem;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -20,8 +21,8 @@ public class Utils {
 //		IFieldGraph fieldGraph = ag.getFieldGraph();
 //		UpdatableWrapper<Unit> sourceStmt = icfg.wrap(ag.getSourceStmt());
 //		UpdatableWrapper<Local> base = icfg.wrap(ag.getBase());
-		/*if(null == ag.getFieldGraph() && null == ag.getSourceStmt() && null == ag.getBase())
-			return InternalAnalysisProblem.ZERO;*/
+		if(null == ag.getFieldGraph() && null == ag.getSourceStmt() && null == ag.getBase() && ag.toString().contains("{ZERO}"))
+			return InternalAnalysisProblem.ZERO;
 		if(null == ag.getFieldGraph() && null == ag.getSourceStmt())
 			return new UpdatableAccessGraph(icfg.wrap(ag.getBase()));
 		else if(null == ag.getFieldGraph() && null != ag.getSourceStmt())

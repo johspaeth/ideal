@@ -24,7 +24,8 @@ public class TypestateDomainValue<State> {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((states == null) ? 0 : states.hashCode());
-    return result;
+//    return result;
+    return 1;
   }
 
   @Override

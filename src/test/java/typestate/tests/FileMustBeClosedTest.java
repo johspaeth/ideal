@@ -38,6 +38,15 @@ public class FileMustBeClosedTest extends IDEALTestingFramework{
 		mustBeInErrorState(file);
 		mustBeInErrorState(alias);
 	}
+	
+	@Test
+	public void simpleTest() {
+		ObjectWithField a = new ObjectWithField();
+		a.field = new File();
+		a.field.open();
+		a.field.close();
+		mustBeInAcceptingState(a.field);
+	}
 
 	@Test
 	public void branching() {

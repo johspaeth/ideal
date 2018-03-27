@@ -8,6 +8,7 @@ import com.google.common.base.Joiner;
 
 import boomerang.accessgraph.SetBasedFieldGraph;
 import boomerang.accessgraph.WrappedSootField;
+import heros.incremental.UpdatableWrapper;
 import soot.Scene;
 import soot.Type;
 
@@ -15,12 +16,14 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 
 	private Set<UpdatableWrappedSootField> fields;
 	public static Set<UpdatableWrappedSootField> allFields;
+	private boolean type = true;
 
 	public UpdatableSetBasedFieldGraph(Set<UpdatableWrappedSootField> fields) {
 		this(fields, true);
 	}
 
 	public UpdatableSetBasedFieldGraph(Set<UpdatableWrappedSootField> fields, boolean type) {
+		this.type = type;
 		if (!type) {
 			this.fields = new HashSet<>();
 			for (UpdatableWrappedSootField f : fields) {
@@ -41,16 +44,16 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 			wrappedSootFields.add(updatableWrappedSootField.getWrappedSootField());
 		}
 		
-		return new SetBasedFieldGraph(wrappedSootFields);
+		return new SetBasedFieldGraph(wrappedSootFields, type);
 	}
 
 
-	private Type superType(Type a, Type b) {
-		if (a.equals(b))
+	private UpdatableWrapper<Type> superType(UpdatableWrapper<Type> a, UpdatableWrapper<Type> b) {
+		if (a.getContents().equals(b.getContents()))
 			return a;
-		if (Scene.v().getOrMakeFastHierarchy().canStoreType(a, b)) {
+		if (Scene.v().getOrMakeFastHierarchy().canStoreType(a.getContents(), b.getContents())) {
 			return b;
-		} else if (Scene.v().getOrMakeFastHierarchy().canStoreType(b, a)) {
+		} else if (Scene.v().getOrMakeFastHierarchy().canStoreType(b.getContents(), a.getContents())) {
 			return a;
 		}
 		return a;
@@ -123,13 +126,9 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		
-		/*final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
-		return result;*/
-		return ((fields == null) ? (prime * result) : getSetBasedFieldGraph().hashCode());
-//		return 1;
+		result = prime * result + ((fields == null) ? 0 : Utils.getWrappedSootField(fields).hashCode());
+//		return result;
+		return 1;
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -139,15 +138,13 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		/*UpdatableSetBasedFieldGraph other = (UpdatableSetBasedFieldGraph) obj;
+		UpdatableSetBasedFieldGraph other = (UpdatableSetBasedFieldGraph) obj;
 		if (fields == null) {
 			if (other.fields != null)
 				return false;
-		}*/
-		if(!((UpdatableSetBasedFieldGraph) obj).getSetBasedFieldGraph().equals(this.getSetBasedFieldGraph()))
+		} else if (fields.size() != other.fields.size() || !Utils.getWrappedSootField(fields).equals(Utils.getWrappedSootField(other.fields)))
 			return false;
 		return true;
-//		return ((UpdatableSetBasedFieldGraph) obj).getSetBasedFieldGraph().equals(this.getSetBasedFieldGraph());
 	}
 
 	@Override

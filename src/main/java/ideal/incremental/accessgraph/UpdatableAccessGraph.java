@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.accessgraph.FieldGraph;
 import heros.incremental.UpdatableWrapper;
 import ideal.InternalAnalysisProblem;
 import soot.Local;
@@ -54,10 +55,14 @@ public class UpdatableAccessGraph {
 			return new AccessGraph(value.getContents());
 		else if(null == fieldGraph && null != getSourceStmt())
 			return new AccessGraph(value.getContents(), getSourceStmt().getContents(), isNullAllocsite);
-		else if(getSourceStmt() == null)
+		else if(getSourceStmt() == null && !fieldGraph.equals(UpdatableFieldGraph.EMPTY_GRAPH))
 			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), null, isNullAllocsite);
-		else
+		else if(getSourceStmt() == null && fieldGraph.equals(UpdatableFieldGraph.EMPTY_GRAPH))
+			return new AccessGraph(value.getContents(), FieldGraph.EMPTY_GRAPH, null, isNullAllocsite);
+		if(!fieldGraph.equals(UpdatableFieldGraph.EMPTY_GRAPH))
 			return new AccessGraph(value.getContents(), fieldGraph.getFieldGraph(), getSourceStmt().getContents(), isNullAllocsite);
+		else
+			return new AccessGraph(value.getContents(), FieldGraph.EMPTY_GRAPH, getSourceStmt().getContents(), isNullAllocsite);
 	}
 	
 	/*public UpdatableAccessGraph(UpdatableWrapper<Unit> base, UpdatableIFieldGraph IFieldGraph, UpdatableWrapper<Unit> sourceStmt, boolean hasNullAllocationSite) {
@@ -455,18 +460,13 @@ public class UpdatableAccessGraph {
 
 		final int prime = 31;
 		int result = 1;
-		
-		/*final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.hashCode());
+		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.getFieldGraph().hashCode());
+		result = prime * result + ((value == null) ? 0 : value.getContents().hashCode());
+		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.getContents().hashCode());
 		this.hashCode = result;
 
-		return this.hashCode;*/
-//		if(fieldGraph == null && value == null && allocationSite == null)
-//			return prime * result;
-		return ((fieldGraph == null) ? (prime * result) : getAccessGraph().hashCode());
+//		return this.hashCode;
+		return 1;
 	}
 
 	@Override
@@ -492,11 +492,8 @@ public class UpdatableAccessGraph {
 				return false;
 		} else if (!fieldGraph.getFieldGraph().equals(other.fieldGraph.getFieldGraph()))
 			return false;
-		if(!((UpdatableAccessGraph) obj).getAccessGraph().equals(this.getAccessGraph()))
-			return false;
 		assert this.hashCode() == obj.hashCode();
 		return true;
-//		return ((UpdatableAccessGraph) obj).getAccessGraph().equals(this.getAccessGraph());
 	}
 
 	public boolean hasSetBasedFieldGraph() {
