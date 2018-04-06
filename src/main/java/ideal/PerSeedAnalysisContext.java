@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -34,9 +35,15 @@ import ideal.incremental.accessgraph.Utils;
 import ideal.pointsofaliasing.NullnessCheck;
 import ideal.pointsofaliasing.PointOfAlias;
 import ideal.pointsofaliasing.ReturnEvent;
+import soot.MethodOrMethodContext;
 import soot.Scene;
+import soot.SootField;
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
+import soot.jimple.InstanceFieldRef;
+import soot.jimple.toolkits.callgraph.ReachableMethods;
+import soot.util.queue.QueueReader;
 
 public class PerSeedAnalysisContext<V> {
 
@@ -136,7 +143,7 @@ public class PerSeedAnalysisContext<V> {
 		boolean isStrongUpdate = analysisDefinition.enableStrongUpdates()
 				&& callSiteToStrongUpdates.get(callSite).contains(returnSideNode);
 		
-		System.out.println("returning is strong update at " + callSite + " : " + returnSideNode + " : " + isStrongUpdate);
+//		System.out.println("returning is strong update at " + callSite + " : " + returnSideNode + " : " + isStrongUpdate);
 		
 		return isStrongUpdate;
 	}
@@ -144,7 +151,7 @@ public class PerSeedAnalysisContext<V> {
 	public void storeStrongUpdateAtCallSite(UpdatableWrapper<Unit> callSite, Collection<UpdatableAccessGraph> mayAliasSet) {
 		callSiteToStrongUpdates.putAll(callSite, mayAliasSet);
 		
-		System.out.println("storing strong updates at site " + callSite + " : " + mayAliasSet);
+//		System.out.println("storing strong updates at site " + callSite + " : " + mayAliasSet);
 	}
 
 	public boolean isNullnessBranch(UpdatableWrapper<Unit> curr, UpdatableWrapper<Unit> succ, UpdatableAccessGraph returnSideNode) {
@@ -386,8 +393,12 @@ public class PerSeedAnalysisContext<V> {
 		pathEdgeToEdgeFunc.clear();
 		queryToResult.clear();
 
+		this.printFields();
+		
 		disableIDEPhase();
 		phaseOneSolver.update(newCfg, cfgChangeSet, isInIDEPhase());
+		
+		this.printFields();
 
 		Set<PointOfAlias<V>> pointsOfAlias = getAndClearPOA();
 		//		debugger().startAliasPhase(pointsOfAlias);
@@ -445,5 +456,22 @@ public class PerSeedAnalysisContext<V> {
 
 	public long getEdgeCount() {
 		return /*phaseOneSolver.getEdgeCount()*/phaseTwoSolver.getEdgeCount();
+	}
+	
+	private void printFields() {
+		ReachableMethods allMethods = Scene.v().getReachableMethods();
+		QueueReader<MethodOrMethodContext> listener = allMethods.listener();
+		while(listener.hasNext()) {
+			SootMethod curr = listener.next().method();
+			if(curr.toString().contains("simpleTest")) {
+				List<Value> paramRefs = curr.getActiveBody().getParameterRefs();
+				for (Value value : paramRefs) {
+					if(value instanceof InstanceFieldRef) {
+						SootField field = ((InstanceFieldRef) value).getField();
+						System.out.println(field);
+					}
+				}
+			}
+		}
 	}
 }

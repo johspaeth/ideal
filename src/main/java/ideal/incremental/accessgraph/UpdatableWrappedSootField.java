@@ -36,36 +36,35 @@ public UpdatableWrapper<SootField> getField() {
 
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((field == null) ? 0 : field.getContents().hashCode());
-    result = prime * result + ((stmt == null) ? 0 : stmt.getContents().hashCode());
-//    return result;
-    return 1;
-  }
+public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((field == null) ? 0 : field.hashCode());
+	result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
+	return result;
+}
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    UpdatableWrappedSootField other = (UpdatableWrappedSootField) obj;
-    if (field == null) {
-      if (other.field != null)
-        return false;
-    } else if (!field.getContents().equals(other.field.getContents()))
-      return false;
-    if (stmt == null) {
-      if (other.stmt != null)
-        return false;
-    } else if (!stmt.getContents().equals(other.stmt.getContents()))
-      return false;
-    return true;
-  }
+public boolean equals(Object obj) {
+	if (this == obj)
+		return true;
+	if (obj == null)
+		return false;
+	if (getClass() != obj.getClass())
+		return false;
+	UpdatableWrappedSootField other = (UpdatableWrappedSootField) obj;
+	if (field == null) {
+		if (other.field != null)
+			return false;
+	} else if (!field.equals(other.field))
+		return false;
+	if (stmt == null) {
+		if (other.stmt != null)
+			return false;
+	} else if (!stmt.equals(other.stmt))
+		return false;
+	return true;
+}
 
   public String toString() {
     return field.getContents().getName().toString();

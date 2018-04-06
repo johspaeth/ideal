@@ -38,13 +38,13 @@ public class ReturnEvent<V> extends Event<V> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((callSite == null) ? 0 : callSite.getContents().hashCode());
+		result = prime * result + ((callSite == null) ? 0 : callSite.hashCode());
+		result = prime * result + ((d1 == null) ? 0 : d1.hashCode());
 		result = prime * result + ((d2 == null) ? 0 : d2.hashCode());
 		result = prime * result + ((d3 == null) ? 0 : d3.hashCode());
-		result = prime * result + ((exitStmt == null) ? 0 : exitStmt.getContents().hashCode());
-		result = prime * result + ((returnSite == null) ? 0 : returnSite.getContents().hashCode());
-//		return result;
-		return 1;
+		result = prime * result + ((exitStmt == null) ? 0 : exitStmt.hashCode());
+		result = prime * result + ((returnSite == null) ? 0 : returnSite.hashCode());
+		return result;
 	}
 
 	@Override
@@ -59,7 +59,12 @@ public class ReturnEvent<V> extends Event<V> {
 		if (callSite == null) {
 			if (other.callSite != null)
 				return false;
-		} else if (!callSite.getContents().equals(other.callSite.getContents()))
+		} else if (!callSite.equals(other.callSite))
+			return false;
+		if (d1 == null) {
+			if (other.d1 != null)
+				return false;
+		} else if (!d1.equals(other.d1))
 			return false;
 		if (d2 == null) {
 			if (other.d2 != null)
@@ -74,12 +79,12 @@ public class ReturnEvent<V> extends Event<V> {
 		if (exitStmt == null) {
 			if (other.exitStmt != null)
 				return false;
-		} else if (!exitStmt.getContents().equals(other.exitStmt.getContents()))
+		} else if (!exitStmt.equals(other.exitStmt))
 			return false;
 		if (returnSite == null) {
 			if (other.returnSite != null)
 				return false;
-		} else if (!returnSite.getContents().equals(other.returnSite.getContents()))
+		} else if (!returnSite.equals(other.returnSite))
 			return false;
 		return true;
 	}

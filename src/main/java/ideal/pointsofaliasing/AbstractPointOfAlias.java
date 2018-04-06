@@ -23,48 +23,46 @@ public abstract class AbstractPointOfAlias<V> implements PointOfAlias<V>{
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((curr == null) ? 0 : curr.getContents().hashCode());
-    result = prime * result + ((d1 == null) ? 0 : d1.hashCode());
-    result = prime * result + ((d2 == null) ? 0 : d2.hashCode());
-    result = prime * result + ((succ == null) ? 0 : succ.getContents().hashCode());
-//    return result;
-    return 1;
-  }
+public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((curr == null) ? 0 : curr.hashCode());
+	result = prime * result + ((d1 == null) ? 0 : d1.hashCode());
+	result = prime * result + ((d2 == null) ? 0 : d2.hashCode());
+	result = prime * result + ((succ == null) ? 0 : succ.hashCode());
+	return result;
+}
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    @SuppressWarnings("rawtypes")
-    AbstractPointOfAlias other = (AbstractPointOfAlias) obj;
-    if (curr == null) {
-      if (other.curr != null)
-        return false;
-    } else if (!curr.getContents().equals(other.curr.getContents()))
-      return false;
-    if (d1 == null) {
-      if (other.d1 != null)
-        return false;
-    } else if (!d1.equals(other.d1))
-      return false;
-    if (d2 == null) {
-      if (other.d2 != null)
-        return false;
-    } else if (!d2.equals(other.d2))
-      return false;
-    if (succ == null) {
-      if (other.succ != null)
-        return false;
-    } else if (!succ.getContents().equals(other.succ.getContents()))
-      return false;
-    return true;
-  };
+public boolean equals(Object obj) {
+	if (this == obj)
+		return true;
+	if (obj == null)
+		return false;
+	if (getClass() != obj.getClass())
+		return false;
+	AbstractPointOfAlias other = (AbstractPointOfAlias) obj;
+	if (curr == null) {
+		if (other.curr != null)
+			return false;
+	} else if (!curr.equals(other.curr))
+		return false;
+	if (d1 == null) {
+		if (other.d1 != null)
+			return false;
+	} else if (!d1.equals(other.d1))
+		return false;
+	if (d2 == null) {
+		if (other.d2 != null)
+			return false;
+	} else if (!d2.equals(other.d2))
+		return false;
+	if (succ == null) {
+		if (other.succ != null)
+			return false;
+	} else if (!succ.equals(other.succ))
+		return false;
+	return true;
+};
 
 }

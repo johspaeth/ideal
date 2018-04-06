@@ -98,33 +98,39 @@ public class IncrementalIDEALTest {
 
 		List<AnalysisStats> statsList = new ArrayList<>();
 		IncrementalIDEALTest test;
-		
+
 		for(int i=0; i<100; i++) {
-			test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
-			if(!test.runTestAndCompareResults())
-				System.exit(1);
-			statsList.add(test.getAnalysisStats());
-//			IncrementalIDEALTest.logResultToFile(test.getAnalysisStats());
+			try {
+				test = new IncrementalIDEALTest(initialVersion, updatedVersion, testClassName);
+				if(!test.runTestAndCompareResults())
+					System.exit(1);
+				statsList.add(test.getAnalysisStats());
+				System.out.println(statsList.get(statsList.size() - 1));
+			}
+			catch(Exception e) {
+//				e.printStackTrace();
+			}
+			//			IncrementalIDEALTest.logResultToFile(test.getAnalysisStats());
 		}
 
 		/*BigInteger computationTotalRunTime = BigInteger.ZERO;
 		BigInteger changeSetComputationTime = BigInteger.ZERO;
 		BigInteger updateTotalRunTime = BigInteger.ZERO;
-		
+
 		int size = statsList.size();
-		
+
 		for (AnalysisStats analysisStats : statsList) {
 			computationTotalRunTime.add(BigInteger.valueOf(analysisStats.getComputeRunTime())); // = BigInteger.valueOf(analysisStats.getComputeRunTime()).add(computationTotalRunTime);
 			changeSetComputationTime.add(BigInteger.valueOf(analysisStats.getChangeSetComputationTime())); //= BigInteger.valueOf(analysisStats.getChangeSetComputationTime()).add(changeSetComputationTime);
 			updateTotalRunTime.add(BigInteger.valueOf(analysisStats.getUpdateRunTime())); //= BigInteger.valueOf(analysisStats.getUpdateRunTime()).add(updateTotalRunTime);
 		}*/
-		
+
 		long computationTotalRunTime = 0;
 		long changeSetComputationTime = 0;
 		long updateTotalRunTime = 0;
-		
+
 		int size = statsList.size();
-		
+
 		for (AnalysisStats analysisStats : statsList) {
 			computationTotalRunTime += TimeUnit.MILLISECONDS.convert(analysisStats.getComputeRunTime(), TimeUnit.NANOSECONDS);
 			changeSetComputationTime += TimeUnit.MILLISECONDS.convert(analysisStats.getChangeSetComputationTime(), TimeUnit.NANOSECONDS);
@@ -134,8 +140,13 @@ public class IncrementalIDEALTest {
 		/*System.out.println(computationTotalRunTime/size);
 		System.out.println(changeSetComputationTime/size);
 		System.out.println(updateTotalRunTime/size);*/
-		
-//		AnalysisStats result = new AnalysisStats(updateTotalRunTime.divide(BigInteger.valueOf(size)).longValueExact(), changeSetComputationTime.divide(BigInteger.valueOf(size)).longValueExact(), computationTotalRunTime.divide(BigInteger.valueOf(size)).longValueExact(), statsList.get(0).getComputePropagationCount(), statsList.get(0).getUpdatePropagationCount());
+
+		//		AnalysisStats result = new AnalysisStats(updateTotalRunTime.divide(BigInteger.valueOf(size)).longValueExact(), changeSetComputationTime.divide(BigInteger.valueOf(size)).longValueExact(), computationTotalRunTime.divide(BigInteger.valueOf(size)).longValueExact(), statsList.get(0).getComputePropagationCount(), statsList.get(0).getUpdatePropagationCount());
+
+		if(statsList.isEmpty()) {
+			System.err.println("Results are not equal");
+			System.exit(1);
+		}
 		
 		AnalysisStats result = new AnalysisStats(updateTotalRunTime/size, changeSetComputationTime/size, computationTotalRunTime/size, statsList.get(0).getComputePropagationCount(), statsList.get(0).getUpdatePropagationCount());
 		IncrementalIDEALTest.logResultToFile(result);
@@ -228,7 +239,7 @@ public class IncrementalIDEALTest {
 	private <V> Transformer createAnalysisComputationTransformer() {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-//				long computeStartTime = System.nanoTime();
+				//				long computeStartTime = System.nanoTime();
 
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				analysis = createAnalysis();
@@ -342,25 +353,26 @@ public class IncrementalIDEALTest {
 		return excludedPackages;
 	}
 
-	public boolean runTestAndCompareResults() {
+	public boolean runTestAndCompareResults() throws Exception {
 		System.out.println("-------------------------------------------------STEP 1-------------------------------------------------");
 		this.computeStartTime = System.nanoTime();
 		computeResults();
-		computeRunTime = System.nanoTime() - computeStartTime;
+		//		computeRunTime = System.nanoTime() - computeStartTime;
 		System.out.println("-------------------------------------------------STEP 2-------------------------------------------------");
 		updateResults();
 		System.out.println("-------------------------------------------------STEP 3-------------------------------------------------");
 		boolean result = false;
-		try {
+//		try {
 			result = compareResults();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		System.err.println("The compute and update results are " + (result ? "EQUAL" : "NOTEQUAL"));
 		System.err.println("Number of edges propagated in the Step 1 " + computeEdgeCount);
 		System.err.println("Number of edges propagated in the Step 2 " + updateEdgeCount);
 		System.err.println("Incremental build was able to save " + (computeEdgeCount - updateEdgeCount) + " edge propagations in total");
-		result = false;
+		//		System.out.println(this.getAnalysisStats());
+		//		result = false;
 		//		if(result)
 		//			logResultToFile();
 		return result;
@@ -368,12 +380,12 @@ public class IncrementalIDEALTest {
 
 	private <V> boolean compareResults() throws Exception {
 
-		for (String key : computeResults.keySet()) {
+		/*for (String key : computeResults.keySet()) {
 			TypestateDomainValue<ConcreteState> computeResult = computeResults.get(key);
 			TypestateDomainValue<ConcreteState> updateResult = updateResults.get(key);
 			System.out.println(key + " --> " + computeResult + " : " + updateResult);
 		}
-		System.out.println();
+		System.out.println();*/
 
 		for (String key : computeResults.keySet()) {
 			TypestateDomainValue<ConcreteState> computeResult = computeResults.get(key);

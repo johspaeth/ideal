@@ -126,9 +126,8 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fields == null) ? 0 : Utils.getWrappedSootField(fields).hashCode());
-//		return result;
-		return 1;
+		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+		return result;
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -142,7 +141,7 @@ public class UpdatableSetBasedFieldGraph implements UpdatableIFieldGraph {
 		if (fields == null) {
 			if (other.fields != null)
 				return false;
-		} else if (fields.size() != other.fields.size() || !Utils.getWrappedSootField(fields).equals(Utils.getWrappedSootField(other.fields)))
+		} else if (!fields.equals(other.fields))
 			return false;
 		return true;
 	}

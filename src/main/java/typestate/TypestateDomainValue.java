@@ -20,30 +20,29 @@ public class TypestateDomainValue<State> {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((states == null) ? 0 : states.hashCode());
-//    return result;
-    return 1;
-  }
+public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((states == null) ? 0 : states.hashCode());
+	return result;
+}
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    TypestateDomainValue other = (TypestateDomainValue) obj;
-    if (states == null) {
-      if (other.states != null)
-        return false;
-    } else if (!states.equals(other.states))
-      return false;
-    return true;
-  }
+public boolean equals(Object obj) {
+	if (this == obj)
+		return true;
+	if (obj == null)
+		return false;
+	if (getClass() != obj.getClass())
+		return false;
+	TypestateDomainValue other = (TypestateDomainValue) obj;
+	if (states == null) {
+		if (other.states != null)
+			return false;
+	} else if (!states.equals(other.states))
+		return false;
+	return true;
+}
 
   public Set<State> getStates() {
     return new HashSet<>(states);

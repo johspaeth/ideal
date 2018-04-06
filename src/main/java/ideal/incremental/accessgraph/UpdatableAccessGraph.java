@@ -170,13 +170,13 @@ public class UpdatableAccessGraph {
 		if(fieldGraph instanceof UpdatableSetBasedFieldGraph)
 			return false;
 		for(UpdatableWrappedSootField f: getFirstField())
-			return f.getField().getContents().equals(field.getContents());
+			return f.getField().getContents().equals(field.getContents()) /*|| f.getField().getContents().toString().equals(field.getContents().toString())*/;
 		throw new RuntimeException("Unreachable Code");
 	}
 	
 	public boolean firstFirstFieldMayMatch(UpdatableWrapper<SootField> field) {
 		for(UpdatableWrappedSootField f: getFirstField())
-			if(f.getField().getContents().equals(field.getContents()))
+			if(f.getField().getContents().equals(field.getContents()) || f.getField().getContents().toString().equals(field.getContents().toString()))
 				return true;
 		return false;
 	}
@@ -455,44 +455,38 @@ public class UpdatableAccessGraph {
 
 	@Override
 	public int hashCode() {
-//		if (hashCode != 0)
-//			return hashCode;
-
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.getFieldGraph().hashCode());
-		result = prime * result + ((value == null) ? 0 : value.getContents().hashCode());
-		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.getContents().hashCode());
-		this.hashCode = result;
-
-//		return this.hashCode;
-		return 1;
+		result = prime * result + ((allocationSite == null) ? 0 : allocationSite.hashCode());
+		result = prime * result + ((fieldGraph == null) ? 0 : fieldGraph.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == this || super.equals(obj))
+		if (this == obj)
 			return true;
-		if (obj == null || getClass() != obj.getClass())
+		if (obj == null)
 			return false;
-
+		if (getClass() != obj.getClass())
+			return false;
 		UpdatableAccessGraph other = (UpdatableAccessGraph) obj;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.getContents().equals(other.value.getContents()))
-			return false;
 		if (allocationSite == null) {
 			if (other.allocationSite != null)
 				return false;
-		} else if (!allocationSite.getContents().equals(other.allocationSite.getContents()))
+		} else if (!allocationSite.equals(other.allocationSite))
 			return false;
 		if (fieldGraph == null) {
 			if (other.fieldGraph != null)
 				return false;
-		} else if (!fieldGraph.getFieldGraph().equals(other.fieldGraph.getFieldGraph()))
+		} else if (!fieldGraph.equals(other.fieldGraph))
 			return false;
-		assert this.hashCode() == obj.hashCode();
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
 		return true;
 	}
 

@@ -74,8 +74,7 @@ public class CallSite<V> extends AbstractPointOfAlias<V> {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((callerCallSiteFact == null) ? 0 : callerCallSiteFact.hashCode());
-//		return result;
-		return 1;
+		return result;
 	}
 
 	@Override

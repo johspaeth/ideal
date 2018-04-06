@@ -39,7 +39,7 @@ public abstract class ExpectedResults<State> implements Assertion, ComparableRes
 		int result = 1;
 		result = prime * result + ((accessGraph == null) ? 0 : accessGraph.hashCode());
 		result = prime * result + ((state == null) ? 0 : state.hashCode());
-		result = prime * result + ((unit == null) ? 0 : unit.getContents().hashCode());
+		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
 		return result;
 	}
 	@Override
@@ -61,7 +61,7 @@ public abstract class ExpectedResults<State> implements Assertion, ComparableRes
 		if (unit == null) {
 			if (other.unit != null)
 				return false;
-		} else if (!unit.getContents().equals(other.unit.getContents()))
+		} else if (!unit.equals(other.unit))
 			return false;
 		return true;
 	}

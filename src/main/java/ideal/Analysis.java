@@ -107,8 +107,9 @@ public class Analysis<V> {
 			}
 
 			//			contextSolver.destroy();
-			System.err.println("updated " + retainedSeedStmts.size() + " seeds!");
 		}
+		
+		System.err.println("updated " + retainedSeedStmts.size() + " seeds!");
 
 		for (IFactAtStatement seed : newSeedsInScene) {
 			if(newSeedStmts.contains(seed.getStmt().getContents()))
