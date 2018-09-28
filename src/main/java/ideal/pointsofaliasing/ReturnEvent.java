@@ -101,7 +101,7 @@ public class ReturnEvent<V> extends Event<V> {
 
 	private void checkMustAlias(AliasResults results,
 			PerSeedAnalysisContext<V> context) {
-		boolean isStrongUpdate = !results.queryTimedout() && results.keySet().size() == 1;
+		boolean isStrongUpdate = !results.queryTimedout() && results.size() == 1;
 		if(isStrongUpdate)
 			context.storeStrongUpdateAtCallSite(callSite, results.mayAliasSet());
 	}
