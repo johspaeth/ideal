@@ -54,7 +54,7 @@ public class PrintStreamStateMachine extends MatcherStateMachine<ConcreteState>
 		Set<SootMethod> out = new HashSet<>();
 		for (SootClass c : subclasses) {
 			for (SootMethod m : c.getMethods())
-				if (m.isPublic() && !closeMethods.contains(m) && !m.isStatic())
+				if (m.isPublic() && !closeMethods.contains(m) && !m.isStatic() && !m.isConstructor())
 					out.add(m);
 		}
 		return out;
