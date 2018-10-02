@@ -58,6 +58,8 @@ public abstract class DefaultIDEALAnalysisDefinition<V> extends IDEALAnalysisDef
 
 			@Override
 			public boolean continuePropagate(AccessGraph d1, Unit n, AccessGraph d2) {
+				if(!icfg().isReachable(n))
+					return false;
 				return true;
 			}};
 	}
